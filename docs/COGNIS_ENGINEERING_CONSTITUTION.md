@@ -1,14 +1,28 @@
-# COGNIS ENGINEERING CONSTITUTION v1.0
+# COGNIS ENGINEERING CONSTITUTION v1.1
 
-## Purpose
+## Status
 
-This document is the highest-priority engineering reference for all Cognis development.
+Approved
 
-All architecture RFCs, sprint plans, engineering contracts, repository structures, and implementation documents must be interpreted through this document.
+Version: 1.1
 
-If generated code conflicts with this constitution, the constitution wins.
+Scope: Entire Cognis Repository
 
-The goal is not merely to build features.
+Authority: Highest Engineering Reference
+
+Owner: Architecture Lead
+
+---
+
+# PURPOSE
+
+This document defines the architectural laws, engineering constraints, implementation standards, and repository governance rules for Cognis.
+
+All architecture RFCs, engineering contracts, sprint plans, implementation guides, repository structures, pull requests, and generated code must comply with this constitution.
+
+If any generated code, proposal, implementation, or architecture conflicts with this constitution, the constitution takes precedence.
+
+The goal is not to build a browser extension.
 
 The goal is to build a hardware-ready cognitive operating system that can evolve for years without architectural rewrites.
 
@@ -16,22 +30,48 @@ The goal is to build a hardware-ready cognitive operating system that can evolve
 
 # SECTION 1 — WHAT COGNIS IS
 
-Cognis is an event-driven cognitive operating system delivered as a browser extension.
+Cognis is the software layer of Hyle's Arc vision.
 
-It consists of two product surfaces sharing one backend.
+Arc = Future Hardware + Software Cognitive Operating System.
 
-Surface A:
-AI Co-pilot
+Current State:
 
-Surface B:
-Visualizer & Skill Progress
+Arc Hardware:
+Research & Development
 
-Future:
-Arc Hardware Layer
+Cognis:
+Production Software Platform
 
-All three systems must operate on the same architectural contracts.
+Cognis is delivered as a browser extension and currently contains two surfaces:
 
-The browser extension is not the product.
+## Surface A
+
+AI Co-Pilot
+
+Responsibilities:
+
+- Observe AI interactions
+- Detect cognitive gaps
+- Generate Ghost Text
+- Enrich prompts
+- Improve interaction quality
+
+## Surface B
+
+Skill Visualization
+
+Responsibilities:
+
+- Task tracking
+- Cognitive mapping
+- Automaticity modeling
+- Longitudinal progress visualization
+
+## Future Surface
+
+Arc Hardware
+
+All three surfaces must operate through identical architectural contracts.
 
 The architecture is the product.
 
@@ -41,26 +81,28 @@ The extension is merely the first runtime.
 
 # SECTION 2 — CORE ARCHITECTURAL PHILOSOPHY
 
-The architecture must satisfy five principles.
+The system must satisfy five principles.
 
 ## Event Driven
 
-Modules communicate only through Domain Events.
-
-Never through direct module invocation.
+Modules communicate exclusively through Domain Events.
 
 Allowed:
 
 Perception
 → Event Bus
-→ State Engine
+→ Engine
 
 Forbidden:
 
 Perception
-→ State Engine
+→ Engine
 
 No exceptions.
+
+No direct module invocation.
+
+No engine coupling.
 
 ---
 
@@ -68,17 +110,21 @@ No exceptions.
 
 Every meaningful action becomes an immutable event.
 
-Events are append-only.
+Events are:
 
-Events are never updated.
+- append-only
+- immutable
+- replayable
 
-Events are never deleted.
+Events are never:
 
-Derived state must be rebuilt from events.
+- updated
+- deleted
+- mutated
 
-Storage exists to preserve facts.
+Storage preserves facts.
 
-Read models exist to provide views.
+Read models provide views.
 
 ---
 
@@ -86,19 +132,20 @@ Read models exist to provide views.
 
 Behavioral data remains local.
 
-No cloud dependency in critical paths.
+Requirements:
 
-No remote state required for runtime decisions.
+- No cloud dependency
+- No remote state requirement
+- No raw prompt persistence
+- Prompt hashes only
 
-No raw prompt storage.
-
-Prompt hashes only.
+Local functionality must remain operational without network access.
 
 ---
 
 ## Hardware Agnostic
 
-All software-generated signals must expose the exact contracts Arc hardware will eventually expose.
+All software-generated signals must expose identical interfaces to future Arc hardware.
 
 Current:
 
@@ -108,11 +155,11 @@ Future:
 
 ArcBLEStateProvider
 
-Both must emit:
+Both emit:
 
 state.changed
 
-with identical payload shape.
+Consumers must not know the source.
 
 Hardware replaces providers.
 
@@ -133,43 +180,11 @@ Prompt Enrichment:
 Event Dispatch:
 < 5 ms
 
-Anything exceeding budget is architecturally incorrect regardless of functionality.
+Violation of latency budgets is an architectural failure.
 
 ---
 
-# SECTION 3 — NON-NEGOTIABLE ENGINEERING RULES
-
-No module may call another module directly.
-
-No business logic inside adapters.
-
-No business logic inside storage.
-
-No business logic inside EventBus.
-
-No DOM references inside engines.
-
-No platform references inside engines.
-
-No browser APIs inside engines.
-
-No AI platform-specific code outside adapters.
-
-No mutable global state.
-
-No singleton abuse.
-
-No hidden side effects.
-
-No circular dependencies.
-
-No engine may know whether it is running on Claude, ChatGPT, Gemini, Perplexity, or future systems.
-
-No engine may know whether signals come from software inference or Arc hardware.
-
----
-
-# SECTION 4 — SYSTEM LAYERS
+# SECTION 3 — SYSTEM LAYERS
 
 Layer 1
 
@@ -188,13 +203,12 @@ Responsibilities:
 
 Observe
 
-Never decide
+Never:
 
-Never enrich
-
-Never classify
-
-Never persist
+- decide
+- classify
+- enrich
+- persist
 
 Produces:
 
@@ -210,19 +224,20 @@ Event Bus
 
 Responsibilities:
 
-Publish
-
-Subscribe
-
-Route
+publish
+subscribe
+unsubscribe
+route
 
 Nothing else.
-
-No intelligence.
 
 No storage.
 
 No business logic.
+
+No persistence.
+
+No intelligence.
 
 ---
 
@@ -232,7 +247,7 @@ Domain Engines
 
 State Engine
 
-Gap Engine
+Gap Detection Engine
 
 Ghost Text Engine
 
@@ -258,7 +273,7 @@ Builds projections.
 
 Never owns business logic.
 
-Never decides behavior.
+Never performs decision making.
 
 ---
 
@@ -276,23 +291,37 @@ UI Components
 
 Consumes projections only.
 
-Never talks directly to engines.
+Never communicates directly with engines.
 
 ---
 
-# SECTION 5 — EVENT CONTRACT LAW
+# SECTION 4 — EVENT CONTRACT LAW
 
-The Event Registry is a source of truth.
+The Event Registry is the canonical source of truth.
 
 Event names are immutable public contracts.
 
 Changing an event name is a breaking architectural change.
 
-All events derive from:
+---
+
+## Current Event Count
+
+Canonical Event Count:
+
+25
+
+Any discrepancy between documentation and implementation must be resolved in favor of implementation.
+
+---
+
+## Domain Event Contract
+
+Every event derives from:
 
 DomainEvent<T>
 
-Every event contains:
+Required Fields:
 
 id
 
@@ -310,7 +339,7 @@ No exceptions.
 
 ---
 
-Supported Event Domains:
+## Supported Domains
 
 Session
 
@@ -326,18 +355,191 @@ Insight
 
 Hardware
 
-Any new event must:
+---
 
-1. Be documented
-2. Have a payload schema
-3. Be added to registry
-4. Be reviewed
+## Event Requirements
+
+Every event must:
+
+1. Exist in registry.ts
+2. Exist in CognisEventMap
+3. Have a payload contract
+4. Be documented
+5. Be reviewed
 
 Undocumented events are forbidden.
 
 ---
 
-# SECTION 6 — STORAGE LAW
+## CognisEventMap
+
+CognisEventMap is a first-class architecture primitive.
+
+All EventBus operations must derive payload types from CognisEventMap.
+
+Payload inference must be compile-time safe.
+
+No runtime payload casting.
+
+No string-based payload access.
+
+---
+
+# SECTION 5 — TYPE SAFETY LAW
+
+TypeScript Strict Mode is mandatory.
+
+No implicit any.
+
+No disabled compiler checks.
+
+No unsafe casting without justification.
+
+---
+
+## Branded Types
+
+The following identifiers are branded:
+
+SessionId
+
+EventId
+
+Timestamp
+
+Primitive strings may not be used in place of branded identifiers.
+
+Constructors must be used.
+
+---
+
+## Domain Types
+
+StateLabel:
+
+stretch
+
+coasting
+
+overload
+
+GapType:
+
+intentionality
+
+audience
+
+constraint
+
+stakes
+
+assumption
+
+mechanism
+
+temporal
+
+second_order
+
+AIPlatform:
+
+chatgpt
+
+claude
+
+gemini
+
+---
+
+# SECTION 6 — PLATFORM ABSTRACTION LAW
+
+Platform-specific logic remains isolated.
+
+Required abstraction:
+
+AIPlatformAdapter
+
+The rest of Cognis must never know:
+
+- Claude selectors
+- ChatGPT selectors
+- Gemini selectors
+- DOM structures
+- Button locations
+- Streaming implementation details
+
+Allowed:
+
+PlatformManager
+→ Adapter
+
+Adapter
+→ DOM
+
+Forbidden:
+
+Engine
+→ DOM
+
+Engine
+→ Adapter Implementation
+
+Engine
+→ Browser APIs
+
+---
+
+# SECTION 7 — ENRICHMENT ENGINE LAW
+
+The Enrichment Engine is a pure domain service.
+
+Input:
+
+IdentityProfile
+
+GapProfile
+
+CurrentState
+
+Prompt
+
+GhostTextCompletions
+
+Output:
+
+EnrichedPrompt
+
+The user's prompt remains semantically intact.
+
+The original prompt must always be preserved.
+
+Enrichment wraps the prompt.
+
+It never replaces it.
+
+---
+
+## Layer Order
+
+Required:
+
+1 Identity Layer
+
+2 Task Frame Layer
+
+3 Gap Resolution Layer
+
+4 Constraints Layer
+
+5 Output Structure Layer
+
+6 State Suffix
+
+Order is immutable.
+
+---
+
+# SECTION 8 — STORAGE LAW
 
 Database:
 
@@ -366,122 +568,28 @@ Only projection builders do.
 
 ---
 
-# SECTION 7 — PLATFORM ABSTRACTION LAW
-
-Platform-specific logic must remain isolated.
-
-Required abstraction:
-
-AIPlatformAdapter
-
-The rest of Cognis must never know:
-
-Claude selectors
-
-ChatGPT selectors
-
-Gemini selectors
-
-DOM structures
-
-Button locations
-
-Streaming implementations
-
-Those belong exclusively inside adapters.
-
----
-
-Allowed:
-
-PlatformManager
-→ Adapter
-
-Adapter
-→ DOM
-
----
-
-Forbidden:
-
-Enrichment Engine
-→ ChatGPT DOM
-
-Gap Engine
-→ Claude DOM
-
-Response Engine
-→ HTML Elements
-
----
-
-# SECTION 8 — ENRICHMENT ENGINE LAW
-
-The Enrichment Engine is a pure domain service.
-
-Input:
-
-IdentityProfile
-
-GapProfile
-
-CurrentState
-
-Prompt
-
-GhostTextCompletions
-
-Output:
-
-EnrichedPrompt
-
-The user's prompt must never be modified.
-
-The user's prompt must remain intact.
-
-The enriched prompt wraps the original prompt.
-
-Required layer order:
-
-1 Identity Layer
-
-2 Task Frame Layer
-
-3 Gap Resolution Layer
-
-4 Constraints Layer
-
-5 Output Structure Layer
-
-6 State Suffix
-
-Layer order is fixed.
-
----
-
 # SECTION 9 — ARC READINESS LAW
 
-Every implementation must assume Arc exists.
+Every implementation assumes Arc exists.
 
-Even though Arc does not exist yet.
+Even though Arc is not currently available.
 
 Future hardware integration must require:
 
-zero engine rewrites
+- zero engine rewrites
+- zero event changes
+- zero schema migrations
+- zero contract modifications
 
-zero event changes
+If Arc integration requires interface changes, the architecture has failed.
 
-zero schema migrations
-
-zero contract modifications
-
-If Arc integration requires changing existing interfaces, the architecture has failed.
-
-Stable interfaces:
+Frozen Contracts:
 
 state.changed
 
 hardware.connected
+
+hardware.disconnected
 
 hardware.signal.received
 
@@ -489,15 +597,11 @@ EnrichmentContext.currentState
 
 TaskAggregates.automaticity_phase
 
-These interfaces are effectively frozen.
-
 ---
 
 # SECTION 10 — REPOSITORY GOVERNANCE
 
-Week 1 Foundation Freeze
-
-Only these areas are considered foundational:
+Protected Foundation Areas:
 
 core/
 
@@ -507,70 +611,86 @@ storage/
 
 mock/
 
-Changes here require heightened review.
+Changes to these areas require architectural review.
 
-These folders define the entire future architecture.
+Feature code adapts to contracts.
 
-Feature code must adapt to foundation contracts.
+Contracts do not adapt to feature code.
 
-Foundation contracts do not adapt to feature code.
+---
+
+## Ownership
+
+Naren
+
+- core
+- platforms
+- enrichment
+- architecture governance
+- mock harness
+
+Suchit
+
+- storage
+- state engine
+
+Yogesh
+
+- gap engine
+- ghost text
+
+Riya
+
+- surface B
+- visualization
+- automaticity projections
 
 ---
 
 # SECTION 11 — DEFINITION OF DONE
 
-A module is not complete because it compiles.
-
 A module is complete only if:
 
 1. Emits documented events
-
 2. Consumes documented events
-
-3. Has typed interfaces
-
-4. Has payload contracts
-
+3. Has typed contracts
+4. Has payload schemas
 5. Has tests
-
 6. Meets latency budgets
-
-7. Has architecture comments
-
+7. Is platform agnostic
 8. Is hardware ready
+9. Has architectural documentation
+10. Can be replaced without downstream modifications
 
-9. Is platform agnostic
-
-10. Can be replaced without downstream changes
-
-If replacing a module requires editing consumers, the architecture has failed.
+If replacing a module requires changing consumers, the architecture has failed.
 
 ---
 
-# SECTION 12 — AI ASSISTANT INSTRUCTIONS
+# SECTION 12 — AI ASSISTANT OPERATING PROCEDURE
 
 Before generating code:
 
 Validate against:
 
-- Architecture RFC
-- Engineering Contracts
-- Sprint Plan
-- Repository Skeleton
-- Foundation Architecture
+1. Cognis Engineering Constitution
+2. Architecture RFC
+3. Engineering Contracts
+4. Repository Skeleton
+5. Event Contracts
+6. Sprint Plan
 
-Reject any implementation that:
+Reject implementations that:
 
-- introduces coupling
-- violates EventBus architecture
-- bypasses adapters
-- stores raw prompts
-- breaks Arc readiness
-- exceeds latency budgets
-- introduces platform knowledge into engines
+- introduce coupling
+- bypass EventBus
+- bypass adapters
+- store raw prompts
+- violate Arc readiness
+- exceed latency budgets
+- introduce platform knowledge into engines
 
 When uncertain:
 
-choose architectural correctness over implementation convenience.
+Choose architectural correctness over implementation convenience.
 
-The primary goal is long-term architectural integrity, not short-term feature delivery.
+Long-term maintainability is more important than short-term delivery speed.
