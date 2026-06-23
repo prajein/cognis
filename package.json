@@ -2,6 +2,7 @@
   "name": "cognis",
   "version": "0.1.0",
   "devDependencies": {
+    "@types/chrome": "^0.2.0",
     "typescript": "^6.0.3"
   }
 }

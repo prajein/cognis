@@ -14,6 +14,18 @@ import { DomainEvent, CognisEventMap } from './contracts';
 import { EventType } from './registry';
 
 // ---------------------------------------------------------------------------
+// Error Reporter
+// ---------------------------------------------------------------------------
+
+/**
+ * Abstraction for reporting subscriber execution errors.
+ * Ensures the EventBus remains decoupled from specific logging/telemetry tools.
+ */
+export interface ErrorReporter {
+  report(error: unknown, context: { eventType: string; source: string }): void;
+}
+
+// ---------------------------------------------------------------------------
 // Event Handler
 // ---------------------------------------------------------------------------
 

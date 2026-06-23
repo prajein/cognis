@@ -1,0 +1,162 @@
+/// <reference types="chrome" />
+import { EventBusContract } from './types';
+import { EventType } from './registry';
+import { DomainEvent } from './contracts';
+
+/** Identifies the browser extension process context. */
+export type ExtensionContext = 'content-script' | 'background' | 'side-panel';
+
+/** The envelope used to wrap DomainEvents over Chrome IPC. */
+export interface BridgeEnvelope {
+  originContext: ExtensionContext;
+  event: DomainEvent<any>;
+}
+
+/**
+ * Extension Event Bridge
+ *
+ * Coordinates the routing of events across isolated browser extension contexts
+ * (Content Script <-> Background Service Worker <-> Side Panel).
+ *
+ * Implements the architecture defined in the EventBus Implementation Plan, ensuring
+ * that the core EventBus remains free of platform-specific IPC logic.
+ */
+export class ExtensionEventBridge {
+  private readonly localContext: ExtensionContext;
+  private readonly localBus: EventBusContract;
+  private readonly subscribedEventTypes: EventType[];
+  
+  // To prevent infinite forwarding loops and echoing, we track recently bridged event IDs.
+  private readonly recentlyBridgedIds = new Set<string>();
+  private readonly MAX_TRACKED_IDS = 1000;
+
+  // For persistent connections (Side Panel -> Background)
+  private port: chrome.runtime.Port | null = null;
+  private connectedPorts = new Set<chrome.runtime.Port>();
+
+  constructor(
+    localContext: ExtensionContext,
+    localBus: EventBusContract,
+    eventsToBridge: EventType[]
+  ) {
+    this.localContext = localContext;
+    this.localBus = localBus;
+    this.subscribedEventTypes = eventsToBridge;
+  }
+
+  /**
+   * Initializes the bridge, setting up local subscriptions and IPC listeners.
+   */
+  public initialize(): void {
+    // 1. Subscribe to local bus to bridge events OUT
+    for (const type of this.subscribedEventTypes) {
+      this.localBus.subscribe(type, (event) => this.bridgeOut(event));
+    }
+
+    // 2. Listen for events coming IN from other contexts
+    if (this.localContext === 'content-script') {
+      chrome.runtime.onMessage.addListener(this.handleIncomingMessage.bind(this));
+    } else if (this.localContext === 'background') {
+      chrome.runtime.onMessage.addListener(this.handleIncomingMessage.bind(this));
+      
+      // Accept persistent port connections from Side Panels
+      chrome.runtime.onConnect.addListener((port) => {
+        if (port.name === 'cognis-event-bridge') {
+          this.connectedPorts.add(port);
+          port.onMessage.addListener(this.handleIncomingMessage.bind(this));
+          port.onDisconnect.addListener(() => {
+            this.connectedPorts.delete(port);
+          });
+        }
+      });
+    } else if (this.localContext === 'side-panel') {
+      this.connectPort();
+    }
+  }
+
+  /**
+   * Forwards a locally published event to other extension contexts.
+   */
+  private bridgeOut(event: DomainEvent<any>): void {
+    // Loop prevention: If we already bridged this event, do not echo it out again.
+    if (this.recentlyBridgedIds.has(event.id)) {
+      return;
+    }
+    
+    this.trackEventId(event.id);
+
+    const envelope: BridgeEnvelope = {
+      originContext: this.localContext,
+      event,
+    };
+
+    try {
+      if (this.localContext === 'content-script') {
+        // Send to Background
+        chrome.runtime.sendMessage(envelope).catch(() => {});
+      } else if (this.localContext === 'side-panel') {
+        // Send to Background via port
+        if (this.port) {
+          this.port.postMessage(envelope);
+        }
+      } else if (this.localContext === 'background') {
+        // Broadcast to all Side Panels
+        for (const port of this.connectedPorts) {
+          port.postMessage(envelope);
+        }
+        // Broadcast to all active Content Scripts (Tabs)
+        chrome.tabs.query({}, (tabs) => {
+          for (const tab of tabs) {
+            if (tab.id) {
+              chrome.tabs.sendMessage(tab.id, envelope).catch(() => {});
+            }
+          }
+        });
+      }
+    } catch (error) {
+      console.warn(`[ExtensionEventBridge] Failed to bridge event ${event.type}:`, error);
+    }
+  }
+
+  /**
+   * Receives an event from IPC and publishes it locally.
+   */
+  private handleIncomingMessage(message: any): void {
+    if (!message || !message.originContext || !message.event) {
+      return;
+    }
+
+    const envelope = message as BridgeEnvelope;
+
+    // Loop prevention: Do not accept events that originated from our own context type,
+    // or events we've already processed.
+    if (envelope.originContext === this.localContext) return;
+    if (this.recentlyBridgedIds.has(envelope.event.id)) return;
+
+    this.trackEventId(envelope.event.id);
+
+    // Publish to local EventBus
+    this.localBus.publish(envelope.event.type, envelope.event);
+  }
+
+  private connectPort(): void {
+    this.port = chrome.runtime.connect({ name: 'cognis-event-bridge' });
+    this.port.onMessage.addListener(this.handleIncomingMessage.bind(this));
+    this.port.onDisconnect.addListener(() => {
+      this.port = null;
+      // Reconnect logic could be added here
+    });
+  }
+
+  private trackEventId(id: string): void {
+    this.recentlyBridgedIds.add(id);
+    if (this.recentlyBridgedIds.size > this.MAX_TRACKED_IDS) {
+      // FIFO eviction: Javascript Sets iterate in insertion order.
+      // Deleting the first key evicts the oldest element.
+      const oldestId = this.recentlyBridgedIds.keys().next().value;
+      if (oldestId !== undefined) {
+        this.recentlyBridgedIds.delete(oldestId);
+      }
+    }
+  }
+}
