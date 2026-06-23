@@ -1,1 +1,3 @@
-export * from './EventBus';
+export * from './registry';
+export * from './contracts';
+export * from './types';
