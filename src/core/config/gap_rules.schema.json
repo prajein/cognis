@@ -1,0 +1,116 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://hylehq.com/schemas/gap_rules.schema.json",
+  "title": "Cognis Gap Detection Rules",
+  "description": "Versioned configuration of rule-based, on-device gap-detection heuristics (Engineering Contracts: Yogesh owns Gap Detection; Full Software Spec gap taxonomy). Loaded at runtime; every threshold/marker/weight lives here so the engine carries no hardcoded numbers or text. Detected confidences are model estimates, not measurements.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "settings", "stateModifiers", "revisionModifier", "rules"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Config version (semantic versioning).",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "note": {
+      "type": "string",
+      "description": "Optional human note about provenance / disclosure."
+    },
+    "settings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minTextLength", "emitThreshold", "maxSignals", "cognitivePauseMs"],
+      "properties": {
+        "minTextLength": {
+          "type": "integer",
+          "description": "Minimum prompt length (characters) before text rules run. Avoids flagging tiny fragments.",
+          "minimum": 0
+        },
+        "emitThreshold": {
+          "type": "number",
+          "description": "Minimum confidence a gap signal must reach to be emitted.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "maxSignals": {
+          "type": "integer",
+          "description": "Maximum number of gap signals emitted per analysis pass.",
+          "minimum": 1
+        },
+        "cognitivePauseMs": {
+          "type": "integer",
+          "description": "Pause duration (ms) that marks a cognitive (thinking) pause — the ghost-text trigger window. Shared with the Ghost Text engine.",
+          "minimum": 0
+        }
+      }
+    },
+    "stateModifiers": {
+      "type": "object",
+      "description": "Additive confidence adjustment keyed by cognitive StateLabel. Overload raises gap likelihood; coasting lowers it.",
+      "additionalProperties": false,
+      "required": ["stretch", "coasting", "overload"],
+      "properties": {
+        "stretch": { "$ref": "#/definitions/modifier" },
+        "coasting": { "$ref": "#/definitions/modifier" },
+        "overload": { "$ref": "#/definitions/modifier" }
+      }
+    },
+    "revisionModifier": {
+      "type": "object",
+      "description": "Additive confidence based on how many times the user has revised the prompt (a proxy for uncertainty).",
+      "additionalProperties": false,
+      "required": ["perRevision", "max"],
+      "properties": {
+        "perRevision": { "$ref": "#/definitions/modifier" },
+        "max": { "$ref": "#/definitions/modifier" }
+      }
+    },
+    "rules": {
+      "type": "array",
+      "description": "One rule per gap type in the Cognis gap taxonomy.",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/rule" }
+    }
+  },
+  "definitions": {
+    "modifier": {
+      "type": "number",
+      "description": "Additive confidence adjustment.",
+      "minimum": -1,
+      "maximum": 1
+    },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gapType", "baseConfidence", "satisfiedWhenAnyPresent"],
+      "properties": {
+        "gapType": {
+          "type": "string",
+          "description": "Gap taxonomy member (must match the GapType union).",
+          "enum": [
+            "intentionality",
+            "audience",
+            "constraint",
+            "stakes",
+            "assumption",
+            "mechanism",
+            "temporal",
+            "second_order"
+          ]
+        },
+        "baseConfidence": {
+          "type": "number",
+          "description": "Confidence assigned when the gap is present (no satisfying marker found), before modifiers.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "satisfiedWhenAnyPresent": {
+          "type": "array",
+          "description": "Lexical markers; if ANY appears in the prompt (case-insensitive), the gap is considered addressed and is NOT emitted.",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

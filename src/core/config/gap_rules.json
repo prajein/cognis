@@ -1,0 +1,96 @@
+{
+  "version": "0.1.0",
+  "note": "Cognis v0.1 gap-detection rules. Rule-based, on-device heuristics only (no network, no model weights) per the Week-1 'draft the gap-detection rules and pick the on-device approach' deliverable. Every threshold, marker list and weight lives here — never hardcoded in engine code (Engineering Constitution: 'never hardcode numbers or text'). Confidences are model estimates, not measurements (Disclosure Rule).",
+  "settings": {
+    "minTextLength": 12,
+    "emitThreshold": 0.5,
+    "maxSignals": 3,
+    "cognitivePauseMs": 1200
+  },
+  "stateModifiers": {
+    "stretch": 0.0,
+    "coasting": -0.1,
+    "overload": 0.1
+  },
+  "revisionModifier": {
+    "perRevision": 0.02,
+    "max": 0.1
+  },
+  "rules": [
+    {
+      "gapType": "intentionality",
+      "baseConfidence": 0.6,
+      "satisfiedWhenAnyPresent": [
+        "so that", "in order to", "so i can", "so we can", "the goal", "my goal",
+        "the point is", "the purpose", "i want to", "i need to", "trying to",
+        "objective", "aim to", "intend to", "end goal"
+      ]
+    },
+    {
+      "gapType": "audience",
+      "baseConfidence": 0.55,
+      "satisfiedWhenAnyPresent": [
+        "audience", "reader", "readers", "for a ", "for my ", "for our ",
+        "for beginners", "for experts", "for a non-technical", "non-technical",
+        "for a technical", "aimed at", "targeted at", "eli5", "explain like",
+        "for a 5", "for children", "for students", "for the team", "for customers",
+        "for users", "for stakeholders"
+      ]
+    },
+    {
+      "gapType": "constraint",
+      "baseConfidence": 0.55,
+      "satisfiedWhenAnyPresent": [
+        "must", "should", "limit", "only", "no more than", "at most", "at least",
+        "within", "constraint", "budget", "word limit", "in 100 words", "in 200 words",
+        "avoid", "do not", "don't", "without", "max ", "maximum", "minimum",
+        "no longer than", "keep it", "concise", "brief"
+      ]
+    },
+    {
+      "gapType": "stakes",
+      "baseConfidence": 0.4,
+      "satisfiedWhenAnyPresent": [
+        "important", "critical", "urgent", "deadline", "high-stakes", "high stakes",
+        "production", "for a client", "for the exam", "exam", "interview", "launch",
+        "matters because", "this is for", "presentation", "investor", "graded"
+      ]
+    },
+    {
+      "gapType": "assumption",
+      "baseConfidence": 0.45,
+      "satisfiedWhenAnyPresent": [
+        "i'm assuming", "i am assuming", "assuming that", "for context", "context:",
+        "background:", "to clarify", "given that", "note that", "as a reminder",
+        "for reference", "currently", "right now we"
+      ]
+    },
+    {
+      "gapType": "mechanism",
+      "baseConfidence": 0.5,
+      "satisfiedWhenAnyPresent": [
+        "how ", "using", "via", "with the", "approach", "method", "steps",
+        "step by step", "algorithm", "implement", "technique", "strategy",
+        "by means of", "the way to", "process"
+      ]
+    },
+    {
+      "gapType": "temporal",
+      "baseConfidence": 0.35,
+      "satisfiedWhenAnyPresent": [
+        "first", "then", "next", "before", "after", "by tomorrow", "by today",
+        "by friday", "deadline", "timeline", "when ", "sequence", "in order",
+        "step 1", "phase", "schedule", "eventually", "finally"
+      ]
+    },
+    {
+      "gapType": "second_order",
+      "baseConfidence": 0.3,
+      "satisfiedWhenAnyPresent": [
+        "impact", "consequence", "side effect", "side-effect", "trade-off", "tradeoff",
+        "long-term", "long term", "downstream", "implication", "implications", "risk",
+        "what could go wrong", "knock-on", "ripple", "second-order"
+      ]
+    }
+  ]
+}
