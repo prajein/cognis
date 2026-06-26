@@ -1,0 +1,98 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://hylehq.com/schemas/activation_profiles.schema.json",
+  "title": "Cognis Activation Profiles",
+  "description": "Versioned configuration of research-baseline brain-region activation profiles for every task in the Cognis taxonomy (Full Software Spec, Parts IV, VI, XIII). Loaded at runtime; values are research-derived baselines, not measured.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "profiles"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Config version (semantic versioning).",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "note": {
+      "type": "string",
+      "description": "Optional human note about provenance / disclosure."
+    },
+    "profiles": {
+      "type": "array",
+      "description": "One entry per task/subclass. Must cover the full 47-task taxonomy.",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/profile" }
+    }
+  },
+  "definitions": {
+    "regionScore": {
+      "type": "integer",
+      "description": "Activation level: 0 inactive, 1 low, 2 moderate, 3 high, 4 peak.",
+      "minimum": 0,
+      "maximum": 4
+    },
+    "regionProfile": {
+      "type": "object",
+      "description": "The ten brain-region activation levels for this task.",
+      "additionalProperties": false,
+      "required": ["DLPFC", "mPFC", "M1", "Parietal", "Temporal", "Occipital", "Cerebellum", "Hippocampus", "Amygdala", "ACC"],
+      "properties": {
+        "DLPFC":       { "$ref": "#/definitions/regionScore" },
+        "mPFC":        { "$ref": "#/definitions/regionScore" },
+        "M1":          { "$ref": "#/definitions/regionScore" },
+        "Parietal":    { "$ref": "#/definitions/regionScore" },
+        "Temporal":    { "$ref": "#/definitions/regionScore" },
+        "Occipital":   { "$ref": "#/definitions/regionScore" },
+        "Cerebellum":  { "$ref": "#/definitions/regionScore" },
+        "Hippocampus": { "$ref": "#/definitions/regionScore" },
+        "Amygdala":    { "$ref": "#/definitions/regionScore" },
+        "ACC":         { "$ref": "#/definitions/regionScore" }
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["task_id", "display_name", "category", "subclass", "skill_domain", "region_profile", "key_insight", "automaticity_type", "transition_threshold_hours"],
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "description": "Stable identifier, lowercase snake_case (e.g. tennis_serve_practice).",
+          "pattern": "^[a-z0-9]+(_[a-z0-9]+)*$"
+        },
+        "display_name": {
+          "type": "string",
+          "description": "Human-readable name as shown to the user (e.g. \"Tennis — Serve Practice\").",
+          "minLength": 1
+        },
+        "category": {
+          "type": "string",
+          "description": "Top-level taxonomy category.",
+          "enum": ["Cognitive", "Creative", "AI-Assisted Work", "Sport and Movement", "Restorative"]
+        },
+        "subclass": {
+          "type": ["string", "null"],
+          "description": "Second-level subclass name, or null when the task has no subclass."
+        },
+        "skill_domain": {
+          "type": "string",
+          "description": "Skill domain this task belongs to, lowercase snake_case (e.g. tennis, writing).",
+          "pattern": "^[a-z0-9]+(_[a-z0-9]+)*$"
+        },
+        "region_profile": { "$ref": "#/definitions/regionProfile" },
+        "key_insight": {
+          "type": "string",
+          "description": "Short explanation of this task's profile. May be empty in v0.1."
+        },
+        "automaticity_type": {
+          "type": "string",
+          "description": "How automaticity is modelled for this task.",
+          "enum": ["cognitive", "creative", "motor", "ai", "restorative"]
+        },
+        "transition_threshold_hours": {
+          "type": ["number", "null"],
+          "description": "Approx. deliberate-practice hours to the automaticity transition (motor tasks, from Part IX). Null when not defined.",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}
