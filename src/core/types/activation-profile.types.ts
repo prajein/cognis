@@ -21,17 +21,29 @@
 /**
  * Stable identifier for a task in the Cognis taxonomy.
  */
-export type TaskId = string;
+declare const __taskIdBrand: unique symbol;
+export type TaskId = string & { readonly __brand: typeof __taskIdBrand };
+export function toTaskId(id: string): TaskId {
+  return id as TaskId;
+}
 
 /**
  * Stable identifier for a skill domain.
  */
-export type SkillDomain = string;
+declare const __skillDomainBrand: unique symbol;
+export type SkillDomain = string & { readonly __brand: typeof __skillDomainBrand };
+export function toSkillDomain(domain: string): SkillDomain {
+  return domain as SkillDomain;
+}
 
 /**
  * Approximate deliberate-practice hours.
  */
-export type Hours = number;
+declare const __hoursBrand: unique symbol;
+export type Hours = number & { readonly __brand: typeof __hoursBrand };
+export function toHours(hours: number): Hours {
+  return hours as Hours;
+}
 
 /**
  * Brain-region activation score.
