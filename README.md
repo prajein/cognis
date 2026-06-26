@@ -53,9 +53,11 @@ src/
 │   ├── response/     # Analyzes AI response stream chunks
 │   └── insights/     # Measures task automaticity and patterns
 ├── storage/          # Local persistence layer
-│   ├── indexeddb/    # Database configuration (cognis_v1)
-│   ├── repositories/ # Repo abstractions for immutable events, sessions, and profiles
-│   └── projections/  # Read-model projections for UI surfaces
+│   ├── types.ts      # Storage layer contract interfaces
+│   ├── migrations/   # Database schema migrations (v1 schema)
+│   ├── indexeddb/    # Database connection manager (cognis_v1) and event subscriber
+│   ├── repositories/ # Repository implementations (EventRepository)
+│   └── projections/  # Read-model projections for UI surfaces (deferred)
 └── mock/             # Sandbox testing environment
     └── harness/      # Simulated platform runtime, streams, and inputs
 ```
