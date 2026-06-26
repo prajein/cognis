@@ -1,8 +1,12 @@
 {
   "name": "cognis",
   "version": "0.1.0",
+  "scripts": {
+    "validate:schemas": "node scripts/validate-schemas.mjs"
+  },
   "devDependencies": {
     "@types/chrome": "^0.2.0",
+    "ajv": "^8.20.0",
     "typescript": "^6.0.3"
   }
 }

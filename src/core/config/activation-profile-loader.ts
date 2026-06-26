@@ -1,17 +1,32 @@
 import activationProfilesJson from "./activation_profiles.json";
 
-import type {
+import {
   ActivationProfile,
   ActivationProfilesConfig,
   TaskCategory,
+  TaskId,
+  toTaskId,
+  toSkillDomain,
+  toHours,
 } from "../types";
 
 // ---------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------
 
-const activationProfiles =
-  activationProfilesJson as ActivationProfilesConfig;
+const rawConfig = activationProfilesJson as any;
+
+const mappedProfiles: ActivationProfile[] = rawConfig.profiles.map((p: any) => ({
+  ...p,
+  task_id: toTaskId(p.task_id),
+  skill_domain: toSkillDomain(p.skill_domain),
+  transition_threshold_hours: p.transition_threshold_hours !== null ? toHours(p.transition_threshold_hours) : null,
+}));
+
+const activationProfiles: ActivationProfilesConfig = {
+  ...rawConfig,
+  profiles: mappedProfiles,
+};
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -35,7 +50,7 @@ export function getAllActivationProfiles(): readonly ActivationProfile[] {
  * Returns the activation profile for a specific task.
  */
 export function getActivationProfile(
-  taskId: string
+  taskId: TaskId
 ): ActivationProfile | undefined {
   return activationProfiles.profiles.find(
     profile => profile.task_id === taskId
@@ -56,7 +71,7 @@ export function getActivationProfilesByCategory(
 /**
  * Returns true if an activation profile exists.
  */
-export function hasActivationProfile(taskId: string): boolean {
+export function hasActivationProfile(taskId: TaskId): boolean {
   return activationProfiles.profiles.some(
     profile => profile.task_id === taskId
   );
