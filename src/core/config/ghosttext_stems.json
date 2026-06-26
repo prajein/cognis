@@ -1,0 +1,43 @@
+{
+  "version": "0.1.0",
+  "note": "Cognis v0.1 ghost-text stems. On-device template stems (no model, no network) offered during a cognitive pause to help the user address a detected gap. v0.1 is a fixed template set; a small pretrained stem model is post-August and will slot in behind the same engine surface. Stems are gentle openers the user continues — never full sentences put in their mouth.",
+  "settings": {
+    "pauseThresholdMs": 1200,
+    "gapRecencyMs": 8000,
+    "maxStemLength": 120
+  },
+  "stems": {
+    "intentionality": [
+      "My goal here is to ",
+      "What I'm ultimately trying to do is "
+    ],
+    "audience": [
+      "This is for ",
+      "The audience is "
+    ],
+    "constraint": [
+      "It needs to ",
+      "A key constraint is "
+    ],
+    "stakes": [
+      "This matters because ",
+      "What's at stake is "
+    ],
+    "assumption": [
+      "For context, ",
+      "I'm assuming that "
+    ],
+    "mechanism": [
+      "The approach should be ",
+      "Specifically, it should work by "
+    ],
+    "temporal": [
+      "The timeline is ",
+      "First, "
+    ],
+    "second_order": [
+      "One downstream effect to consider is ",
+      "A knock-on effect could be "
+    ]
+  }
+}
