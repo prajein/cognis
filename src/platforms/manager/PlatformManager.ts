@@ -1,5 +1,6 @@
 import { PlatformAdapter } from '../interfaces/PlatformAdapter';
 import { GapDetectionEngine } from '../../engines/gap/GapDetectionEngine';
+import { EnrichmentEngine } from '../../engines/enrichment/EnrichmentEngine';
 import { ChatGPTAdapter } from '../chatgpt/ChatGPTAdapter';
 
 /**
@@ -12,9 +13,11 @@ import { ChatGPTAdapter } from '../chatgpt/ChatGPTAdapter';
 export class PlatformManager {
   private activeAdapter: PlatformAdapter | null = null;
   private readonly gapEngine: GapDetectionEngine;
+  private readonly enrichmentEngine: EnrichmentEngine;
 
-  constructor(gapEngine: GapDetectionEngine) {
+  constructor(gapEngine: GapDetectionEngine, enrichmentEngine: EnrichmentEngine) {
     this.gapEngine = gapEngine;
+    this.enrichmentEngine = enrichmentEngine;
   }
 
   /**
@@ -46,7 +49,7 @@ export class PlatformManager {
 
   private createAdapterForUrl(url: string): PlatformAdapter | null {
     if (url.includes('chatgpt.com')) {
-      return new ChatGPTAdapter(this.gapEngine);
+      return new ChatGPTAdapter(this.gapEngine, this.enrichmentEngine);
     }
     // Future: claude.ai, gemini.google.com
     return null;
