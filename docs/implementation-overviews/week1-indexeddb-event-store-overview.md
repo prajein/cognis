@@ -4,7 +4,7 @@
 **Owner**: Suchit (Storage Layer) + Naren (Architecture Governance)
 **Implementation Date**: 2026-06-26
 **Status**: Implemented and Verified
-**Reference**: [IndexedDB Event Store Implementation Plan](../implementation-plans/indexeddb-event-store-implementation-plan.md)
+**Reference**: [IndexedDB Event Store Implementation Plan](../implementation-plans/week1-indexeddb-event-store-implementation-plan.md)
 
 ---
 

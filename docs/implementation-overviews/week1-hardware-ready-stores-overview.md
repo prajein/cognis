@@ -4,7 +4,7 @@
 **Owner**: Suchit (Storage Layer)
 **Sprint**: Week 1 — "create the hardware-ready tables now … but leave them empty"
 **Status**: Implemented and Verified
-**Reference**: [IndexedDB Event Store Implementation Plan](../implementation-plans/indexeddb-event-store-implementation-plan.md)
+**Reference**: [IndexedDB Event Store Implementation Plan](../implementation-plans/week1-indexeddb-event-store-implementation-plan.md)
 **Constitution Reference**: Sections 8 (Storage Law), 9 (Arc Readiness)
 
 ---
