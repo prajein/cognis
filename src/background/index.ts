@@ -1,0 +1,67 @@
+import { EventBus } from '../core/event-bus/EventBus';
+import { ExtensionEventBridge } from '../core/event-bus/ExtensionEventBridge';
+import { ConsoleErrorReporter } from '../core/error/ConsoleErrorReporter';
+import { CognisDatabase } from '../storage/indexeddb/CognisDatabase';
+import { EventRepository } from '../storage/repositories/EventRepository';
+import { EventStoreSubscriber } from '../storage/indexeddb/EventStoreSubscriber';
+import { v1Migration } from '../storage/migrations/v1';
+import { v2Migration } from '../storage/migrations/v2';
+
+import {
+  SessionEvents,
+  PromptEvents,
+  CognitiveEvents,
+  GhostTextEvents,
+  ResponseEvents,
+  InsightEvents,
+  HardwareEvents,
+  EventType
+} from '../core/event-bus/registry';
+
+const allEvents: EventType[] = [
+  ...Object.values(SessionEvents),
+  ...Object.values(PromptEvents),
+  ...Object.values(CognitiveEvents),
+  ...Object.values(GhostTextEvents),
+  ...Object.values(ResponseEvents),
+  ...Object.values(InsightEvents),
+  ...Object.values(HardwareEvents),
+];
+
+/**
+ * Background Service Worker Composition Root
+ *
+ * Bootstraps the EventBus in "host" mode, establishes the database
+ * connection, and spins up the EventStoreSubscriber.
+ */
+async function bootstrapBackground(): Promise<void> {
+  const errorReporter = new ConsoleErrorReporter();
+  const eventBus = new EventBus(errorReporter);
+
+  // Initialize EventBridge in host mode (background script)
+  const eventBridge = new ExtensionEventBridge('background', eventBus, allEvents);
+  eventBridge.initialize();
+
+  try {
+    // 1. Initialize Database with migrations
+    const db = new CognisDatabase([v1Migration, v2Migration]);
+    await db.open();
+
+    // 2. Initialize Repository
+    const eventRepo = new EventRepository(db);
+
+    // 3. Start Subscriber
+    const subscriber = new EventStoreSubscriber(eventBus, eventRepo, errorReporter);
+    subscriber.subscribeToAll();
+
+    console.log('[Background] Bootstrap complete. Cognis is active.');
+  } catch (error) {
+    errorReporter.report(error, {
+      eventType: 'system.bootstrap.failed',
+      source: 'background',
+    });
+  }
+}
+
+// Start the background process
+bootstrapBackground();
