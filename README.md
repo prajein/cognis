@@ -34,11 +34,12 @@ src/
 ├── content/          # Content scripts interacting with host AI platforms (ChatGPT, Claude)
 ├── sidepanel/        # Surface B UI for cognitive modeling and visualization
 ├── core/             # Central core contract definitions and infrastructural Event Bus
-│   ├── event-bus/    # Event Bus implementation details
-│   ├── contracts/    # DomainEvent definitions and core interfaces
-│   ├── config/       # Core static configuration
-│   ├── constants/    # Stable event registry names
-│   └── types/        # TypeScript types representing event payloads
+│   ├── event-bus/    # Event Bus implementation, Extension Event Bridge, Event Contracts, and Registry
+│   ├── contracts/    # Core platform adapter and engine interface contracts
+│   ├── config/       # Core static configuration and schemas
+│   ├── constants/    # Stable event registry names and re-exports
+│   ├── error/        # Error reporting abstraction and implementations
+│   └── types/        # TypeScript types representing event payloads and schemas
 ├── platforms/        # Adapters abstracting host AI platforms
 │   ├── manager/      # Selection and lifecycle execution of active platform adapters
 │   ├── chatgpt/      # ChatGPT DOM integration and response monitoring
@@ -50,14 +51,14 @@ src/
 │   ├── gap/          # Detects formulation gaps in current input
 │   ├── ghosttext/    # Orchestrates ghost text proposals
 │   ├── enrichment/   # Contextual prompt enrichment compilation
-│   ├── response/     # Analyzes AI response stream chunks
-│   └── insights/     # Measures task automaticity and patterns
+│   ├── response/     # Analyzes AI response stream chunks (transient per ADR-019)
+│   └── insights/     # Measures task automaticity and patterns (background worker)
 ├── storage/          # Local persistence layer
 │   ├── types.ts      # Storage layer contract interfaces
-│   ├── migrations/   # Database schema migrations (v1 schema)
-│   ├── indexeddb/    # Database connection manager (cognis_v1) and event subscriber
-│   ├── repositories/ # Repository implementations (EventRepository)
-│   └── projections/  # Read-model projections for UI surfaces (deferred)
+│   ├── migrations/   # Database schema migrations (v1, v2, v3 schemas)
+│   ├── indexeddb/    # Database connection manager (cognis_v3) and event subscriber
+│   ├── repositories/ # Repository implementations (EventRepository, ReadModelRepository)
+│   └── projections/  # Projection Manager and Read-Model Builders
 └── mock/             # Sandbox testing environment
     └── harness/      # Simulated platform runtime, streams, and inputs
 ```
