@@ -2,6 +2,7 @@ import { EventBus } from '../core/event-bus/EventBus';
 import { ExtensionEventBridge } from '../core/event-bus/ExtensionEventBridge';
 import { ConsoleErrorReporter } from '../core/error/ConsoleErrorReporter';
 import { GapDetectionEngine } from '../engines/gap/GapDetectionEngine';
+import { EnrichmentEngine } from '../engines/enrichment/EnrichmentEngine';
 // GhostTextEngine is pending PR #8 merge, so we only type-hint it or leave a comment
 // import { GhostTextEngine } from '../engines/ghosttext/GhostTextEngine';
 import { PlatformManager } from '../platforms/manager/PlatformManager';
@@ -51,8 +52,11 @@ function bootstrapContentScript(): void {
     // const ghostEngine = new GhostTextEngine(eventBus);
     // ghostEngine.start();
 
+    const enrichmentEngine = new EnrichmentEngine(eventBus);
+    enrichmentEngine.start();
+
     // 2. Initialize Platform Adapter Wiring
-    const platformManager = new PlatformManager(gapEngine);
+    const platformManager = new PlatformManager(gapEngine, enrichmentEngine);
     platformManager.detectAndStart(window.location.href);
 
     console.log('[Content Script] Bootstrap complete. Cognis Surface A is active.');

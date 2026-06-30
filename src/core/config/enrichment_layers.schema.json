@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EnrichmentLayersConfig",
+  "type": "object",
+  "properties": {
+    "settings": {
+      "type": "object",
+      "properties": {
+        "latencyTimeoutMs": {
+          "type": "integer",
+          "default": 100
+        },
+        "enableCaching": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "required": [
+        "latencyTimeoutMs",
+        "enableCaching"
+      ]
+    },
+    "layers": {
+      "type": "object",
+      "properties": {
+        "identity": {
+          "$ref": "#/definitions/LayerConfig"
+        },
+        "taskFrame": {
+          "$ref": "#/definitions/LayerConfig"
+        },
+        "gapResolution": {
+          "$ref": "#/definitions/LayerConfig"
+        },
+        "outputStructure": {
+          "$ref": "#/definitions/LayerConfig"
+        },
+        "constraints": {
+          "$ref": "#/definitions/LayerConfig"
+        }
+      },
+      "required": [
+        "identity",
+        "taskFrame",
+        "gapResolution",
+        "outputStructure",
+        "constraints"
+      ]
+    }
+  },
+  "definitions": {
+    "LayerConfig": {
+      "type": "object",
+      "properties": {
+        "defaultPriority": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "template": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "defaultPriority",
+        "template"
+      ]
+    }
+  }
+}

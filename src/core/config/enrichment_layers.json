@@ -1,0 +1,28 @@
+{
+  "settings": {
+    "latencyTimeoutMs": 100,
+    "enableCaching": true
+  },
+  "layers": {
+    "identity": {
+      "defaultPriority": 20,
+      "template": "### User Identity Context\n- The user prefers explicit, step-by-step reasoning.\n- Tone should be professional but highly concise."
+    },
+    "taskFrame": {
+      "defaultPriority": 40,
+      "template": "### Current Task Frame\n- Analyzing technical architecture and identifying foundational gaps."
+    },
+    "gapResolution": {
+      "defaultPriority": 60,
+      "template": "### Cognitive Guidance\n- The user paused frequently while constructing the logic. Please ensure you clarify edge cases and complex boolean evaluations."
+    },
+    "outputStructure": {
+      "defaultPriority": 50,
+      "template": "### Output Structure\n- Use markdown format.\n- Present comparisons in a table."
+    },
+    "constraints": {
+      "defaultPriority": 90,
+      "template": "### Core Constraints\n- DO NOT output code blocks unless explicitly requested.\n- Focus purely on architectural principles."
+    }
+  }
+}
