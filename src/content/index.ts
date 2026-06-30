@@ -3,6 +3,7 @@ import { ExtensionEventBridge } from '../core/event-bus/ExtensionEventBridge';
 import { ConsoleErrorReporter } from '../core/error/ConsoleErrorReporter';
 import { GapDetectionEngine } from '../engines/gap/GapDetectionEngine';
 import { EnrichmentEngine } from '../engines/enrichment/EnrichmentEngine';
+import { ResponseIntelligenceEngine } from '../engines/response/ResponseIntelligenceEngine';
 // GhostTextEngine is pending PR #8 merge, so we only type-hint it or leave a comment
 // import { GhostTextEngine } from '../engines/ghosttext/GhostTextEngine';
 import { PlatformManager } from '../platforms/manager/PlatformManager';
@@ -54,6 +55,9 @@ function bootstrapContentScript(): void {
 
     const enrichmentEngine = new EnrichmentEngine(eventBus);
     enrichmentEngine.start();
+
+    const responseEngine = new ResponseIntelligenceEngine();
+    responseEngine.start(eventBus);
 
     // 2. Initialize Platform Adapter Wiring
     const platformManager = new PlatformManager(gapEngine, enrichmentEngine);

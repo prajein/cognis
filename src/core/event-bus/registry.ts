@@ -64,6 +64,7 @@ export const ResponseEvents = Object.freeze({
   CHUNK: 'response.chunk',
   COMPLETED: 'response.completed',
   ABANDONED: 'response.abandoned',
+  ANALYSIS_COMPLETED: 'response.analysis.completed',
 } as const);
 
 // ---------------------------------------------------------------------------

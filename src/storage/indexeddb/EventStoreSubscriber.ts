@@ -71,9 +71,20 @@ export class EventStoreSubscriber {
    * asynchronously in the background. This is a critical architectural invariant.
    */
   private handleEvent = (event: DomainEvent<any>): void => {
+    // Persistence Mapping (Sanitization) - ADR-019
+    // Strip transport-only fields before appending to the EventStore.
+    let persistenceDto = event;
+    if (event.type === ResponseEvents.CHUNK) {
+      const { chunkText, ...sanitizedPayload } = event.payload;
+      persistenceDto = {
+        ...event,
+        payload: sanitizedPayload
+      };
+    }
+
     // Fire-and-forget: append returns a Promise, but we don't await it here.
     // The EventBus synchronous dispatch loop returns immediately.
-    this.eventRepository.append(event).catch((error) => {
+    this.eventRepository.append(persistenceDto).catch((error) => {
       // Isolate failures: Storage errors are reported but do not crash the bus.
       this.errorReporter.report(
         error instanceof Error ? error : new Error(String(error)),
