@@ -326,11 +326,18 @@ export interface ResponseStartedPayload {
  * Payload for response.chunk
  *
  * Purpose: Records a streaming chunk from the AI response.
- *          Contains only metadata, not the raw response text.
  * Producer: Perception Layer (content script via adapter)
  * Consumer: Response Intelligence Engine
  */
 export interface ResponseChunkPayload {
+  /**
+   * [TRANSPORT-ONLY]
+   * Transient string containing the actual streaming text.
+   * Per ADR-019, this field is excluded from persistence mapping.
+   * It exists only in memory for synchronous analytical dispatch.
+   */
+  readonly chunkText?: string;
+
   /** Character count of this chunk. */
   readonly chunkLength: number;
 
@@ -368,9 +375,36 @@ export interface ResponseAbandonedPayload {
   readonly durationMs: number;
 }
 
+/**
+ * Payload for response.analysis.completed
+ *
+ * Purpose: Records the heuristic evaluation of a completed response.
+ *          Contains derived metrics ONLY, no transient text.
+ * Producer: Response Intelligence Engine
+ * Consumer: Storage Layer, Projection Builders
+ */
+export interface ResponseAnalysisCompletedPayload {
+  /** Hash of the prompt that triggered this response. */
+  readonly promptHash: string;
+  
+  /** Evaluated structural completeness (0.0 to 1.0). */
+  readonly structuralScore: number;
+  
+  /** Evaluated reasoning depth (0.0 to 1.0). */
+  readonly reasoningScore: number;
+  
+  /** Evaluated quality score (0.0 to 1.0). */
+  readonly qualityScore: number;
+  
+  /** Array of semantic flags (e.g., 'heavy_code', 'step_by_step'). */
+  readonly flags: ReadonlyArray<string>;
+}
+
 // ---------------------------------------------------------------------------
 // Insight Event Payloads
 // ---------------------------------------------------------------------------
+
+import { TaxonomyDomain } from '../types/insight.types';
 
 /**
  * Payload for insight.generated
@@ -380,11 +414,23 @@ export interface ResponseAbandonedPayload {
  * Consumer: Storage Layer, Side Panel (Surface B)
  */
 export interface InsightGeneratedPayload {
+  /** Unique identifier for the insight. */
+  readonly insightId: string;
+
   /** Category of the insight. */
-  readonly insightType: string;
+  readonly domain: TaxonomyDomain;
+
+  /** Title of the insight. */
+  readonly title: string;
 
   /** Human-readable summary of the insight. */
   readonly summary: string;
+
+  /** Confidence score (0.0 to 1.0). */
+  readonly confidence: number;
+
+  /** Number of independent events that contributed to this insight. */
+  readonly evidenceCount: number;
 }
 
 /**
@@ -529,6 +575,7 @@ export interface CognisEventMap {
   'response.chunk': ResponseChunkPayload;
   'response.completed': ResponseCompletedPayload;
   'response.abandoned': ResponseAbandonedPayload;
+  'response.analysis.completed': ResponseAnalysisCompletedPayload;
 
   // Insight
   'insight.generated': InsightGeneratedPayload;

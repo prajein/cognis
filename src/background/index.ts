@@ -29,11 +29,13 @@ const allEvents: EventType[] = [
   ...Object.values(HardwareEvents),
 ];
 
+import { InsightEngine } from '../engines/insights/InsightEngine';
+
 /**
  * Background Service Worker Composition Root
  *
  * Bootstraps the EventBus in "host" mode, establishes the database
- * connection, and spins up the EventStoreSubscriber.
+ * connection, and spins up the EventStoreSubscriber and Insight Engine.
  */
 async function bootstrapBackground(): Promise<void> {
   const errorReporter = new ConsoleErrorReporter();
@@ -54,6 +56,10 @@ async function bootstrapBackground(): Promise<void> {
     // 3. Start Subscriber
     const subscriber = new EventStoreSubscriber(eventBus, eventRepo, errorReporter);
     subscriber.subscribeToAll();
+
+    // 4. Start Insight Engine (Apex Reasoning Layer)
+    const insightEngine = new InsightEngine();
+    insightEngine.start(eventBus);
 
     console.log('[Background] Bootstrap complete. Cognis is active.');
   } catch (error) {

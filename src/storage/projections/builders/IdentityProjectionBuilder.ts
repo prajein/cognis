@@ -41,10 +41,10 @@ export class IdentityProjectionBuilder implements ProjectionBuilder {
       const payload = event.payload as InsightGeneratedPayload;
       
       // Enforce idempotency: prevent adding the same insight event twice during replay
-      const existing = model.insights.find(i => i.timestamp === event.timestamp && i.type === payload.insightType);
+      const existing = model.insights.find(i => i.timestamp === event.timestamp && i.type === payload.domain);
       if (!existing) {
         model.insights.push({
-          type: payload.insightType,
+          type: payload.domain,
           summary: payload.summary,
           timestamp: event.timestamp
         });
