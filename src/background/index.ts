@@ -7,6 +7,13 @@ import { EventStoreSubscriber } from '../storage/indexeddb/EventStoreSubscriber'
 import { v1Migration } from '../storage/migrations/v1';
 import { v2Migration } from '../storage/migrations/v2';
 import { v3Migration } from '../storage/migrations/v3';
+import { ReadModelRepository } from '../storage/repositories/ReadModelRepository';
+import { ProjectionManager } from '../storage/projections/ProjectionManager';
+import { SessionProjectionBuilder } from '../storage/projections/builders/SessionProjectionBuilder';
+import { GapProfileProjectionBuilder } from '../storage/projections/builders/GapProfileProjectionBuilder';
+import { IdentityProjectionBuilder } from '../storage/projections/builders/IdentityProjectionBuilder';
+import { AutomaticityProjectionBuilder } from '../storage/projections/builders/AutomaticityProjectionBuilder';
+import { ResponseMetricsProjectionBuilder } from '../storage/projections/builders/ResponseMetricsProjectionBuilder';
 
 import {
   SessionEvents,
@@ -57,7 +64,19 @@ async function bootstrapBackground(): Promise<void> {
     const subscriber = new EventStoreSubscriber(eventBus, eventRepo, errorReporter);
     subscriber.subscribeToAll();
 
-    // 4. Start Insight Engine (Apex Reasoning Layer)
+    // 4. Initialize Projections
+    const readModelRepo = new ReadModelRepository(db);
+    const builders = [
+      new SessionProjectionBuilder(readModelRepo),
+      new GapProfileProjectionBuilder(readModelRepo),
+      new IdentityProjectionBuilder(readModelRepo),
+      new AutomaticityProjectionBuilder(readModelRepo),
+      new ResponseMetricsProjectionBuilder(readModelRepo)
+    ];
+    const projectionManager = new ProjectionManager(builders, eventBus, eventRepo, errorReporter);
+    projectionManager.startLiveSubscriptions();
+
+    // 5. Start Insight Engine (Apex Reasoning Layer)
     const insightEngine = new InsightEngine();
     insightEngine.start(eventBus);
 

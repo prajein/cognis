@@ -47,4 +47,35 @@ export class ReadModelRepository {
       });
     });
   }
+
+  /**
+   * Atomically updates a read model within a single readwrite transaction.
+   * Prevents lost updates when multiple events trigger concurrent modifications.
+   */
+  public async update<T extends { projectionId: string }>(
+    projectionId: string,
+    updater: (model: T | undefined) => T
+  ): Promise<void> {
+    return this.db.transaction(ReadModelRepository.STORE_NAME, 'readwrite', (tx) => {
+      return new Promise((resolve, reject) => {
+        const store = tx.objectStore(ReadModelRepository.STORE_NAME);
+        const getRequest = store.get(projectionId);
+
+        getRequest.onsuccess = () => {
+          try {
+            const currentModel = getRequest.result as T | undefined;
+            const updatedModel = updater(currentModel);
+            const putRequest = store.put(updatedModel);
+
+            putRequest.onsuccess = () => resolve();
+            putRequest.onerror = () => reject(putRequest.error);
+          } catch (error) {
+            reject(error);
+          }
+        };
+
+        getRequest.onerror = () => reject(getRequest.error);
+      });
+    });
+  }
 }

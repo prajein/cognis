@@ -30,6 +30,12 @@ export class EventRepository implements EventStoreContract {
 
         request.onsuccess = () => resolve();
         request.onerror = () => {
+          if (request.error && request.error.name === 'QuotaExceededError') {
+            console.error('[EventRepository] CRITICAL: QuotaExceededError. Event Store is full. Halting persistence.');
+            // We intentionally do not automatically delete events to preserve the Source of Truth.
+            reject(request.error);
+            return;
+          }
           // If the error is a ConstraintError, it means we attempted to insert a duplicate EventId.
           // In an append-only store, this could indicate a replay or a UUID collision.
           reject(request.error || new Error(`[EventRepository] Failed to append event ${event.id}`));

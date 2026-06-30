@@ -25,6 +25,7 @@ import {
   HardwareEvents,
   EventType
 } from '../../core/event-bus/registry';
+import { DefaultPersistenceMapper, PersistenceEventV1DTO } from './PersistenceMapper';
 
 /**
  * Interface for delegating error logging, keeping the subscriber
@@ -38,8 +39,9 @@ export class EventStoreSubscriber {
   constructor(
     private readonly eventBus: EventBusContract,
     private readonly eventRepository: EventStoreContract,
-    private readonly errorReporter: ErrorReporter
-  ) {}
+    private readonly errorReporter: ErrorReporter,
+    private readonly mapper: DefaultPersistenceMapper = new DefaultPersistenceMapper()
+  ) { }
 
   /**
    * Initializes subscriptions to all known domain events.
@@ -73,14 +75,7 @@ export class EventStoreSubscriber {
   private handleEvent = (event: DomainEvent<any>): void => {
     // Persistence Mapping (Sanitization) - ADR-019
     // Strip transport-only fields before appending to the EventStore.
-    let persistenceDto = event;
-    if (event.type === ResponseEvents.CHUNK) {
-      const { chunkText, ...sanitizedPayload } = event.payload;
-      persistenceDto = {
-        ...event,
-        payload: sanitizedPayload
-      };
-    }
+    const persistenceDto: PersistenceEventV1DTO = this.mapper.sanitize(event);
 
     // Fire-and-forget: append returns a Promise, but we don't await it here.
     // The EventBus synchronous dispatch loop returns immediately.
