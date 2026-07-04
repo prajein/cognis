@@ -4,8 +4,7 @@ import { ConsoleErrorReporter } from '../core/error/ConsoleErrorReporter';
 import { GapDetectionEngine } from '../engines/gap/GapDetectionEngine';
 import { EnrichmentEngine } from '../engines/enrichment/EnrichmentEngine';
 import { ResponseIntelligenceEngine } from '../engines/response/ResponseIntelligenceEngine';
-// GhostTextEngine is pending PR #8 merge, so we only type-hint it or leave a comment
-// import { GhostTextEngine } from '../engines/ghosttext/GhostTextEngine';
+import { GhostTextEngine } from '../engines/ghosttext/GhostTextEngine';
 import { PlatformManager } from '../platforms/manager/PlatformManager';
 
 import {
@@ -50,8 +49,8 @@ function bootstrapContentScript(): void {
     const gapEngine = new GapDetectionEngine(eventBus);
     gapEngine.start();
 
-    // const ghostEngine = new GhostTextEngine(eventBus);
-    // ghostEngine.start();
+    const ghostEngine = new GhostTextEngine(eventBus);
+    ghostEngine.start();
 
     const enrichmentEngine = new EnrichmentEngine(eventBus);
     enrichmentEngine.start();

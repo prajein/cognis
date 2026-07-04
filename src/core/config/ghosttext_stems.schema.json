@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://hylehq.com/schemas/ghosttext_stems.schema.json",
+  "title": "Cognis Ghost Text Stems",
+  "description": "Versioned configuration of on-device ghost-text stem templates, one list per gap type (Engineering Contracts: Yogesh owns Ghost Text). Loaded at runtime so wording is tuned without a code change. Stems are gentle openers the user continues, never full completions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "settings", "stems"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Config version (semantic versioning).",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "note": {
+      "type": "string",
+      "description": "Optional human note about provenance / disclosure."
+    },
+    "settings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pauseThresholdMs", "gapRecencyMs", "maxStemLength"],
+      "properties": {
+        "pauseThresholdMs": {
+          "type": "integer",
+          "description": "Minimum pause duration (ms) that triggers a ghost-text offer — the cognitive-pause window.",
+          "minimum": 0
+        },
+        "gapRecencyMs": {
+          "type": "integer",
+          "description": "How recently (ms) a gap must have been detected for a pause to surface a stem for it.",
+          "minimum": 0
+        },
+        "maxStemLength": {
+          "type": "integer",
+          "description": "Maximum allowed stem length (characters). Stems must stay short and non-intrusive.",
+          "minimum": 1
+        }
+      }
+    },
+    "stems": {
+      "type": "object",
+      "description": "Stem templates keyed by gap type. Every gap type must have at least one stem.",
+      "additionalProperties": false,
+      "required": [
+        "intentionality",
+        "audience",
+        "constraint",
+        "stakes",
+        "assumption",
+        "mechanism",
+        "temporal",
+        "second_order"
+      ],
+      "properties": {
+        "intentionality": { "$ref": "#/definitions/stemList" },
+        "audience": { "$ref": "#/definitions/stemList" },
+        "constraint": { "$ref": "#/definitions/stemList" },
+        "stakes": { "$ref": "#/definitions/stemList" },
+        "assumption": { "$ref": "#/definitions/stemList" },
+        "mechanism": { "$ref": "#/definitions/stemList" },
+        "temporal": { "$ref": "#/definitions/stemList" },
+        "second_order": { "$ref": "#/definitions/stemList" }
+      }
+    }
+  },
+  "definitions": {
+    "stemList": {
+      "type": "array",
+      "description": "Ordered list of stem templates for a gap type.",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}
