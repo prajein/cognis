@@ -43,9 +43,10 @@ export interface GhostTextEngineOptions {
   readonly idFactory?: EventIdFactory;
 }
 
-/** The most recent gap the engine could offer a stem for. */
+/** The strongest recent gap the engine could offer a stem for. */
 interface RecentGap {
   readonly gapType: GapType;
+  readonly confidence: number;
   readonly atTimestamp: Timestamp;
   readonly sessionId: SessionId;
 }
@@ -86,11 +87,23 @@ export class GhostTextEngine {
 
     this.unsubscribes.push(
       this.eventBus.subscribe("gap.detected", (event) => {
-        this.recentGap = {
+        const incoming: RecentGap = {
           gapType: event.payload.gapType,
+          confidence: event.payload.confidence,
           atTimestamp: event.timestamp,
           sessionId: event.sessionId,
         };
+        const prev = this.recentGap;
+        const prevStillRelevant =
+          prev !== null &&
+          prev.sessionId === incoming.sessionId &&
+          incoming.atTimestamp - prev.atTimestamp <= this.config.settings.gapRecencyMs;
+        // A single analysis pass emits several gaps (strongest first). Keep the
+        // strongest one within the recency window so the stem nudges the most
+        // important missing context, not whichever gap happened to arrive last.
+        if (!prevStillRelevant || incoming.confidence >= prev.confidence) {
+          this.recentGap = incoming;
+        }
       }),
     );
 
