@@ -86,14 +86,20 @@ function newEngine(bus: EventBus, config: GhostTextStemsConfig = FIXTURE): Ghost
   });
 }
 
-function emitGap(bus: EventBus, gapType: GapType, at: number, session: SessionId = SESSION): void {
+function emitGap(
+  bus: EventBus,
+  gapType: GapType,
+  at: number,
+  session: SessionId = SESSION,
+  confidence = 0.7,
+): void {
   bus.publish("gap.detected", {
-    id: toEventId(`gap-${at}`),
+    id: toEventId(`gap-${gapType}-${at}`),
     type: "gap.detected",
     timestamp: toTimestamp(at) as Timestamp,
     sessionId: session,
     source: "test",
-    payload: { gapType, confidence: 0.7 },
+    payload: { gapType, confidence },
   });
 }
 
@@ -201,6 +207,20 @@ export function runGhostTextSelfTest(): SelfTestReport {
     emitGap(bus, "intentionality", 1000);
     emitPause(bus, 1500, 1200);
     c.eq(got.length, 0, "over-length stem is suppressed");
+  }
+
+  // 8. Strongest-gap: when a pass emits several gaps (strongest first), the stem
+  //    addresses the strongest, not whichever arrived last.
+  {
+    const bus = new EventBus(silentReporter);
+    const got = capture(bus);
+    newEngine(bus).start();
+    emitGap(bus, "intentionality", 1000, SESSION, 0.6);
+    emitGap(bus, "audience", 1000, SESSION, 0.55);
+    emitGap(bus, "constraint", 1000, SESSION, 0.55);
+    emitPause(bus, 1500, 1100);
+    c.eq(got.length, 1, "strongest-gap: exactly one stem");
+    c.eq(got[0]?.payload.gapType, "intentionality", "strongest-gap: stem addresses the strongest gap");
   }
 
   return { passed: c.passed, failed: c.failed, failures: c.failures };
