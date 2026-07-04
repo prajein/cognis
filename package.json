@@ -2,11 +2,22 @@
   "name": "cognis",
   "version": "0.1.0",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "validate:schemas": "node scripts/validate-schemas.mjs"
   },
   "devDependencies": {
     "@types/chrome": "^0.2.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
     "ajv": "^8.20.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vite": "^8.1.3"
+  },
+  "dependencies": {
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   }
 }
