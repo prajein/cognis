@@ -62,8 +62,17 @@ function bootstrapContentScript(): void {
     const stateEngine = new StateEngine(eventBus);
     stateEngine.start();
 
+    // Development Mode Diagnostics
+    // @ts-ignore: Injected by bundler
+    if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
+      // @ts-ignore: Injected by bundler
+      const { EventTraceValidator } = require('../engines/diagnostics/EventTraceValidator');
+      const validator = new EventTraceValidator(eventBus);
+      validator.start();
+    }
+
     // 2. Initialize Platform Adapter Wiring
-    const platformManager = new PlatformManager(gapEngine, enrichmentEngine);
+    const platformManager = new PlatformManager(eventBus);
     platformManager.detectAndStart(window.location.href);
 
     console.log('[Content Script] Bootstrap complete. Cognis Surface A is active.');
