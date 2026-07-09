@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0",
+  "note": "State Engine configuration for determining cognitive states (stretch, coasting, overload). This separates transition evaluation logic from hardcoded values.",
+  "thresholds": {
+    "velocity": {
+      "coasting": 3.0,
+      "stretch": 6.0,
+      "overload": 9.0
+    },
+    "revisionRate": {
+      "coasting": 0.1,
+      "stretch": 0.3,
+      "overload": 0.6
+    },
+    "pauseDurationMs": {
+      "coasting": 5000,
+      "stretch": 2000,
+      "overload": 1000
+    }
+  },
+  "hysteresis": {
+    "cooldownMs": 5000,
+    "requiredSustainedMeasurements": 3
+  }
+}

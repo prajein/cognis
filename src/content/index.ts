@@ -5,6 +5,7 @@ import { GapDetectionEngine } from '../engines/gap/GapDetectionEngine';
 import { EnrichmentEngine } from '../engines/enrichment/EnrichmentEngine';
 import { ResponseIntelligenceEngine } from '../engines/response/ResponseIntelligenceEngine';
 import { GhostTextEngine } from '../engines/ghosttext/GhostTextEngine';
+import { StateEngine } from '../engines/state/StateEngine';
 import { PlatformManager } from '../platforms/manager/PlatformManager';
 
 import {
@@ -57,6 +58,9 @@ function bootstrapContentScript(): void {
 
     const responseEngine = new ResponseIntelligenceEngine();
     responseEngine.start(eventBus);
+
+    const stateEngine = new StateEngine(eventBus);
+    stateEngine.start();
 
     // 2. Initialize Platform Adapter Wiring
     const platformManager = new PlatformManager(gapEngine, enrichmentEngine);

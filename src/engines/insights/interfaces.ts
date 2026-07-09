@@ -1,15 +1,21 @@
 import { TaxonomyDomain, InsightCandidate } from '../../core/types/insight.types';
 import { EventBusContract } from '../../core/event-bus/types';
+import { SessionReadModel } from '../../storage/projections/builders/SessionProjectionBuilder';
+import { AutomaticityReadModel } from '../../storage/projections/builders/AutomaticityProjectionBuilder';
+import { GapProfileReadModel } from '../../storage/projections/builders/GapProfileProjectionBuilder';
+import { IdentityReadModel } from '../../storage/projections/builders/IdentityProjectionBuilder';
+import { ResponseMetricsReadModel } from '../../storage/projections/builders/ResponseMetricsProjectionBuilder';
 
 export interface ReasoningContext {
   readonly sessionId: string;
   readonly now: number;
   
-  /**
-   * Retrieves all historical event timestamps (ms) for a specific gap type or marker.
-   * This represents the Evidence Collector abstraction for strategies.
-   */
-  getEventHistory(marker: string): number[];
+  // Fully materialized immutable read models
+  readonly sessionMetrics: Readonly<SessionReadModel>;
+  readonly automaticityProfile: Readonly<AutomaticityReadModel>;
+  readonly gapProfile: Readonly<GapProfileReadModel>;
+  readonly identityProfile: Readonly<IdentityReadModel>;
+  readonly responseMetrics: Readonly<ResponseMetricsReadModel>;
 }
 
 export interface InsightStrategy {
@@ -23,7 +29,9 @@ export interface InsightStrategy {
   execute(context: ReasoningContext): InsightCandidate[];
 }
 
+import { ReadModelRepository } from '../../storage/repositories/ReadModelRepository';
+
 export interface IInsightEngine {
-  start(eventBus: EventBusContract): void;
+  start(eventBus: EventBusContract, readModelRepo: ReadModelRepository): void;
   stop(): void;
 }
