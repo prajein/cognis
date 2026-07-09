@@ -78,7 +78,7 @@ async function bootstrapBackground(): Promise<void> {
 
     // 5. Start Insight Engine (Apex Reasoning Layer)
     const insightEngine = new InsightEngine();
-    insightEngine.start(eventBus);
+    insightEngine.start(eventBus, readModelRepo);
 
     console.log('[Background] Bootstrap complete. Cognis is active.');
   } catch (error) {

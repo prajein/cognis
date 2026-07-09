@@ -32,20 +32,32 @@ export class InsightScheduler {
     this.unsubscribeHandlers = [];
   }
 
-  private handleSessionEnded(event: DomainEvent<any>): void {
+  private async handleSessionEnded(event: DomainEvent<any>): Promise<void> {
     const { sessionId } = event;
     console.log(`[InsightScheduler] Triggering pipeline for session.ended (${sessionId})`);
-    this.pipeline.execute(sessionId);
+    
+    try {
+      await this.pipeline.execute(sessionId);
+    } catch (error) {
+      console.error(`[InsightScheduler] Pipeline execution failed for session ${sessionId}:`, error);
+    }
+    
     this.promptsSinceLastEval = 0; // Reset counter after evaluation
   }
 
-  private handlePromptSent(event: DomainEvent<any>): void {
+  private async handlePromptSent(event: DomainEvent<any>): Promise<void> {
     this.promptsSinceLastEval++;
     
     if (this.promptsSinceLastEval >= this.PROMPT_VOLUME_THRESHOLD) {
       const { sessionId } = event;
       console.log(`[InsightScheduler] Triggering pipeline for volume threshold (${sessionId})`);
-      this.pipeline.execute(sessionId);
+      
+      try {
+        await this.pipeline.execute(sessionId);
+      } catch (error) {
+        console.error(`[InsightScheduler] Pipeline execution failed for session ${sessionId}:`, error);
+      }
+      
       this.promptsSinceLastEval = 0;
     }
   }

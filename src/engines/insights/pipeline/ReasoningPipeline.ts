@@ -1,48 +1,36 @@
-import { EventBusContract } from '../../../core/event-bus/types';
+import { EventBusContract, createDomainEvent } from '../../../core/event-bus';
 import { InsightEvents } from '../../../core/event-bus/registry';
 import { InsightGeneratedPayload } from '../../../core/event-bus/contracts';
-import { EventId, SessionId, Timestamp } from '../../../core/types/session.types';
-import { InsightStrategy, ReasoningContext } from '../interfaces';
+import { toSessionId } from '../../../core/types/session.types';
+import { InsightStrategy } from '../interfaces';
 import { InsightValidator } from '../InsightValidator';
+import { ReasoningContextBuilder } from './ReasoningContextBuilder';
 
 export class ReasoningPipeline {
   private readonly validator = new InsightValidator();
 
   constructor(
     private readonly eventBus: EventBusContract,
+    private readonly contextBuilder: ReasoningContextBuilder,
     private readonly strategies: InsightStrategy[]
   ) {}
 
   /**
-   * Executes the 8-stage cognitive reasoning pipeline.
+   * Executes the cognitive reasoning pipeline.
    * @param sessionId The session that triggered the evaluation.
    */
-  public execute(sessionId: string): void {
-    const now = Date.now();
+  public async execute(sessionId: string): Promise<void> {
+    // 1. Context Builder asynchronously constructs fully materialized read models
+    const context = await this.contextBuilder.build(sessionId);
 
-    // 1 & 2. Context Builder & Evidence Collector
-    // In a real implementation, this would query the Read Models (Projection DB)
-    // to build the context. For now, we mock the Context Builder.
-    const context: ReasoningContext = {
-      sessionId,
-      now,
-      getEventHistory: (marker: string) => {
-        // Mock evidence: return some recent timestamps simulating events.
-        if (marker === 'success:typescript') {
-          return Array.from({ length: 25 }, (_, i) => now - (i * 1000 * 60 * 60 * 24)); // 25 days of success
-        }
-        return [];
-      }
-    };
-
-    // 4, 5, 6. Execute Strategies (which encapsulate Signal Weighting, Confidence, Conflict)
+    // 2. Execute Strategies synchronously and deterministically
     for (const strategy of this.strategies) {
       const candidates = strategy.execute(context);
 
       for (const candidate of candidates) {
-        // 7. Insight Validator
+        // 3. Insight Validator
         if (this.validator.isValid(candidate)) {
-          // 8. Publisher
+          // 4. Publisher
           this.publishInsight(sessionId, candidate);
         }
       }
@@ -59,13 +47,13 @@ export class ReasoningPipeline {
       evidenceCount: candidate.evidenceCount
     };
 
-    this.eventBus.publish(InsightEvents.GENERATED, {
-      id: crypto.randomUUID() as EventId,
-      type: InsightEvents.GENERATED,
-      timestamp: Date.now() as Timestamp,
-      sessionId: sessionId as SessionId,
-      source: 'InsightEngine',
+    const event = createDomainEvent(
+      InsightEvents.GENERATED,
+      toSessionId(sessionId),
+      'InsightEngine',
       payload
-    });
+    );
+
+    this.eventBus.publish(InsightEvents.GENERATED, event);
   }
 }

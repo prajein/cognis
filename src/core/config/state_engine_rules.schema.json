@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "StateEngineRules",
+  "type": "object",
+  "properties": {
+    "version": { "type": "string" },
+    "note": { "type": "string" },
+    "thresholds": {
+      "type": "object",
+      "properties": {
+        "velocity": {
+          "type": "object",
+          "properties": {
+            "coasting": { "type": "number" },
+            "stretch": { "type": "number" },
+            "overload": { "type": "number" }
+          },
+          "required": ["coasting", "stretch", "overload"]
+        },
+        "revisionRate": {
+          "type": "object",
+          "properties": {
+            "coasting": { "type": "number" },
+            "stretch": { "type": "number" },
+            "overload": { "type": "number" }
+          },
+          "required": ["coasting", "stretch", "overload"]
+        },
+        "pauseDurationMs": {
+          "type": "object",
+          "properties": {
+            "coasting": { "type": "number" },
+            "stretch": { "type": "number" },
+            "overload": { "type": "number" }
+          },
+          "required": ["coasting", "stretch", "overload"]
+        }
+      },
+      "required": ["velocity", "revisionRate", "pauseDurationMs"]
+    },
+    "hysteresis": {
+      "type": "object",
+      "properties": {
+        "cooldownMs": { "type": "number" },
+        "requiredSustainedMeasurements": { "type": "number" }
+      },
+      "required": ["cooldownMs", "requiredSustainedMeasurements"]
+    }
+  },
+  "required": ["version", "thresholds", "hysteresis"]
+}
