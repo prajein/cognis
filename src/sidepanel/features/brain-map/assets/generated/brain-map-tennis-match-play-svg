@@ -1,0 +1,26 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" data-template-api="1.0.0" data-template-asset="1.0.0">
+  <defs></defs>
+  <g id="outline">
+    <rect x="76" y="56" width="360" height="400" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+  </g>
+  <g id="separators"></g>
+  <g id="regions">
+    <path id="DLPFC" d="M 76 56 L 196 56 L 196 156 L 76 156 Z" fill="#39d353" />
+    <path id="mPFC" d="M 196 56 L 316 56 L 316 156 L 196 156 Z" fill="#006d32" />
+    <path id="M1" d="M 316 56 L 436 56 L 436 156 L 316 156 Z" fill="#26a641" />
+    <path id="Parietal" d="M 76 156 L 196 156 L 196 256 L 76 256 Z" fill="#39d353" />
+    <path id="Temporal" d="M 196 156 L 436 156 L 436 256 L 196 256 Z" fill="#0e4429" />
+    <path id="Occipital" d="M 76 256 L 196 256 L 196 356 L 76 356 Z" fill="#39d353" />
+    <path id="Cerebellum" d="M 196 256 L 436 256 L 436 356 L 196 356 Z" fill="#26a641" />
+    <path id="Hippocampus" d="M 76 356 L 196 356 L 196 456 L 76 456 Z" fill="#006d32" />
+    <path id="Amygdala" d="M 196 356 L 316 356 L 316 456 L 196 456 Z" fill="#39d353" />
+    <path id="ACC" d="M 316 356 L 436 356 L 436 456 L 316 456 Z" fill="#26a641" />
+  </g>
+  <metadata>
+    <task_id>tennis_match_play</task_id>
+    <generated_from_api>1.0.0</generated_from_api>
+    <generated_from_asset>1.0.0</generated_from_asset>
+    <profile_version>0.1.0</profile_version>
+    <generator_version>1.0.0</generator_version>
+  </metadata>
+</svg>

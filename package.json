@@ -2,10 +2,13 @@
   "name": "cognis",
   "version": "0.1.0",
   "scripts": {
-    "validate:schemas": "node scripts/validate-schemas.mjs"
+    "validate:schemas": "node scripts/validate-schemas.mjs",
+    "build:brain-maps": "npx tsx src/sidepanel/features/brain-map/utils/svg-generator.ts",
+    "test": "npm run validate:schemas && npm run build:brain-maps"
   },
   "devDependencies": {
     "@types/chrome": "^0.2.0",
+    "@types/node": "^26.1.1",
     "ajv": "^8.20.0",
     "typescript": "^6.0.3"
   }
