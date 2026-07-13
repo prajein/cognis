@@ -39,11 +39,14 @@ export class ReconstructorBuffer {
     if (this.isAbandoned) return;
     this.clearWatchdog();
     
-    // Execute the analysis pipeline with the fully reconstructed text
-    this.pipeline.execute(this.sessionId, this.promptHash, this.buffer);
-    
-    this.destroy(); // Explicit garbage collection
-    this.onComplete(this.sessionId);
+    try {
+      // Execute the analysis pipeline with the fully reconstructed text.
+      // destroy() is guaranteed to run even if the pipeline throws.
+      this.pipeline.execute(this.sessionId, this.promptHash, this.buffer);
+    } finally {
+      this.destroy(); // Explicit garbage collection, always runs
+      this.onComplete(this.sessionId);
+    }
   }
 
   public abandon(reason: string): void {
