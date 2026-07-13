@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { validateBrainTemplate } from './svg-validator';
+import { taskIdToAssetName } from '../shared/naming';
 import type { ActivationProfile, RegionScore } from '../../../../core/types/activation-profile.types';
 
 // The abstraction: RegionScore -> Intensity -> Visual Style
@@ -90,15 +91,31 @@ if (require.main === module) {
   const configStr = fs.readFileSync(configPath, 'utf8');
   const config = JSON.parse(configStr) as { profiles: ActivationProfile[] };
 
-  if (!fs.existsSync(outDir)) {
+  if (fs.existsSync(outDir)) {
+    // Clean outDir to remove stale/extension-less outputs
+    const existingFiles = fs.readdirSync(outDir);
+    for (const file of existingFiles) {
+      fs.unlinkSync(path.join(outDir, file));
+    }
+  } else {
     fs.mkdirSync(outDir, { recursive: true });
   }
 
+  const filenameToTaskId = new Map<string, string>();
   let generatedCount = 0;
   for (const profile of config.profiles) {
     try {
       const generatedSvg = generateBrainMapSvg(templateSvg, profile);
-      const outFilename = `brain-map-${profile.task_id}.svg`.replace(/[^a-z0-9-]/gi, '-').toLowerCase();
+      const outFilename = taskIdToAssetName(profile.task_id);
+
+      if (filenameToTaskId.has(outFilename)) {
+        const existingTaskId = filenameToTaskId.get(outFilename);
+        throw new Error(
+          `\nNormalization collision:\n- ${existingTaskId} -> ${outFilename}\n- ${profile.task_id} -> ${outFilename}\nGeneration aborted.`
+        );
+      }
+      filenameToTaskId.set(outFilename, profile.task_id);
+
       fs.writeFileSync(path.join(outDir, outFilename), generatedSvg, 'utf8');
       generatedCount++;
     } catch (e) {
