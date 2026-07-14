@@ -4,11 +4,14 @@ import { ReasoningPipeline } from './pipeline/ReasoningPipeline';
 import { InsightScheduler } from './InsightScheduler';
 import { V1AutomaticityEvaluator } from './strategies/V1AutomaticityEvaluator';
 
+import { ReadModelRepository } from '../../storage/repositories/ReadModelRepository';
+import { ReasoningContextBuilder } from './pipeline/ReasoningContextBuilder';
+
 export class InsightEngine implements IInsightEngine {
   private eventBus: EventBusContract | null = null;
   private scheduler: InsightScheduler | null = null;
 
-  public start(eventBus: EventBusContract): void {
+  public start(eventBus: EventBusContract, readModelRepo: ReadModelRepository): void {
     if (this.eventBus) return; // Already started
     
     this.eventBus = eventBus;
@@ -18,8 +21,11 @@ export class InsightEngine implements IInsightEngine {
       new V1AutomaticityEvaluator()
     ];
 
+    // Initialize Context Builder
+    const contextBuilder = new ReasoningContextBuilder(readModelRepo);
+
     // Initialize Pipeline
-    const pipeline = new ReasoningPipeline(eventBus, strategies);
+    const pipeline = new ReasoningPipeline(eventBus, contextBuilder, strategies);
 
     // Initialize and Start Scheduler
     this.scheduler = new InsightScheduler(eventBus, pipeline);

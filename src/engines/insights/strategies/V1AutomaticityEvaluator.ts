@@ -15,18 +15,21 @@ export class V1AutomaticityEvaluator implements InsightStrategy {
     // Evaluate TypeScript mastery progression as an example skill.
     // In a full implementation, this would iterate over known skills.
     
-    // 1. Gather evidence (e.g., successful zero-shot typescript prompts, lack of syntax errors)
-    const syntaxErrorHistory = context.getEventHistory('gap:syntax_error');
-    const successfulCompilations = context.getEventHistory('success:typescript');
+    // 1. Gather evidence from fully materialized Read Models
+    const syntaxErrors = context.gapProfile.gaps['mechanism']?.detectedCount ?? 0;
+    const successfulCompilationsCount = context.responseMetrics.totalResponses;
+
+    // We synthesize an evidence array for the calculator based on the Read Model's metrics
+    const simulatedRecentActivity = Array.from({ length: successfulCompilationsCount }, () => context.responseMetrics.lastUpdated);
 
     // Hysteresis & Thresholding: 
     // If the user has many recent successes and few errors, they are transitioning to Autonomous.
     
     // For V1, we simulate a simple heuristic:
-    if (successfulCompilations.length > 20 && syntaxErrorHistory.length < 5) {
+    if (successfulCompilationsCount > 20 && syntaxErrors < 5) {
       
       const confidence = this.calculator.calculate(
-        successfulCompilations, 
+        simulatedRecentActivity, 
         20, // required threshold
         0.9, // high baseline for this strong heuristic
         false, 
@@ -40,7 +43,7 @@ export class V1AutomaticityEvaluator implements InsightStrategy {
         title: 'TypeScript Skill Progression',
         summary: 'User has transitioned to Autonomous phase for TypeScript syntax.',
         confidence,
-        evidenceCount: successfulCompilations.length,
+        evidenceCount: successfulCompilationsCount,
         metadata: {
           skill: 'TypeScript',
           newPhase: 'Autonomous'

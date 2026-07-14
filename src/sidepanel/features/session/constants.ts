@@ -1,0 +1,2 @@
+export const DEFAULT_SESSION_NUMBER = 1;
+export const TIMER_INTERVAL_MS = 1000;

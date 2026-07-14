@@ -4,10 +4,15 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "validate:schemas": "node scripts/validate-schemas.mjs"
+    "validate:schemas": "node scripts/validate-schemas.mjs",
+    "generate:brain-maps": "npx tsx src/sidepanel/features/brain-map/utils/svg-generator.ts",
+    "verify:brain-maps": "npx tsx src/sidepanel/features/brain-map/utils/verify-assets.ts",
+    "build:brain-maps": "npm run generate:brain-maps && npm run verify:brain-maps",
+    "test": "npm run validate:schemas && npm run build:brain-maps"
   },
   "devDependencies": {
     "@types/chrome": "^0.2.0",
+    "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
