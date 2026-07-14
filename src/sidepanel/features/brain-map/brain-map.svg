@@ -1,0 +1,271 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 500" width="600" height="500">
+  <defs>
+    <!-- Glow filter for peak activation (level 4) -->
+    <filter id="glow-peak" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <!-- Subtle inner shadow for depth -->
+    <filter id="inner-depth">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <!-- Radial gradient for brain base -->
+    <radialGradient id="brain-base-gradient" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#f5f0eb"/>
+      <stop offset="100%" stop-color="#e8ddd3"/>
+    </radialGradient>
+    <!-- Activation colour palette (cyan-to-magenta scientific palette) -->
+    <!-- Level 0: no fill (outline only) -->
+    <!-- Level 1: #4dd0e1 at 20% opacity -->
+    <!-- Level 2: #26c6da at 40% opacity -->
+    <!-- Level 3: #7c4dff at 70% opacity -->
+    <!-- Level 4: #e040fb at 100% opacity + glow -->
+  </defs>
+
+  <!-- Brain outline (lateral/sagittal view) -->
+  <g id="brain-outline">
+    <!-- Main cerebrum silhouette -->
+    <path d="M 100,250 
+             C 90,200 95,150 120,110 
+             C 145,70 190,40 250,30 
+             C 310,20 370,25 420,50 
+             C 470,75 500,120 510,170 
+             C 520,220 515,270 490,310 
+             C 465,350 430,370 400,380
+             L 390,385
+             C 370,390 350,392 330,390
+             L 310,385
+             C 280,382 260,378 240,370
+             C 220,362 200,350 180,340
+             C 150,315 115,290 100,250 Z"
+          fill="url(#brain-base-gradient)" 
+          stroke="#bbb0a3" 
+          stroke-width="2"
+          opacity="0.6"/>
+    <!-- Brain stem -->
+    <path d="M 310,385 C 315,400 320,420 318,445 C 316,460 310,470 300,475 C 290,470 284,460 282,445 C 280,420 285,400 290,385"
+          fill="#e8ddd3" 
+          stroke="#bbb0a3" 
+          stroke-width="1.5"
+          opacity="0.6"/>
+    <!-- Cerebellum outline (separate, will be overlaid by region group) -->
+    <path d="M 400,380 C 420,385 435,395 440,415 C 445,435 435,450 415,458 C 395,465 370,460 350,450 C 330,440 318,425 318,445 C 318,425 330,400 350,392 C 370,390 390,385 400,380 Z"
+          fill="#e8ddd3" 
+          stroke="#bbb0a3" 
+          stroke-width="1.5"
+          opacity="0.4"/>
+    <!-- Cortical fold lines (sulci) for realism -->
+    <g stroke="#c5b8aa" stroke-width="1" fill="none" opacity="0.4">
+      <!-- Central sulcus (divides frontal from parietal) -->
+      <path d="M 300,50 C 295,80 285,120 275,160 C 265,200 260,230 270,260"/>
+      <!-- Lateral/Sylvian fissure -->
+      <path d="M 160,240 C 200,235 240,225 280,230 C 320,235 350,250 370,270"/>
+      <!-- Frontal sulci -->
+      <path d="M 170,130 C 190,140 210,145 230,140"/>
+      <path d="M 150,180 C 175,185 200,188 225,182"/>
+      <!-- Parietal sulci -->
+      <path d="M 330,100 C 350,115 370,130 380,155"/>
+      <!-- Temporal sulci -->
+      <path d="M 200,285 C 230,290 260,295 290,290"/>
+    </g>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- REGION GROUPS: Each region is a <g> with an id matching the   -->
+  <!-- config key. Fill colour/opacity should be set dynamically     -->
+  <!-- based on the activation level from activation_profiles.json.  -->
+  <!--                                                               -->
+  <!-- Default state shown: level 0 (outline only, no fill)          -->
+  <!-- ============================================================ -->
+
+  <!-- Region: DLPFC — Dorsolateral Prefrontal Cortex (frontal-lateral) -->
+  <g id="region-DLPFC" class="brain-region" data-region="DLPFC" data-label="DLPFC" data-role="Working memory, planning, executive control">
+    <path d="M 130,150 
+             C 140,120 160,95 185,80 
+             C 210,65 235,60 255,65 
+             C 265,68 270,80 265,95 
+             C 258,120 245,145 230,165 
+             C 215,185 195,195 175,195 
+             C 155,195 140,185 135,170 
+             C 132,162 130,156 130,150 Z"
+          fill="none" 
+          stroke="#7c4dff" 
+          stroke-width="1.5" 
+          stroke-dasharray="4,3"
+          opacity="0.7"/>
+    <text x="185" y="138" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#7c4dff" text-anchor="middle" font-weight="600" opacity="0.85">DLPFC</text>
+  </g>
+
+  <!-- Region: mPFC — Medial Prefrontal Cortex (frontal-medial, deeper) -->
+  <g id="region-mPFC" class="brain-region" data-region="mPFC" data-label="mPFC" data-role="Self-reference, motivation, default mode, creative modelling">
+    <path d="M 240,70 
+             C 250,55 270,45 290,42 
+             C 310,40 325,48 330,62 
+             C 335,76 330,95 318,110 
+             C 306,125 290,132 275,130 
+             C 260,128 248,118 243,105 
+             C 238,92 238,80 240,70 Z"
+          fill="none" 
+          stroke="#e040fb" 
+          stroke-width="1.5" 
+          stroke-dasharray="4,3"
+          opacity="0.7"/>
+    <text x="285" y="92" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#e040fb" text-anchor="middle" font-weight="600" opacity="0.85">mPFC</text>
+  </g>
+
+  <!-- Region: M1 — Primary Motor Cortex (motor strip, precentral) -->
+  <g id="region-M1" class="brain-region" data-region="M1" data-label="M1" data-role="Voluntary movement execution">
+    <path d="M 260,60 
+             C 268,55 278,52 285,55 
+             C 295,60 300,75 298,92 
+             C 296,108 288,130 278,155 
+             C 268,180 260,200 255,215 
+             C 250,225 242,228 238,220 
+             C 234,210 236,192 242,170 
+             C 248,148 255,125 260,100 
+             C 263,82 262,68 260,60 Z"
+          fill="none" 
+          stroke="#00bcd4" 
+          stroke-width="1.5" 
+          stroke-dasharray="4,3"
+          opacity="0.7"/>
+    <text x="268" y="160" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#00bcd4" text-anchor="middle" font-weight="600" opacity="0.85">M1</text>
+  </g>
+
+  <!-- Region: Parietal — Parietal Cortex (upper-posterior) -->
+  <g id="region-Parietal" class="brain-region" data-region="Parietal" data-label="Parietal Cortex" data-role="Spatial reasoning, sensory integration, number processing">
+    <path d="M 340,60 
+             C 370,70 400,90 425,120 
+             C 450,150 465,185 468,215 
+             C 470,235 462,248 448,250 
+             C 430,252 405,240 382,222 
+             C 358,204 338,180 325,155 
+             C 312,130 308,108 315,90 
+             C 322,72 332,63 340,60 Z"
+          fill="none" 
+          stroke="#ff7043" 
+          stroke-width="1.5" 
+          stroke-dasharray="4,3"
+          opacity="0.7"/>
+    <text x="395" y="165" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#ff7043" text-anchor="middle" font-weight="600" opacity="0.85">Parietal</text>
+  </g>
+
+  <!-- Region: Temporal — Temporal Cortex (lateral, below Sylvian fissure) -->
+  <g id="region-Temporal" class="brain-region" data-region="Temporal" data-label="Temporal Cortex" data-role="Language, auditory memory, semantic retrieval">
+    <path d="M 160,245 
+             C 175,238 200,232 230,232 
+             C 260,232 290,238 320,250 
+             C 345,260 360,275 365,292 
+             C 368,305 360,318 342,325 
+             C 320,332 290,330 260,322 
+             C 230,314 200,300 180,285 
+             C 165,273 157,258 160,245 Z"
+          fill="none" 
+          stroke="#ffc107" 
+          stroke-width="1.5" 
+          stroke-dasharray="4,3"
+          opacity="0.7"/>
+    <text x="262" y="285" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#ffc107" text-anchor="middle" font-weight="600" opacity="0.85">Temporal</text>
+  </g>
+
+  <!-- Region: Occipital — Occipital Cortex (rear) -->
+  <g id="region-Occipital" class="brain-region" data-region="Occipital" data-label="Occipital Cortex" data-role="Visual processing, visual-spatial construction">
+    <path d="M 470,240 
+             C 485,255 495,278 498,300 
+             C 500,322 492,342 475,355 
+             C 458,368 435,372 415,368 
+             C 395,364 382,352 378,335 
+             C 374,318 380,298 392,280 
+             C 404,262 425,248 448,242 
+             C 458,240 465,238 470,240 Z"
+          fill="none" 
+          stroke="#66bb6a" 
+          stroke-width="1.5" 
+          stroke-dasharray="4,3"
+          opacity="0.7"/>
+    <text x="440" y="310" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#66bb6a" text-anchor="middle" font-weight="600" opacity="0.85">Occipital</text>
+  </g>
+
+  <!-- Region: Cerebellum (bottom-rear, below occipital) -->
+  <g id="region-Cerebellum" class="brain-region" data-region="Cerebellum" data-label="Cerebellum" data-role="Coordination, timing, rhythm, procedural memory storage">
+    <path d="M 395,382 
+             C 415,385 432,395 440,412 
+             C 448,430 442,448 425,458 
+             C 408,468 385,465 365,455 
+             C 345,445 332,430 330,415 
+             C 328,400 340,390 358,385 
+             C 370,382 382,380 395,382 Z"
+          fill="none" 
+          stroke="#42a5f5" 
+          stroke-width="1.5" 
+          stroke-dasharray="4,3"
+          opacity="0.7"/>
+    <!-- Cerebellar folia lines -->
+    <g stroke="#42a5f5" stroke-width="0.5" fill="none" opacity="0.3">
+      <path d="M 355,400 C 375,398 395,400 415,408"/>
+      <path d="M 348,418 C 370,415 395,418 420,428"/>
+      <path d="M 350,435 C 370,432 390,435 410,442"/>
+    </g>
+    <text x="388" y="425" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#42a5f5" text-anchor="middle" font-weight="600" opacity="0.85">Cerebellum</text>
+  </g>
+
+  <!-- Region: Hippocampus (deep medial-temporal, shown as inset) -->
+  <g id="region-Hippocampus" class="brain-region" data-region="Hippocampus" data-label="Hippocampus" data-role="Encoding, retrieval, novelty detection, spatial navigation">
+    <path d="M 255,255 
+             C 265,248 280,245 292,250 
+             C 304,255 310,265 308,278 
+             C 306,290 296,298 284,298 
+             C 272,298 260,292 254,282 
+             C 248,272 248,262 255,255 Z"
+          fill="none" 
+          stroke="#ab47bc" 
+          stroke-width="1.5" 
+          stroke-dasharray="4,3"
+          opacity="0.7"/>
+    <text x="280" y="260" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#ab47bc" text-anchor="middle" font-weight="600" opacity="0.85">Hippo-</text>
+    <text x="280" y="271" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#ab47bc" text-anchor="middle" font-weight="600" opacity="0.85">campus</text>
+  </g>
+
+  <!-- Region: Amygdala (deep, anterior to hippocampus) -->
+  <g id="region-Amygdala" class="brain-region" data-region="Amygdala" data-label="Amygdala" data-role="Emotional processing, threat detection, arousal regulation">
+    <path d="M 222,248 
+             C 230,240 242,238 252,242 
+             C 258,245 260,252 256,260 
+             C 252,268 244,273 235,273 
+             C 226,273 218,268 216,260 
+             C 214,252 216,248 222,248 Z"
+          fill="none" 
+          stroke="#ef5350" 
+          stroke-width="1.5" 
+          stroke-dasharray="4,3"
+          opacity="0.7"/>
+    <text x="237" y="243" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#ef5350" text-anchor="middle" font-weight="600" opacity="0.85">Amygdala</text>
+  </g>
+
+  <!-- Region: ACC — Anterior Cingulate Cortex (medial frontal, cingulate) -->
+  <g id="region-ACC" class="brain-region" data-region="ACC" data-label="ACC" data-role="Error monitoring, conflict detection, effort allocation">
+    <path d="M 265,105 
+             C 275,95 290,90 305,95 
+             C 315,98 320,108 318,120 
+             C 316,132 308,142 298,148 
+             C 288,154 276,152 268,142 
+             C 260,132 258,118 265,105 Z"
+          fill="none" 
+          stroke="#ffab40" 
+          stroke-width="1.5" 
+          stroke-dasharray="4,3"
+          opacity="0.7"/>
+    <text x="290" y="127" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#ffab40" text-anchor="middle" font-weight="600" opacity="0.85">ACC</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- DISCLOSURE LABEL (always visible in software mode)            -->
+  <!-- ============================================================ -->
+  <g id="disclosure-label">
+    <rect x="130" y="478" width="340" height="20" rx="4" fill="#1a1a2e" opacity="0.75"/>
+    <text x="300" y="492" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#a0a0b0" text-anchor="middle" letter-spacing="0.5">
+      Research baseline — no hardware connected
+    </text>
+  </g>
+</svg>

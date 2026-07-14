@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cognis System Sandbox Harness</title>
+  <!-- Modern Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #030307;
+      --panel-bg: #0b0b14;
+      --border: rgba(255, 255, 255, 0.05);
+      --accent: #7c4dff;
+      --text: #d6d6db;
+      --text-muted: #666688;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top navbar */
+    .nav {
+      height: 60px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: justify;
+      padding: 0 24px;
+      background: #06060c;
+    }
+
+    .nav h1 {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #7c4dff, #e040fb);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav .subtitle {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-left: 12px;
+      border-left: 1px solid var(--border);
+      padding-left: 12px;
+    }
+
+    /* Main workspace grid */
+    .harness-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 380px 420px;
+      height: calc(100vh - 60px);
+    }
+
+    /* Column Styles */
+    .col-workspace {
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 30px;
+      background: linear-gradient(180deg, #05050a, #030306);
+    }
+
+    .col-sidepanel {
+      border-right: 1px solid var(--border);
+      background-color: #06060c;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .col-logger {
+      background-color: #040408;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Left: Mock Workspace Elements */
+    .workspace-header {
+      margin-bottom: 20px;
+    }
+
+    .workspace-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .workspace-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .textarea-wrapper {
+      flex: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mock-editor {
+      flex: 1;
+      width: 100%;
+      background: #090910;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      color: #e2e2e9;
+      font-family: inherit;
+      font-size: 14px;
+      line-height: 1.6;
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .mock-editor:focus {
+      border-color: var(--accent);
+    }
+
+    .editor-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 15px;
+    }
+
+    .ghosttext-preview {
+      font-size: 12px;
+      color: #00bcd4;
+      font-style: italic;
+      height: 20px;
+    }
+
+    .send-btn {
+      background: linear-gradient(135deg, #7c4dff, #512da8);
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .send-btn:hover {
+      opacity: 0.9;
+    }
+
+    /* Right: Logger Elements */
+    .logger-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: #06060c;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logger-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #fff;
+    }
+
+    .clear-logger-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .clear-logger-btn:hover {
+      border-color: #555;
+      color: #fff;
+    }
+
+    .logger-stream {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .log-entry {
+      background: #090912;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 6px;
+      padding: 10px;
+      border-left: 3px solid #444;
+      animation: fadeIn 0.15s ease-out;
+    }
+
+    .log-entry.started { border-left-color: #4caf50; }
+    .log-entry.ended { border-left-color: #f44336; }
+    .log-entry.typed { border-left-color: #2196f3; }
+    .log-entry.pause { border-left-color: #ff9800; }
+    .log-entry.state { border-left-color: #9c27b0; }
+    .log-entry.gap { border-left-color: #00bcd4; }
+    .log-entry.onboard { border-left-color: #e91e63; }
+
+    .log-meta {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-size: 9.5px;
+      margin-bottom: 4px;
+    }
+
+    .log-type {
+      font-weight: 700;
+      color: #e3e3e8;
+    }
+
+    .log-payload {
+      color: #a0a0c0;
+      white-space: pre-wrap;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <div class="nav">
+    <h1>Cognis System Sandbox</h1>
+    <span class="subtitle">DEVELOPMENT HARNESS & SIMULATOR</span>
+  </div>
+
+  <!-- Harness Containers -->
+  <div class="harness-container">
+    
+    <!-- LEFT: Mock Editor Workspace -->
+    <div class="col-workspace">
+      <div class="workspace-header">
+        <h2 class="workspace-title">Mock Document Editor</h2>
+        <p class="workspace-desc">Simulates a user typing context inside an AI platform text area.</p>
+      </div>
+
+      <div class="textarea-wrapper">
+        <textarea 
+          id="mockTextarea" 
+          class="mock-editor" 
+          placeholder="Start typing your prompt here... (e.g. 'I want to write a python service that schedules tasks...')"
+        ></textarea>
+        
+        <div class="editor-footer">
+          <div id="ghosttextPreview" class="ghosttext-preview"></div>
+          <button id="sendBtn" class="send-btn">Send Prompt</button>
+        </div>
+      </div>
+
+      {/* Suggested Writing Prompts */}
+      <div class="mt-6 border-t border-white/5 pt-4">
+        <h3 class="text-xs font-bold text-[#8888a8] uppercase tracking-wider mb-2">Simulation Presets</h3>
+        <div class="flex flex-wrap gap-2 text-[10px]">
+          <button onclick="document.getElementById('mockTextarea').value = 'I need you to write a high-performance websocket router in Go. Make sure to handle channel cleanup and non-blocking writes correctly.'; document.getElementById('mockTextarea').dispatchEvent(new Event('input'))" class="bg-[#111122] hover:bg-[#181830] border border-white/5 text-[#8888a8] px-3 py-1.5 rounded-lg">Websocket Router (Coding)</button>
+          <button onclick="document.getElementById('mockTextarea').value = 'In the quiet hum of the night, the clock tower chimed twelve. A shadow slipped past the iron gates, clutching a key.'; document.getElementById('mockTextarea').dispatchEvent(new Event('input'))" class="bg-[#111122] hover:bg-[#181830] border border-white/5 text-[#8888a8] px-3 py-1.5 rounded-lg">Mystery Novel Opening (Creative)</button>
+          <button onclick="document.getElementById('mockTextarea').value = 'Evaluate the security risks of decentralized token bridge smart contracts and summarize current mitigation strategies.'; document.getElementById('mockTextarea').dispatchEvent(new Event('input'))" class="bg-[#111122] hover:bg-[#181830] border border-white/5 text-[#8888a8] px-3 py-1.5 rounded-lg">Bridge Audit (Technical)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MIDDLE: Target React Surface B UI Sidepanel -->
+    <div id="sidepanelRoot" class="col-sidepanel"></div>
+
+    <!-- RIGHT: Real-time System Log Stream -->
+    <div class="col-logger">
+      <div class="logger-header">
+        <h2 class="logger-title">Live Cognis Event Stream</h2>
+        <button id="clearLogsBtn" class="clear-logger-btn">Clear Log</button>
+      </div>
+      <div id="loggerStream" class="logger-stream">
+        <!-- Logs will be prepended here in real time -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Mounting sandbox entry script -->
+  <script type="module" src="/src/mock/harness/sandbox.tsx"></script>
+</body>
+</html>

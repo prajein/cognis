@@ -108,6 +108,20 @@ export interface SessionResumedPayload {
   readonly pauseDurationMs: number;
 }
 
+/**
+ * Payload for session.onboarding_completed
+ *
+ * Purpose: Records the completed onboarding questionnaire answers to seed the Identity profile.
+ * Producer: Sidepanel UI (Surface B)
+ * Consumer: Identity Projection Builder, Storage Layer
+ */
+export interface SessionOnboardingCompletedPayload {
+  readonly environment: string;
+  readonly goal: string;
+  readonly exhausting: string;
+}
+
+
 // ---------------------------------------------------------------------------
 // Prompt Event Payloads
 // ---------------------------------------------------------------------------
@@ -552,6 +566,8 @@ export interface CognisEventMap {
   'session.ended': SessionEndedPayload;
   'session.paused': SessionPausedPayload;
   'session.resumed': SessionResumedPayload;
+  'session.onboarding_completed': SessionOnboardingCompletedPayload;
+
 
   // Prompt
   'prompt.typed': PromptTypedPayload;

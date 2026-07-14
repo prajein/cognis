@@ -1,30 +1,37 @@
-import { DomainEvent, InsightGeneratedPayload } from '../../../core/event-bus/contracts';
-import { InsightEvents, EventType } from '../../../core/event-bus/registry';
+import { DomainEvent, InsightGeneratedPayload, SessionOnboardingCompletedPayload } from '../../../core/event-bus/contracts';
+import { InsightEvents, SessionEvents, EventType } from '../../../core/event-bus/registry';
 import { ProjectionBuilder } from '../interfaces';
 import { ReadModelRepository } from '../../repositories/ReadModelRepository';
 
 export interface IdentityReadModel {
-  projectionId: string;
+  projectionId: string; // e.g. "identity-v1_SESSION_ID" or "identity-v1_global"
   sessionId: string;
   insights: Array<{
     type: string;
     summary: string;
     timestamp: number;
   }>;
+  onboarding?: {
+    environment: string;
+    goal: string;
+    exhausting: string;
+    completedAt: number;
+  };
   lastUpdated: number;
 }
 
 export class IdentityProjectionBuilder implements ProjectionBuilder {
   public readonly projectionId = 'identity-v1';
-  // Simplified for this milestone: just tracking insights to form identity
+  
   public readonly consumedEvents: ReadonlyArray<EventType> = [
-    InsightEvents.GENERATED
+    InsightEvents.GENERATED,
+    SessionEvents.ONBOARDING_COMPLETED
   ];
 
   constructor(private readonly repo: ReadModelRepository) {}
 
   public async handleEvent(event: DomainEvent<any>): Promise<void> {
-    const id = `${this.projectionId}_${event.sessionId}`;
+    const id = `${this.projectionId}_global`; // Seed a global profile rather than per-session, as Identity is a long-term user profile
     
     let model = await this.repo.get<IdentityReadModel>(id);
 
@@ -49,6 +56,14 @@ export class IdentityProjectionBuilder implements ProjectionBuilder {
           timestamp: event.timestamp
         });
       }
+    } else if (event.type === SessionEvents.ONBOARDING_COMPLETED) {
+      const payload = event.payload as SessionOnboardingCompletedPayload;
+      model.onboarding = {
+        environment: payload.environment,
+        goal: payload.goal,
+        exhausting: payload.exhausting,
+        completedAt: event.timestamp
+      };
     }
 
     model.lastUpdated = event.timestamp;
@@ -56,6 +71,8 @@ export class IdentityProjectionBuilder implements ProjectionBuilder {
   }
 
   public async clear(): Promise<void> {
-    console.warn(`[IdentityProjectionBuilder] clear() not implemented for bulk deletion.`);
+    const id = `${this.projectionId}_global`;
+    await this.repo.delete(id);
+    console.log(`[IdentityProjectionBuilder] Read model cleared.`);
   }
 }

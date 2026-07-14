@@ -21,6 +21,7 @@ export const SessionEvents = Object.freeze({
   ENDED: 'session.ended',
   PAUSED: 'session.paused',
   RESUMED: 'session.resumed',
+  ONBOARDING_COMPLETED: 'session.onboarding_completed',
 } as const);
 
 // ---------------------------------------------------------------------------
