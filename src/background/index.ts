@@ -4,9 +4,7 @@ import { ConsoleErrorReporter } from '../core/error/ConsoleErrorReporter';
 import { CognisDatabase } from '../storage/indexeddb/CognisDatabase';
 import { EventRepository } from '../storage/repositories/EventRepository';
 import { EventStoreSubscriber } from '../storage/indexeddb/EventStoreSubscriber';
-import { v1Migration } from '../storage/migrations/v1';
-import { v2Migration } from '../storage/migrations/v2';
-import { v3Migration } from '../storage/migrations/v3';
+import { migrations } from '../storage/migrations';
 import { ReadModelRepository } from '../storage/repositories/ReadModelRepository';
 import { ProjectionManager } from '../storage/projections/ProjectionManager';
 import { SessionProjectionBuilder } from '../storage/projections/builders/SessionProjectionBuilder';
@@ -54,7 +52,7 @@ async function bootstrapBackground(): Promise<void> {
 
   try {
     // 1. Initialize Database with migrations
-    const db = new CognisDatabase([v1Migration, v2Migration, v3Migration]);
+    const db = new CognisDatabase(migrations);
     await db.open();
 
     // 2. Initialize Repository
