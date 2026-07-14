@@ -54,7 +54,7 @@ const REGIONS = ['DLPFC', 'mPFC', 'M1', 'Parietal', 'Temporal', 'Occipital', 'Ce
 const LEVEL_LABELS = ['Inactive', 'Low', 'Moderate', 'High', 'Peak'];
 const LEVEL_OPACITIES = [0.05, 0.22, 0.42, 0.70, 0.95];
 
-export default function App() {
+export function App() {
   const [tab, setTab] = useState<'now' | 'progress' | 'skills' | 'digest'>('now');
   
   // Onboarding state
@@ -751,3 +751,5 @@ export default function App() {
     </div>
   );
 }
+
+export default App;
