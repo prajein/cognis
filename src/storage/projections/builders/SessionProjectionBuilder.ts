@@ -7,6 +7,12 @@ export interface SessionReadModel {
   projectionId: string; // e.g. "session_v1_SESSION_ID"
   sessionId: string;
   platform: string;
+  /**
+   * The task the user was working on during this session.
+   * Populated only when the session was initiated from Surface B.
+   * Undefined for sessions started implicitly by the platform adapter.
+   */
+  taskId?: string;
   startTime: number;
   endTime?: number;
   status: 'active' | 'paused' | 'ended';
@@ -38,6 +44,7 @@ export class SessionProjectionBuilder implements ProjectionBuilder {
           projectionId: id,
           sessionId: event.sessionId,
           platform: payload.platform,
+          taskId: payload.taskId,
           startTime: event.timestamp,
           status: 'active',
           totalPauseDurationMs: 0,

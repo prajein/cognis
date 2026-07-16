@@ -78,4 +78,36 @@ export class ReadModelRepository {
       });
     });
   }
+  /**
+   * Retrieves all records whose `projectionId` starts with the given prefix.
+   *
+   * Uses an IDBKeyRange cursor (lower bound inclusive, upper bound exclusive via
+   * the high-Unicode sentinel '\uffff') so the scan is index-efficient and does
+   * not load the entire object store into memory.
+   *
+   * Used by background query handlers to find projections by projection type
+   * (e.g. all sessions: prefix = 'session-v1_').
+   */
+  public async getAllByPrefix<T>(prefix: string): Promise<T[]> {
+    return this.db.transaction(ReadModelRepository.STORE_NAME, 'readonly', (tx) => {
+      return new Promise((resolve, reject) => {
+        const store = tx.objectStore(ReadModelRepository.STORE_NAME);
+        const range = IDBKeyRange.bound(prefix, prefix + '\uffff');
+        const request = store.openCursor(range);
+        const results: T[] = [];
+
+        request.onsuccess = () => {
+          const cursor = request.result;
+          if (cursor) {
+            results.push(cursor.value as T);
+            cursor.continue();
+          } else {
+            resolve(results);
+          }
+        };
+
+        request.onerror = () => reject(request.error);
+      });
+    });
+  }
 }

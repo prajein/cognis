@@ -44,8 +44,20 @@ export function SurfaceB() {
         selectTask,
         startSession,
         endSession,
+        connectionStatus,
     } = useSession();
-    
+
+    if (connectionStatus !== 'connected') {
+        return (
+            <main style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '240px', color: '#666', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+                <div>
+                    {connectionStatus === 'reconnecting'
+                        ? 'Reconnecting to Cognis service...'
+                        : 'Disconnected from Cognis background service.'}
+                </div>
+            </main>
+        );
+    }
 
   return (
         <main>

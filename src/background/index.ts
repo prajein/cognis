@@ -35,6 +35,7 @@ const allEvents: EventType[] = [
 ];
 
 import { InsightEngine } from '../engines/insights/InsightEngine';
+import { SessionQueryHandler } from './handlers/SessionQueryHandler';
 
 /**
  * Background Service Worker Composition Root
@@ -74,7 +75,12 @@ async function bootstrapBackground(): Promise<void> {
     const projectionManager = new ProjectionManager(builders, eventBus, eventRepo, errorReporter);
     projectionManager.startLiveSubscriptions();
 
-    // 5. Start Insight Engine (Apex Reasoning Layer)
+    // 5. Register background query handlers
+    //    Each handler is a dedicated class; no query logic is inlined here.
+    const sessionQueryHandler = new SessionQueryHandler(readModelRepo);
+    sessionQueryHandler.register();
+
+    // 6. Start Insight Engine (Apex Reasoning Layer)
     const insightEngine = new InsightEngine();
     insightEngine.start(eventBus, readModelRepo);
 

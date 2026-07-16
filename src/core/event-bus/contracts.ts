@@ -54,6 +54,18 @@ export interface DomainEvent<T> {
 
   /** The event-specific payload. */
   readonly payload: T;
+
+  /**
+   * Transport-level origin indicating whether this event originated locally ('local')
+   * or arrived over IPC from a remote authoritative context ('remote').
+   */
+  readonly origin?: 'local' | 'remote';
+
+  /**
+   * Flag indicating whether this event has been processed and authoritatively confirmed
+   * by the background domain projection.
+   */
+  readonly isAuthoritative?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -64,12 +76,20 @@ export interface DomainEvent<T> {
  * Payload for session.started
  *
  * Purpose: Records the initiation of a new user session on an AI platform.
- * Producer: Perception Layer (content script)
+ * Producer: Perception Layer (content script), Side Panel (user-initiated)
  * Consumer: State Engine, Storage Layer
  */
 export interface SessionStartedPayload {
   /** The AI platform where the session was started. */
   readonly platform: string;
+
+  /**
+   * The task the user selected before starting the session.
+   * Populated when the session is initiated from Surface B (side panel).
+   * Absent when the session is started implicitly by the platform adapter
+   * (e.g. PlatformManager detecting a page load in the content script).
+   */
+  readonly taskId?: string;
 }
 
 /**
