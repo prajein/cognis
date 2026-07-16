@@ -85,9 +85,14 @@ export class ExtensionEventBridge {
     
     this.trackEventId(event.id);
 
+    const outboundEvent: DomainEvent<any> = {
+      ...event,
+      origin: event.origin ?? 'local',
+    };
+
     const envelope: BridgeEnvelope = {
       originContext: this.localContext,
-      event,
+      event: outboundEvent,
     };
 
     try {
@@ -135,8 +140,34 @@ export class ExtensionEventBridge {
 
     this.trackEventId(envelope.event.id);
 
+    // Stamp inbound event with transport metadata indicating it arrived from a remote context
+    const inboundEvent: DomainEvent<any> = {
+      ...envelope.event,
+      origin: 'remote',
+      isAuthoritative: true,
+    };
+
     // Publish to local EventBus
-    this.localBus.publish(envelope.event.type, envelope.event);
+    this.localBus.publish(inboundEvent.type, inboundEvent);
+
+    // If we are in the background worker and an event arrives from content-script or side-panel,
+    // broadcast the authoritative event to all connected sidepanels and tabs.
+    if (this.localContext === 'background') {
+      const broadcastEnvelope: BridgeEnvelope = {
+        originContext: 'background',
+        event: inboundEvent,
+      };
+      for (const port of this.connectedPorts) {
+        port.postMessage(broadcastEnvelope);
+      }
+      chrome.tabs.query({}, (tabs) => {
+        for (const tab of tabs) {
+          if (tab.id) {
+            chrome.tabs.sendMessage(tab.id, broadcastEnvelope).catch(() => {});
+          }
+        }
+      });
+    }
   }
 
   private connectPort(): void {
