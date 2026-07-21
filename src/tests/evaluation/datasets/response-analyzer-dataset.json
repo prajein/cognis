@@ -1,0 +1,61 @@
+{
+  "_schemaVersion": "1.0.0",
+  "entries": [
+    {
+      "id": "resp-001",
+      "platform": "chatgpt",
+      "promptHash": "sha256:3e438570d2b824b353a0ba1d6c7dbbf53cf758c66befe4f4652f177ef4d1e880",
+      "responseText": "[![colleges18.com/blog/320-...](https://images.openai.com/thumbnails/url/5CefWHicu1mSUVJSUGylr5-al1xUWVCSmqJbkpRnoJdeXJJYkpmsl5yfq5-Zm5ieWmxfaAuUsXL0S7F0Tw6yME_SNStwMq9KDE7NSassM6hwyw80Msj0M6qqMEz2NvZ2zw01Lc_29SvzyShKqfQONPfMK7XwznYKC1QrBgALkCmm)](https://www.colleges18.com/blog/320-srm-university-ramapuram-campus-chennai-good-or-bad-an-in-depth-review-and-analysis)\n in engineering and technology. ([SRM Ramapuram | SRMIST Ramapuram][1])* **Tech Club**: One of the oldest and inclusive engineering clubs on campus, promoting innovation, inter-disciplinary collaboration, and knowledge-sharing across departments like CSE, EEE, IT, ECE, and more. It organizes events and fosters a foundation\n Android app development.  * **ANDROPEDIA** – Dedicated to\nve activities organized during tech fest season. ([Knowafest][5])* **National-level Tech Marathon (TEXUS 25)**, **CircuitCraze**, **ROBO RACE**, **Paper Presentation**, **CIRCUITRIX**, **Brainwave Battle**, and **Tech Pick and Talk**—a suite of educational and competiti\ngroups. ([GeeksforGeeks][9])* **Less Crowded, More Flexible**: Students often enjoy a less congested environment, which lends itself to self-directed learning and close-knit \n it cybersecurity, app development, robotics—or if you want help navigating event participation or connecting with peers. Happy to help you dive deeper into the developer ecosystem at SRM Ramapuram!Let me know if you’re looking for clubs based on your interest—be\ntitute-science-technology-ramapuram-campus-chennai?utm_source=chatgpt.com \"Code Wars 25 - The Rise of Automation 12 Hour Hackathon, SRM Institute of Science and Technology Ramapuram Campus, Hackathon, Chennai\"[6]: https://www.knowafest.com/explore/events/2025/03/1905-code-wars-25-rise-automation-12-hour-hackathon-srm-ins",
+      "expectedStructureScore": 0.65,
+      "expectedReasoningScore": 0.9,
+      "expectedCompletenessScore": 0.6,
+      "expectedQualityScore": 0.5,
+      "expectedFlags": [],
+      "split": "evaluation",
+      "labeledBy": "Dhan",
+      "labelNotes": "Deliberate verbose edge case"
+    },
+    {
+      "id": "resp-002",
+      "platform": "chatgpt",
+      "promptHash": "sha256:227ff39a9d32e33ea803e6d670d72c79294bccb91f150d4614eb6a26ce369c23",
+      "responseText": "Here’s a complete **MC script** for the event based on the details from the poster and your instructions. It’s formal yet engaging and ensures smooth transitions:\neswari**, Associate Professor & HOD of Big Data Analytics & Cloud Computing, to deliver the welcome address and set the context for today’s lecture. Kindly welcome her with a round of applause.At this point, I request our Head of the Department, **Dr. A. Umamag\nur Mr. Sudhakar Palaniappan with a momento. Let’s all give a warm round of applause.I now request **Dr. A. Umamageswari**, Associate Professor & HOD, to felicitate and hono\ne’s nature. This version balances professionalism with warmth and ensures smooth transitions throughout the event.Let me know if you want the script to be more casual, humorous, or formal depending on the audienc",
+      "expectedStructureScore": 0.9,
+      "expectedReasoningScore": 0.8,
+      "expectedCompletenessScore": 0.9,
+      "expectedQualityScore": 0.6,
+      "expectedFlags": [],
+      "split": "evaluation",
+      "labeledBy": "Dhan",
+      "labelNotes": "The prompt was supposed to recieve a verbose heavy answer"
+    },
+    {
+      "id": "resp-003",
+      "platform": "chatgpt",
+      "promptHash": "sha256:8a33aa010b5d0f0101d413ac04201413bd946247942fa62d3ce24357b9c6328b",
+      "responseText": "In DBMS, the term **“strong structure”** isn’t a standard textbook keyword by itself—but in most academic contexts (especially in exams and viva), it refers to **systems with strict schema enforcement, strong relationships, and high data integrity guarantees**.\n50),    name VARCHAR(\nolumns)*** Data stored in **tables (rows + c\n## 📌 3. Example of Strong Structure\n Example   | MySQL, PostgreSQL | MongoDB, NoSQL     ||",
+      "expectedStructureScore": 0.7,
+      "expectedReasoningScore": 0.65,
+      "expectedCompletenessScore": 0.5,
+      "expectedQualityScore": 0.65,
+      "expectedFlags": [
+        "unclosed_markdown"
+      ],
+      "split": "evaluation",
+      "labeledBy": "Dhan"
+    },
+    {
+      "id": "resp-004",
+      "platform": "chatgpt",
+      "promptHash": "sha256:6da65b36714435332c51f7f1cff4cc72b0b8e5a3bed3cd5eca029b76ff2b1c35",
+      "responseText": "This is a classic **engineering ethics dilemma**—and there isn’t a “comfortable” answer. But there *is* a professionally and ethically defensible one.\ne conditions**> **Known deviation from safety standards + uncertainty under extrem\n💡 The *Best* Ethical Response (Not Binary)## \nt either/or if you act intelligently.This isn’t actually a stric\nterviews).If you want, I can help you turn this into a **debate answer, presentation, or case study write-up** (this is perfect for exams/in",
+      "expectedStructureScore": 0.7,
+      "expectedReasoningScore": 0.8,
+      "expectedCompletenessScore": 0.3,
+      "expectedQualityScore": 0.5,
+      "expectedFlags": [],
+      "split": "evaluation",
+      "labeledBy": "Dhan"
+    }
+  ]
+}

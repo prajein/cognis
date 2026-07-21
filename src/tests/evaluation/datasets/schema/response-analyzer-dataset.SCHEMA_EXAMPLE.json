@@ -1,0 +1,62 @@
+{
+  "_schemaNote": "This is a 4-entry EXAMPLE file to get schema review approval before labeling 50-100 real entries. ",
+  "_schemaVersion": "1.0.0",
+  "entries": [
+    {
+      "id": "resp-001",
+      "platform": "chatgpt",
+      "promptHash": "sha256:REPLACE_WITH_REAL_HASH_OF_ORIGINAL_PROMPT",
+      "responseText": "Example: a well-structured response with clear headers, code blocks, and a logical because/therefore reasoning chain, ending cleanly with no dangling markdown.",
+      "expectedStructureScore": 0.85,
+      "expectedReasoningScore": 0.7,
+      "expectedCompletenessScore": 0.9,
+      "expectedQualityScore": 0.81,
+      "expectedFlags": [],
+      "split": "evaluation",
+      "labeledBy": "Dhan",
+      "labelNotes": "Clean baseline example, no edge cases present."
+    },
+    {
+      "id": "resp-002",
+      "platform": "claude",
+      "promptHash": "sha256:REPLACE_WITH_REAL_HASH",
+      "responseText": "Example: a very verbose response that overuses 'because' and 'therefore' without adding real reasoning depth -- tests ReasoningAnalyzer's known marker-stuffing weakness.",
+      "expectedStructureScore": 0.6,
+      "expectedReasoningScore": 0.35,
+      "expectedCompletenessScore": 0.75,
+      "expectedQualityScore": 0.55,
+      "expectedFlags": ["verbose_reasoning_markers"],
+      "split": "evaluation",
+      "labeledBy": "Dhan",
+      "labelNotes": "Deliberately verbose edge case -- expect ReasoningAnalyzer to overscore this."
+    },
+    {
+      "id": "resp-003",
+      "platform": "gemini",
+      "promptHash": "sha256:REPLACE_WITH_REAL_HASH",
+      "responseText": "Example: a response cut off mid-codeblock with an unclosed triple-backtick fence.",
+      "expectedStructureScore": 0.4,
+      "expectedReasoningScore": 0.5,
+      "expectedCompletenessScore": 0.2,
+      "expectedQualityScore": 0.38,
+      "expectedFlags": ["unclosed_markdown", "prose_heavy"],
+      "split": "holdout",
+      "labeledBy": "Dhan",
+      "labelNotes": "Tests CompletenessAnalyzer's backtick-counting logic directly."
+    },
+    {
+      "id": "resp-004",
+      "platform": "chatgpt",
+      "promptHash": "sha256:REPLACE_WITH_REAL_HASH",
+      "responseText": "Example: a very short, terse but fully correct and complete response under 100 characters.",
+      "expectedStructureScore": 0.7,
+      "expectedReasoningScore": 0.2,
+      "expectedCompletenessScore": 0.95,
+      "expectedQualityScore": 0.55,
+      "expectedFlags": [],
+      "split": "holdout",
+      "labeledBy": "Dhan",
+      "labelNotes": "Tests whether analyzers unfairly penalize brevity."
+    }
+  ]
+}
