@@ -1,1 +1,10 @@
+cat > .gitignore << 'EOF'
+node_modules/
+dist/
+build/
+*.log
+.env
+.DS_Store
 scripts/prompt-reference.local.json
+EOF
+
