@@ -1,61 +1,812 @@
 {
-  "_schemaVersion": "1.0.0",
+  "_schemaVersion": "2.0.0",
   "entries": [
     {
       "id": "resp-001",
       "platform": "chatgpt",
-      "promptHash": "sha256:3e438570d2b824b353a0ba1d6c7dbbf53cf758c66befe4f4652f177ef4d1e880",
-      "responseText": "[![colleges18.com/blog/320-...](https://images.openai.com/thumbnails/url/5CefWHicu1mSUVJSUGylr5-al1xUWVCSmqJbkpRnoJdeXJJYkpmsl5yfq5-Zm5ieWmxfaAuUsXL0S7F0Tw6yME_SNStwMq9KDE7NSassM6hwyw80Msj0M6qqMEz2NvZ2zw01Lc_29SvzyShKqfQONPfMK7XwznYKC1QrBgALkCmm)](https://www.colleges18.com/blog/320-srm-university-ramapuram-campus-chennai-good-or-bad-an-in-depth-review-and-analysis)\n in engineering and technology. ([SRM Ramapuram | SRMIST Ramapuram][1])* **Tech Club**: One of the oldest and inclusive engineering clubs on campus, promoting innovation, inter-disciplinary collaboration, and knowledge-sharing across departments like CSE, EEE, IT, ECE, and more. It organizes events and fosters a foundation\n Android app development.  * **ANDROPEDIA** – Dedicated to\nve activities organized during tech fest season. ([Knowafest][5])* **National-level Tech Marathon (TEXUS 25)**, **CircuitCraze**, **ROBO RACE**, **Paper Presentation**, **CIRCUITRIX**, **Brainwave Battle**, and **Tech Pick and Talk**—a suite of educational and competiti\ngroups. ([GeeksforGeeks][9])* **Less Crowded, More Flexible**: Students often enjoy a less congested environment, which lends itself to self-directed learning and close-knit \n it cybersecurity, app development, robotics—or if you want help navigating event participation or connecting with peers. Happy to help you dive deeper into the developer ecosystem at SRM Ramapuram!Let me know if you’re looking for clubs based on your interest—be\ntitute-science-technology-ramapuram-campus-chennai?utm_source=chatgpt.com \"Code Wars 25 - The Rise of Automation 12 Hour Hackathon, SRM Institute of Science and Technology Ramapuram Campus, Hackathon, Chennai\"[6]: https://www.knowafest.com/explore/events/2025/03/1905-code-wars-25-rise-automation-12-hour-hackathon-srm-ins",
-      "expectedStructureScore": 0.65,
-      "expectedReasoningScore": 0.9,
-      "expectedCompletenessScore": 0.6,
-      "expectedQualityScore": 0.5,
-      "expectedFlags": [],
+      "promptCategory": "factual",
+      "promptHash": "sha256:86cc3fe108e3a76e426b414cffc7fa751c62fb892bfb121d194a85770b79be22",
+      "responseText": "The **Berlin Wall fell on November 9, 1989**.",
+      "responseMetadata": {
+        "wordCount": 8,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.8,
+        "reasoning": 0.9,
+        "completeness": 1,
+        "quality": 0.7
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
       "split": "evaluation",
-      "labeledBy": "Dhan",
-      "labelNotes": "Deliberate verbose edge case"
+      "labeledBy": "Dhanya"
     },
     {
       "id": "resp-002",
-      "platform": "chatgpt",
-      "promptHash": "sha256:227ff39a9d32e33ea803e6d670d72c79294bccb91f150d4614eb6a26ce369c23",
-      "responseText": "Here’s a complete **MC script** for the event based on the details from the poster and your instructions. It’s formal yet engaging and ensures smooth transitions:\neswari**, Associate Professor & HOD of Big Data Analytics & Cloud Computing, to deliver the welcome address and set the context for today’s lecture. Kindly welcome her with a round of applause.At this point, I request our Head of the Department, **Dr. A. Umamag\nur Mr. Sudhakar Palaniappan with a momento. Let’s all give a warm round of applause.I now request **Dr. A. Umamageswari**, Associate Professor & HOD, to felicitate and hono\ne’s nature. This version balances professionalism with warmth and ensures smooth transitions throughout the event.Let me know if you want the script to be more casual, humorous, or formal depending on the audienc",
-      "expectedStructureScore": 0.9,
-      "expectedReasoningScore": 0.8,
-      "expectedCompletenessScore": 0.9,
-      "expectedQualityScore": 0.6,
-      "expectedFlags": [],
+      "platform": "claude",
+      "promptCategory": "factual",
+      "promptHash": "sha256:862b9bb6a32d5ce054c3027333d36cb6e40f08770711454789b344e4f2b59d8a",
+      "responseText": "The Moon orbits at an average distance of about 384,400 km (238,855 miles) from Earth, measured center to center.\nThat distance is also slowly increasing — the Moon drifts away from Earth by about 3.8 cm per year due to tidal interactions.",
+      "responseMetadata": {
+        "wordCount": 42,
+        "containsCode": false,
+        "containsMarkdown": false,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.8,
+        "reasoning": 0.9,
+        "completeness": 0.9,
+        "quality": 0.8
+      },
+      "observedIssues": [],
+      "overallVerdict": "excellent",
       "split": "evaluation",
-      "labeledBy": "Dhan",
-      "labelNotes": "The prompt was supposed to recieve a verbose heavy answer"
+      "labeledBy": "Dhanya"
     },
     {
       "id": "resp-003",
-      "platform": "chatgpt",
-      "promptHash": "sha256:8a33aa010b5d0f0101d413ac04201413bd946247942fa62d3ce24357b9c6328b",
-      "responseText": "In DBMS, the term **“strong structure”** isn’t a standard textbook keyword by itself—but in most academic contexts (especially in exams and viva), it refers to **systems with strict schema enforcement, strong relationships, and high data integrity guarantees**.\n50),    name VARCHAR(\nolumns)*** Data stored in **tables (rows + c\n## 📌 3. Example of Strong Structure\n Example   | MySQL, PostgreSQL | MongoDB, NoSQL     ||",
-      "expectedStructureScore": 0.7,
-      "expectedReasoningScore": 0.65,
-      "expectedCompletenessScore": 0.5,
-      "expectedQualityScore": 0.65,
-      "expectedFlags": [
-        "unclosed_markdown"
-      ],
+      "platform": "gemini",
+      "promptCategory": "factual",
+      "promptHash": "sha256:d8866d27a49467c8fa92e4bf3133425051bc956a87121d4156a6dcbaff13c642",
+      "responseText": "**Pride and Prejudice** was written by the English novelist **Jane Austen**.\nIt was published anonymously in **1813**—credited simply to *\"The Author of Sense and Sensibility\"*—and has since become one of the most famous and beloved novels in English literature.",
+      "responseMetadata": {
+        "wordCount": 39,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.8,
+        "reasoning": 0.7,
+        "completeness": 0.6,
+        "quality": 0.6
+      },
+      "observedIssues": [],
+      "overallVerdict": "average",
       "split": "evaluation",
-      "labeledBy": "Dhan"
+      "labeledBy": "Dhanya"
     },
     {
       "id": "resp-004",
       "platform": "chatgpt",
-      "promptHash": "sha256:6da65b36714435332c51f7f1cff4cc72b0b8e5a3bed3cd5eca029b76ff2b1c35",
-      "responseText": "This is a classic **engineering ethics dilemma**—and there isn’t a “comfortable” answer. But there *is* a professionally and ethically defensible one.\ne conditions**> **Known deviation from safety standards + uncertainty under extrem\n💡 The *Best* Ethical Response (Not Binary)## \nt either/or if you act intelligently.This isn’t actually a stric\nterviews).If you want, I can help you turn this into a **debate answer, presentation, or case study write-up** (this is perfect for exams/in",
-      "expectedStructureScore": 0.7,
-      "expectedReasoningScore": 0.8,
-      "expectedCompletenessScore": 0.3,
-      "expectedQualityScore": 0.5,
-      "expectedFlags": [],
+      "promptCategory": "factual",
+      "promptHash": "sha256:43c116eaed956464d8814e814c440818c15890cb2bf6cedadd4eec1b1abfda25",
+      "responseText": "At standard atmospheric pressure (1 atmosphere, or 101.325 kPa) at sea level, **water boils at 100°C (212°F)**.",
+      "responseMetadata": {
+        "wordCount": 17,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.8,
+        "reasoning": 0.9,
+        "completeness": 1,
+        "quality": 1
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "labelConfidence": 1,
       "split": "evaluation",
-      "labeledBy": "Dhan"
+      "labeledBy": "Dhanya",
+      "labelNotes": "Factual prompts are observed to have little to no redudancy"
+    },
+    {
+      "id": "resp-005",
+      "platform": "claude",
+      "promptCategory": "factual",
+      "promptHash": "sha256:414706fe2494d3daffa1b779bdb158c7deae649d8454a7534ddeee54bc6ef21a",
+      "responseText": "India has the largest population in the world, having surpassed China around 2023. As of 2026, India's population is estimated at roughly 1.45 billion, compared to China's approximately 1.41 billion.\n- Estimates can vary somewhat depending on the source (UN, World Bank, national statistics agencies), but all major sources agree India is now in the top spot.",
+      "responseMetadata": {
+        "wordCount": 57,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.8,
+        "reasoning": 0.9,
+        "completeness": 0.9,
+        "quality": 0.88
+      },
+      "observedIssues": [],
+      "overallVerdict": "excellent",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-006",
+      "platform": "gemini",
+      "promptCategory": "factual",
+      "promptHash": "sha256:3042ac57f02717c3876eb1a64e0a13aba56cdcbe56200ef9ba52fc22431fa9b6",
+      "responseText": "**DNS** stands for **Domain Name System**.\nIt functions as the internet's phonebook: it translates human-friendly domain names (like `google.com`) into computer-friendly IP addresses (like `142.250.190.46`) so your browser can find and load web pages.",
+      "responseMetadata": {
+        "wordCount": 34,
+        "containsCode": true,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.7,
+        "reasoning": 0.8,
+        "completeness": 0.65,
+        "quality": 0.66
+      },
+      "observedIssues": [],
+      "overallVerdict": "average",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-007",
+      "platform": "chatgpt",
+      "promptCategory": "factual",
+      "promptHash": "sha256:45f2bac8ce44c742a9646b297b7233d00d980bb3ed42b8fa4fa14dc98d86c140",
+      "responseText": "![Image](https://images.openai.com/static-rsc-4/t_6Mrzo5p-2fAhw0k52nGDPwuWpAPM4xM1S5541B19Ccf3RlM41-FSnz7g42lR1daRl8iMgylz6XL62sSG_JTaF6gBHEHUg91aTWKP_-I1HQuaOP_8p_nTCn5GH43m3O4QMgo-E17yKtljzpfa7yTbjEhTLFuac6DFBuZf-1rBUzbmj0POOu8yHWXHujUp46?purpose=fullsize)\npose=fullsize)![Image](https://images.openai.com/static-rsc-4/RzrFWbgz-UdGyuW9woJW3_ir3EYHBwltiiXbRA44-8s-lSsRegHSH-ZKS5AL0o1iTbX5x8NavZUF_S1922vOtJtXfBUYGOAEuPbo7oqADuQXCIidp2Fh5o5Qvj1jcWZaMGXFpAag4ZoQyFJ7bvj9eRaW37z6-UXR8NA46D9jXCb68q1whYddX3X81IuAlDsD?pur\n.* **Original purpose:** A temporary exhibit for the World's Fair, though it was later preserved because of its value for scientific experiments and radio communications",
+      "responseMetadata": {
+        "wordCount": 27,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.78,
+        "reasoning": 0.88,
+        "completeness": 0.89,
+        "quality": 0.94
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-008",
+      "platform": "claude",
+      "promptCategory": "factual",
+      "promptHash": "sha256:9e42af973c2b448f2af32ef3bc886ffbf5198b78b9a1f3bd248a6d8f5907077a",
+      "responseText": "The capital of Kazakhstan is **Astana**.\n(Fun bit of trivia: the city has changed names a few times — it was called Akmola before 1998, then Astana, briefly renamed Nur-Sultan in 2019 in honor of former president Nursultan Nazarbayev, and then changed back to Astana in 2022.)",
+      "responseMetadata": {
+        "wordCount": 47,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 1,
+        "reasoning": 1,
+        "completeness": 1,
+        "quality": 0.98
+      },
+      "observedIssues": [],
+      "overallVerdict": "excellent",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-009",
+      "platform": "gemini",
+      "promptCategory": "factual",
+      "promptHash": "sha256:9feda3980fdde3e18dc5d2e56e71e4e0191a4fe4ece8e70b28b999e7b05b3c9f",
+      "responseText": "An adult human body has **206 bones**.\nt)* **Lower limbs:** 60 bones (legs, ankles, and fee",
+      "responseMetadata": {
+        "wordCount": 16,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.97,
+        "reasoning": 1,
+        "completeness": 1,
+        "quality": 0.99
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-010",
+      "platform": "chatgpt",
+      "promptCategory": "factual",
+      "promptHash": "sha256:841b585970593897d6c1bf09f3e9ccb854c4d422f1dc922437928754fd8ccf49",
+      "responseText": "The main difference is that **bacteria are living single-celled organisms**, while **viruses are not considered living organisms** and can only reproduce inside the cells of a host.\n*Viruses:** Influenza (flu), COVID-19, measles, common cold.* *",
+      "responseMetadata": {
+        "wordCount": 35,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.98,
+        "reasoning": 0.82,
+        "completeness": 0.76,
+        "quality": 0.77
+      },
+      "observedIssues": [],
+      "overallVerdict": "average",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-011",
+      "platform": "claude",
+      "promptCategory": "factual",
+      "promptHash": "sha256:0154dcd0a92f6792c8c1038f2e70f9819834781732782c7ec33a3ac4f667dfb4",
+      "responseText": "Tim Berners-Lee is credited with inventing the World Wide Web. He created it in 1989 while working at CERN, the European particle physics laboratory, as a way to help scientists share information more easily across different computer systems.\nHe built the core technologies that still underpin the web today: HTML (the markup language for web pages), HTTP (the protocol for transmitting data), and URLs (the addressing system for locating resources). He also created the first web browser and the first web server. The web became publicly available in 1991.",
+      "responseMetadata": {
+        "wordCount": 89,
+        "containsCode": false,
+        "containsMarkdown": false,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.97,
+        "reasoning": 0.98,
+        "completeness": 0.98,
+        "quality": 0.99
+      },
+      "observedIssues": [],
+      "overallVerdict": "excellent",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-012",
+      "platform": "gemini",
+      "promptCategory": "factual",
+      "promptHash": "sha256:d7341e668fa8c87cb5025ebddcef963d464ed29cea0139735306c304c6f10b6b",
+      "responseText": "The tallest mountain in Africa is **Mount Kilimanjaro**, located in northeastern Tanzania near the border with Kenya. Its highest peak, **Uhuru Peak** on the Kibo volcanic cone, reaches **5,895 meters (19,341 feet)** above sea level.\n* **Climatic Zones:** Trekkers climbing from the base to Uhuru Peak pass through five distinct ecosystem zones: rainforest, heath/moorland, alpine desert, and the icy arctic summit zone.",
+      "responseMetadata": {
+        "wordCount": 62,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.98,
+        "reasoning": 0.87,
+        "completeness": 0.73,
+        "quality": 0.7
+      },
+      "observedIssues": [],
+      "overallVerdict": "average",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-013",
+      "platform": "chatgpt",
+      "promptCategory": "factual",
+      "promptHash": "sha256:30902de0e293994e78969fe0acbae119b5b04bfc4c62a7138c1b0c67630badcd",
+      "responseText": "Japan uses the **Japanese yen** (currency code: **JPY**).",
+      "responseMetadata": {
+        "wordCount": 8,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 1,
+        "reasoning": 0.83,
+        "completeness": 0.97,
+        "quality": 0.9
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "holdout",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-014",
+      "platform": "claude",
+      "promptCategory": "factual",
+      "promptHash": "sha256:2fda1e00a6fa7c3d92ca3fc28be56d5f911a5dbeb3033d76b8847ec1c5d93356",
+      "responseText": "A marathon is 42.195 kilometers (about 26.2 miles).",
+      "responseMetadata": {
+        "wordCount": 8,
+        "containsCode": false,
+        "containsMarkdown": false,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 1,
+        "reasoning": 1,
+        "completeness": 1,
+        "quality": 1
+      },
+      "observedIssues": [],
+      "overallVerdict": "excellent",
+      "split": "holdout",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-015",
+      "platform": "gemini",
+      "promptCategory": "reasoning",
+      "promptHash": "sha256:9ec18994dd0ffbe11fa9267fee648975b23ab2fbe90c86b26e62474b2f3f4059",
+      "responseText": "```python\nWhen they cross paths, Train A will have traveled **180 km** ($60 \\times 3$) and Train B will have traveled **270 km** ($90 \\times 3$).",
+      "responseMetadata": {
+        "wordCount": 26,
+        "containsCode": true,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.95,
+        "reasoning": 0.88,
+        "completeness": 0.7,
+        "quality": 0.7
+      },
+      "observedIssues": [],
+      "overallVerdict": "poor",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-016",
+      "platform": "chatgpt",
+      "promptCategory": "reasoning",
+      "promptHash": "sha256:1f0e34063d551fb5e7552b2625ccd3707e28605ee512bd47a9cd819ec7c7b2cd",
+      "responseText": "Here's the process step by step:\nund is much slower than light, the thunder arrives several seconds after you see the lightning.   * Because so",
+      "responseMetadata": {
+        "wordCount": 25,
+        "containsCode": false,
+        "containsMarkdown": false,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.91,
+        "reasoning": 0.94,
+        "completeness": 0.89,
+        "quality": 0.85
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-017",
+      "platform": "claude",
+      "promptCategory": "reasoning",
+      "promptHash": "sha256:247a7e88f3655c1de3f151bbd1b595f43e0287a54db6771240bdf016457e1ff8",
+      "responseText": "Pick a fruit from the box labeled **\"Apples + Oranges\"** — that label is guaranteed wrong, so it can't actually contain both. It must be all-apples or all-oranges, and the one fruit you draw tells you which.\nThat leaves the box labeled \"Oranges\" — by elimination, and since its label must also be wrong, it has to be the **mixed** box.\nThe key insight: because *every* label is wrong, you have strong constraints on all three boxes at once — one real data point (the fruit you drew) is enough to cascade through and pin down everything else.",
+      "responseMetadata": {
+        "wordCount": 98,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.88,
+        "reasoning": 0.89,
+        "completeness": 0.91,
+        "quality": 0.9
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-018",
+      "platform": "gemini",
+      "promptCategory": "reasoning",
+      "promptHash": "sha256:8cc5acade22830fb7fd9acfbd662642b24e776356d317984e3f0495f8c17d140",
+      "responseText": "The fundamental difference comes down to what is actually generating returns: **simple interest grows linearly**, while **compound interest grows exponentially**.\n,000** | $2,358 | $236 | **$2,594** || **10** | $1,000 | $100 | **$2\n upward.Because $t$ sits in the exponent for compound interest, time acts as a multiplier on top of itself. Early on, the two lines stay close together. But as time goes on, the accumulated interest eclipses the initial investment, pulling the compound line dramatically\n---",
+      "responseMetadata": {
+        "wordCount": 79,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.98,
+        "reasoning": 0.91,
+        "completeness": 0.93,
+        "quality": 0.95
+      },
+      "observedIssues": [],
+      "overallVerdict": "excellent",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-019",
+      "platform": "chatgpt",
+      "promptCategory": "reasoning",
+      "promptHash": "sha256:22d29a1daf716ee0220caa265b762ff930dea97baafc681c32a86dc0699fe350",
+      "responseText": "The sky appears **blue instead of violet** because of a combination of **how sunlight is scattered** and **how our eyes perceive color**.\n* Violet scatters even more than blue.\nthe quieter one. Even though the louder person is shouting harder, you mostly hear the quieter one.But you're wearing earplugs that block the louder person's voice more than",
+      "responseMetadata": {
+        "wordCount": 57,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.84,
+        "reasoning": 0.91,
+        "completeness": 0.92,
+        "quality": 0.89
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-020",
+      "platform": "claude",
+      "promptCategory": "reasoning",
+      "promptHash": "sha256:d49c8b01d45d6bda94c965ab53a6ab80157962b8316ead46257fccc6be7d6301",
+      "responseText": "Yes — all bloops are lorches.\nlogism form:This pattern is called **transitivity** in logic — specifically, it's an example of the syl\nIt's valid regardless of what A, B, and C actually refer to (they could be nonsense words like \"bloops,\" \"razzles,\" and \"lorches,\" or real categories like \"dogs,\" \"mammals,\" and \"animals\"). The conclusion follows purely from the *structure* of the statements, not from knowing what the words mean — that's what makes it a matter of logical form rather than factual knowledge.",
+      "responseMetadata": {
+        "wordCount": 83,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.93,
+        "reasoning": 0.95,
+        "completeness": 0.98,
+        "quality": 0.91
+      },
+      "observedIssues": [],
+      "overallVerdict": "excellent",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-021",
+      "platform": "gemini",
+      "promptCategory": "reasoning",
+      "promptHash": "sha256:6341c18354f6775644087e3ba3dd94952dd75034147ca1691be96a302cb292ed",
+      "responseText": "Ice floats on water because **solid ice is less dense than liquid water**—by about 9%.\n### 3. Extra Air/Space\n> If ice were denser than liquid water, ice cubes would sink to the bottom of your glass—and lakes, rivers, and oceans would freeze solid from the bottom up during winter. Because ice floats, it forms an insulating top layer over bodies of water, keeping the liquid underneath warm enough for fish and aquatic ecosystems to survive.",
+      "responseMetadata": {
+        "wordCount": 76,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.85,
+        "reasoning": 0.88,
+        "completeness": 0.9,
+        "quality": 0.87
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-022",
+      "platform": "chatgpt",
+      "promptCategory": "reasoning",
+      "promptHash": "sha256:6a214a840cee85b7e39c3698dc896efe9eaf80c92a6f5cd89ac79627e4e5f626",
+      "responseText": "The answer is **9**.",
+      "responseMetadata": {
+        "wordCount": 4,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.9,
+        "reasoning": 0.93,
+        "completeness": 0.99,
+        "quality": 0.94
+      },
+      "observedIssues": [],
+      "overallVerdict": "excellent",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-023",
+      "platform": "claude",
+      "promptCategory": "reasoning",
+      "promptHash": "sha256:de426b11a1387cf3404f8852a0bac898b961a6aa1ec9a7dbc8785e9881895019",
+      "responseText": "Daylight saving time (DST) exists for a mix of historical, economic, and energy-related reasons. Here's the reasoning chain:\n created scheduling chaos (especially for transportation and broadcasting), which eventually pushed countries to standardize dates through legislation.After the World Wars, many countries dropped DST, only to bring it back later — often piecemeal, with different regions or states choosing different rules. This\n standard time or DST permanent year-round, since the twice-yearly clock changes are also linked to short-term disruptions in sleep and health.Modern research on whether DST actually saves energy is mixed — many studies find minimal or no net savings, since reduced evening lighting use can be offset by increased heating/cooling demand. This has fueled ongoing debates in several countries about abolishing DST or making\nSo in short: DST exists because of a wartime energy-saving idea that stuck, got formalized into law for consistency, and has been kept largely due to inertia and modern lifestyle habits — even though the original justification is now contested.",
+      "responseMetadata": {
+        "wordCount": 164,
+        "containsCode": false,
+        "containsMarkdown": false,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.81,
+        "reasoning": 0.92,
+        "completeness": 0.98,
+        "quality": 0.86
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-024",
+      "platform": "gemini",
+      "promptCategory": "reasoning",
+      "promptHash": "sha256:be4520fccd54a49f9368937cf35858f0b1e4b5348151a617ef031e60c4556bf0",
+      "responseText": "```python\nep 2: Scale it up to 100 machines### St\n> **The key takeaway:** Adding more machines produces more widgets in total, but it doesn't change how fast a single machine builds one widget.",
+      "responseMetadata": {
+        "wordCount": 34,
+        "containsCode": true,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.98,
+        "reasoning": 0.94,
+        "completeness": 0.95,
+        "quality": 0.94
+      },
+      "observedIssues": [],
+      "overallVerdict": "excellent",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-025",
+      "platform": "chatgpt",
+      "promptCategory": "reasoning",
+      "promptHash": "sha256:d8d89b1a004fdab132a4a81ef4af8945590b3cb1bf226c5438da9921418000cc",
+      "responseText": "It seems intuitive that being closer to the Sun should make a place warmer. However, the difference in distance is tiny compared to the Earth's distance from the Sun.\nSun\" effect is negligible.**4. **The \"closer to the \nhere (the troposphere), the temperature decreases by about **6.5°C for every 1,000 meters** (1 km) of altitude.On average, in the lower atmosp",
+      "responseMetadata": {
+        "wordCount": 59,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.84,
+        "reasoning": 0.91,
+        "completeness": 0.88,
+        "quality": 0.89
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-026",
+      "platform": "claude",
+      "promptCategory": "reasoning",
+      "promptHash": "sha256:c54088096791de5fb4a2f4cb563baec7af322fcfd2f6528efe4d3415c1a22a30",
+      "responseText": "Here's the core idea:\ntself appears to run slower for the person on the fast-moving train, compared to someone standing still.Since light always travels at the same speed (that's a fixed rule of the universe), if the light has to travel a *longer* path from the outside observer's point of view, it must take *more time* to do so — from that observer's perspective. So time i\nedicts.This effect is tiny at everyday speeds (like cars or planes) — we're talking fractions of a second over years. It only becomes dramatic at speeds close to the speed of light, which is about 300,000 km per second. We've actually confirmed this with real experiments — atomic clocks flown on airplanes tick very slightly differently than identical clocks left on the ground, exactly matching what relativity pr\nSo it's not that your biological aging process changes — it's that time itself passes at a different rate for you, and everything (heartbeat, cell aging, clocks, thoughts) follows that same slower or faster flow of time.",
+      "responseMetadata": {
+        "wordCount": 172,
+        "containsCode": false,
+        "containsMarkdown": false,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.93,
+        "reasoning": 0.98,
+        "completeness": 0.92,
+        "quality": 0.99
+      },
+      "observedIssues": [],
+      "overallVerdict": "excellent",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-027",
+      "platform": "gemini",
+      "promptCategory": "reasoning",
+      "promptHash": "sha256:bb597f7586a4486c2ae4f40e1417bbe42c6e9c754942f934c102216fea040826",
+      "responseText": "Ask either guard:\ner:** Honestly passes along the Liar's lie.* **Truth-Tell\nBecause **both guards will point to the dangerous door**, simply walking through the door **opposite** of the one pointed to guarantees your safety every single time.",
+      "responseMetadata": {
+        "wordCount": 37,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.98,
+        "reasoning": 1,
+        "completeness": 1,
+        "quality": 0.94
+      },
+      "observedIssues": [],
+      "overallVerdict": "excellent",
+      "split": "holdout",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-028",
+      "platform": "chatgpt",
+      "promptCategory": "reasoning",
+      "promptHash": "sha256:e19d255d5829b02ed01ae034640f656ad64e71bbbe03bf4baf641b4c077d14e2",
+      "responseText": "This phenomenon is called the **Moon illusion**, and despite being known for thousands of years, scientists still debate exactly why it happens. The key point is:\nears to be farther away but still projects the same-sized image on your retina, your brain interprets it as being **larger**. This is known as the **apparent-distance theory**.If the Moon app\nurrounding objects and how it perceives the shape and distance of the sky**, not because the Moon itself changes size.In short, the Moon looks bigger near the horizon because **your brain interprets its size differently based on s",
+      "responseMetadata": {
+        "wordCount": 95,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.82,
+        "reasoning": 0.8,
+        "completeness": 0.9,
+        "quality": 0.87
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "holdout",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-029",
+      "platform": "claude",
+      "promptCategory": "coding",
+      "promptHash": "sha256:dbd6fa45654a9aeced249fab53594f12090b91c0b2ed5b07a2b84d1556995904",
+      "responseText": "Here's a simple palindrome checker in Python:\nIt works by stripping out anything that isn't a letter or number and lowercasing everything, so it handles phrases with punctuation and mixed case, not just single words. If you want a stricter version that only checks exact character-for-character equality (no cleaning), just compare `s == s[::-1]` directly.",
+      "responseMetadata": {
+        "wordCount": 55,
+        "containsCode": true,
+        "containsMarkdown": false,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.98,
+        "reasoning": 1,
+        "completeness": 1,
+        "quality": 1
+      },
+      "observedIssues": [],
+      "overallVerdict": "excellent",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-030",
+      "platform": "gemini",
+      "promptCategory": "coding",
+      "promptHash": "sha256:f8b66df3d377f3360b869601db33d5346703a8942c62c33f782d949ac33445ed",
+      "responseText": "Reversing a singly linked list comes down to changing the direction of the `next` pointers. Instead of pointing to the node ahead, each node needs to point to the node behind it.\nnext = prev;         // 2. Reverse the pointer    curr.\ntemp.next;  temp = \n```",
+      "responseMetadata": {
+        "wordCount": 45,
+        "containsCode": true,
+        "containsMarkdown": false,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.87,
+        "reasoning": 0.98,
+        "completeness": 0.82,
+        "quality": 0.85
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-031",
+      "platform": "chatgpt",
+      "promptCategory": "coding",
+      "promptHash": "sha256:01aff7ff0c1edcec24da5a4f3f46ff4c38c2c3091668c9a05e4f2e88631ec64e",
+      "responseText": "Assuming the table structure is:",
+      "responseMetadata": {
+        "wordCount": 5,
+        "containsCode": false,
+        "containsMarkdown": false,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.88,
+        "reasoning": 0,
+        "completeness": 0.98,
+        "quality": 0.91
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-032",
+      "platform": "claude",
+      "promptCategory": "coding",
+      "promptHash": "sha256:a3daa34cda9594f015d32482a41f575343284c6f30d6628c1320965a150bf53e",
+      "responseText": "## Why it happens\n'tick'), 1000);  const id = setInterval(() => console.log(\nimate reasons (e.g., fast refresh, future concurrent features).- Don't use a `useRef` \"hasRun\" flag to block the second call — that just masks the symptom and can break for legit\nIf you paste the actual effect that's misbehaving, I can point to the specific fix.",
+      "responseMetadata": {
+        "wordCount": 57,
+        "containsCode": true,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.94,
+        "reasoning": 0.91,
+        "completeness": 0.92,
+        "quality": 0.93
+      },
+      "observedIssues": [],
+      "overallVerdict": "excellent",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-033",
+      "platform": "gemini",
+      "promptCategory": "coding",
+      "promptHash": "sha256:867a68d94fbb0b08ddc8d38f73897405702e43aa540befddd7b291ad4854d6ad",
+      "responseText": "Here is a clean, simple Python function using the **Sieve of Eratosthenes**—the most efficient way to find all prime numbers up to a given limit:\nm $2$ to $99$ are prime (`True`).1. **Initial Assumption:** We assume all numbers fro\n3. **Short Circuiting:** Starting the inner cross-off loop at `num * num` avoids redundant work (e.g., for $5$, multiples like $10$, $15$, and $20$ were already crossed off by $2$ and $3$).",
+      "responseMetadata": {
+        "wordCount": 71,
+        "containsCode": true,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.87,
+        "reasoning": 0.52,
+        "completeness": 0.54,
+        "quality": 0.67
+      },
+      "observedIssues": [],
+      "overallVerdict": "poor",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-034",
+      "platform": "chatgpt",
+      "promptCategory": "coding",
+      "promptHash": "sha256:fea2d5bdda047be808e7126caac83ead6a3e3158724d0993f99d8b9cae577ba0",
+      "responseText": "Debouncing delays the execution of a function until the user has stopped triggering an event for a specified amount of time. It's commonly used for search inputs, API calls, and form validation to avoid unnecessary work.\ntimer starts.* User types `H` → \n debounced function is created on every input event, so the timeout is never reused.A new\nBest for search boxes, autocomplete, validation.    | Best for scroll, resize, mousemove, drag events.                   ||",
+      "responseMetadata": {
+        "wordCount": 72,
+        "containsCode": true,
+        "containsMarkdown": false,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.78,
+        "reasoning": 0.84,
+        "completeness": 0.85,
+        "quality": 0.7
+      },
+      "observedIssues": [],
+      "overallVerdict": "average",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-035",
+      "platform": "claude",
+      "promptCategory": "coding",
+      "promptHash": "sha256:2df78e89fc83bc991cc4ffa3ba57e2fa9b43e6642cdd688851151b637b222085",
+      "responseText": "```typescript\nitem.price * item.quantity, 0);  return cart.items.reduce((sum, item) => sum + \nLet me know if this cart needs variants (e.g. size/color), per-item discounts, or persistence (localStorage/DB), and I can adjust the shape accordingly.",
+      "responseMetadata": {
+        "wordCount": 33,
+        "containsCode": true,
+        "containsMarkdown": false,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.89,
+        "reasoning": 0.86,
+        "completeness": 0.89,
+        "quality": 0.92
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
     }
   ]
 }

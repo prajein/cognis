@@ -1,62 +1,113 @@
 {
-  "_schemaNote": "This is a 4-entry EXAMPLE file to get schema review approval before labeling 50-100 real entries. ",
-  "_schemaVersion": "1.0.0",
+  "_schemaNote": "v2.0.0 -- merged schema after Architecture Lead review.",
+  "_schemaVersion": "2.0.0",
+  "_enums": {
+    "platform": ["chatgpt", "claude", "gemini"],
+    "promptCategory": [
+      "factual",
+      "reasoning",
+      "coding",
+      "long_form",
+      "ambiguous",
+      "adversarial_verbose",
+      "other"
+    ],
+    "overallVerdict": ["excellent", "good", "average", "poor", "failing"],
+    "split": ["evaluation", "holdout"]
+  },
   "entries": [
     {
       "id": "resp-001",
       "platform": "chatgpt",
-      "promptHash": "sha256:REPLACE_WITH_REAL_HASH_OF_ORIGINAL_PROMPT",
-      "responseText": "Example: a well-structured response with clear headers, code blocks, and a logical because/therefore reasoning chain, ending cleanly with no dangling markdown.",
-      "expectedStructureScore": 0.85,
-      "expectedReasoningScore": 0.7,
-      "expectedCompletenessScore": 0.9,
-      "expectedQualityScore": 0.81,
-      "expectedFlags": [],
+      "promptCategory": "coding",
+      "promptHash": "sha256:REPLACE_WITH_REAL_HASH",
+      "responseText": "Example: a well-structured coding response with a fenced code block, clear explanation before and after, and a clean because/therefore reasoning chain.",
+      "responseMetadata": {
+        "wordCount": 42,
+        "containsCode": true,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.84,
+        "reasoning": 0.73,
+        "completeness": 0.91,
+        "quality": 0.8
+      },
+      "observedIssues": ["verbosity", "redundant_reasoning"],
+      "overallVerdict": "good",
+      "labelConfidence": 0.92,
+      "scoreRationale": {
+        "structure": "Clear headers and one clean code block, well organized.",
+        "reasoning": "Explanation is correct but repeats the same justification twice.",
+        "completeness": "Fully closes the code block and answers the full question.",
+        "quality": "Solid overall, minor verbosity drags the reasoning sub-score."
+      },
       "split": "evaluation",
-      "labeledBy": "Dhan",
-      "labelNotes": "Clean baseline example, no edge cases present."
+      "labeledBy": "Dhanya",
+      "labelNotes": "Good example of redundant-but-not-wrong reasoning."
     },
     {
       "id": "resp-002",
       "platform": "claude",
+      "promptCategory": "adversarial_verbose",
       "promptHash": "sha256:REPLACE_WITH_REAL_HASH",
-      "responseText": "Example: a very verbose response that overuses 'because' and 'therefore' without adding real reasoning depth -- tests ReasoningAnalyzer's known marker-stuffing weakness.",
-      "expectedStructureScore": 0.6,
-      "expectedReasoningScore": 0.35,
-      "expectedCompletenessScore": 0.75,
-      "expectedQualityScore": 0.55,
-      "expectedFlags": ["verbose_reasoning_markers"],
+      "responseText": "Example: an intentionally verbose response stuffed with 'because' and 'therefore' markers without real reasoning depth -- tests the known ReasoningAnalyzer marker-stuffing weakness.",
+      "responseMetadata": {
+        "wordCount": 610,
+        "containsCode": false,
+        "containsMarkdown": false,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.6,
+        "reasoning": 0.35,
+        "completeness": 0.75,
+        "quality": 0.55
+      },
+      "observedIssues": ["verbosity", "marker_stuffing"],
+      "overallVerdict": "average",
+      "labelConfidence": 0.88,
+      "scoreRationale": {
+        "structure": "Wall of prose, no headers, borderline prose_heavy territory.",
+        "reasoning": "Marker density is high but each 'because' restates the same shallow point.",
+        "completeness": "Technically answers the question in full.",
+        "quality": "Dragged down almost entirely by reasoning shallowness."
+      },
       "split": "evaluation",
-      "labeledBy": "Dhan",
-      "labelNotes": "Deliberately verbose edge case -- expect ReasoningAnalyzer to overscore this."
+      "labeledBy": "Dhanya",
+      "labelNotes": "Deliberate stress-test case for the reasoning marker bias."
     },
     {
       "id": "resp-003",
       "platform": "gemini",
+      "promptCategory": "coding",
       "promptHash": "sha256:REPLACE_WITH_REAL_HASH",
-      "responseText": "Example: a response cut off mid-codeblock with an unclosed triple-backtick fence.",
-      "expectedStructureScore": 0.4,
-      "expectedReasoningScore": 0.5,
-      "expectedCompletenessScore": 0.2,
-      "expectedQualityScore": 0.38,
-      "expectedFlags": ["unclosed_markdown", "prose_heavy"],
+      "responseText": "Example: response cut off mid-codeblock, unclosed triple-backtick fence.",
+      "responseMetadata": {
+        "wordCount": 88,
+        "containsCode": true,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.4,
+        "reasoning": 0.5,
+        "completeness": 0.2,
+        "quality": 0.38
+      },
+      "observedIssues": ["unclosed_markdown", "prose_heavy"],
+      "overallVerdict": "poor",
+      "labelConfidence": 0.95,
+      "scoreRationale": {
+        "structure": "Structure breaks down entirely once the code fence is left open.",
+        "reasoning": "What reasoning exists before the cutoff is sound.",
+        "completeness": "Response is truncated mid-thought, clearly incomplete.",
+        "quality": "Incompleteness is severe enough to dominate the composite score."
+      },
       "split": "holdout",
-      "labeledBy": "Dhan",
-      "labelNotes": "Tests CompletenessAnalyzer's backtick-counting logic directly."
-    },
-    {
-      "id": "resp-004",
-      "platform": "chatgpt",
-      "promptHash": "sha256:REPLACE_WITH_REAL_HASH",
-      "responseText": "Example: a very short, terse but fully correct and complete response under 100 characters.",
-      "expectedStructureScore": 0.7,
-      "expectedReasoningScore": 0.2,
-      "expectedCompletenessScore": 0.95,
-      "expectedQualityScore": 0.55,
-      "expectedFlags": [],
-      "split": "holdout",
-      "labeledBy": "Dhan",
-      "labelNotes": "Tests whether analyzers unfairly penalize brevity."
+      "labeledBy": "Dhanya",
+      "labelNotes": "Directly tests CompletenessAnalyzer's backtick-counting logic."
     }
   ]
 }
