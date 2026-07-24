@@ -807,6 +807,354 @@
       "overallVerdict": "good",
       "split": "evaluation",
       "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-036",
+      "platform": "gemini",
+      "promptCategory": "coding",
+      "promptHash": "sha256:2c4057329213ed7cf1a2866790c1094de09aee82e8eb2a3f1aefb487e22496e1",
+      "responseText": "In the worst case, Quicksort has a time complexity of **$O(n^2)$**.\nursion tree:This eliminates the logarithmic height of the rec\nn among the first, middle, and last elements guarantees better partitioning on nearly-sorted data.* **Median-of-Three:** Choosing the media",
+      "responseMetadata": {
+        "wordCount": 38,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0,
+        "reasoning": 0.91,
+        "completeness": 0.99,
+        "quality": 0.89
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-037",
+      "platform": "chatgpt",
+      "promptCategory": "coding",
+      "promptHash": "sha256:5e540b2deee20d8ce1205f330e49255e7f6fe56a809dc3db70a44e5a9a62cf20",
+      "responseText": "An **LRU (Least Recently Used) Cache** stores a fixed number of items. When the cache is full and a new item is added, it removes the item that has not been used for the longest time.\n(0, 0)        self.head = Node\n Node(key, value)        new_node =\npler alternative### Sim",
+      "responseMetadata": {
+        "wordCount": 48,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.89,
+        "reasoning": 0.98,
+        "completeness": 0.91,
+        "quality": 0.89
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-038",
+      "platform": "claude",
+      "promptCategory": "coding",
+      "promptHash": "sha256:18fa9ddccd7bfec41f5056318074a688531fb4035a04bc361409f5680571833f",
+      "responseText": "```bash\n- Just filenames, no size: `find \"$DIR\" -type f -size +100M`",
+      "responseMetadata": {
+        "wordCount": 12,
+        "containsCode": true,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.94,
+        "reasoning": 0.91,
+        "completeness": 0.98,
+        "quality": 0.98
+      },
+      "observedIssues": [],
+      "overallVerdict": "excellent",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-039",
+      "platform": "gemini",
+      "promptCategory": "coding",
+      "promptHash": "sha256:abeae30e96f5c52b8e0123bf131bf60a545684ac783d7284bab17d430f3d45ff",
+      "responseText": "Handling async errors in Express used to be a major pain point, but modern Node.js and Express make it much cleaner.\n```javascript\nleware** at the bottom of your app (after all `app.use()` and route definitions).Regardless of which version or approach you use, you **must define a central error-handling midd\n* **Don't leak stack traces in production:** Only log detailed `err.stack` server-side, and strip it out before sending JSON back to client browsers.",
+      "responseMetadata": {
+        "wordCount": 72,
+        "containsCode": true,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.81,
+        "reasoning": 0.83,
+        "completeness": 0.85,
+        "quality": 0.82
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-040",
+      "platform": "chatgpt",
+      "promptCategory": "coding",
+      "promptHash": "sha256:bec783db4741cd2a56ad5c385a8389331ca677ce76c2c1017c72e98d996efb8a",
+      "responseText": "A straightforward recursive Fibonacci implementation directly follows the mathematical definition:\nme Complexity### Ti",
+      "responseMetadata": {
+        "wordCount": 13,
+        "containsCode": false,
+        "containsMarkdown": false,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.88,
+        "reasoning": 0.87,
+        "completeness": 0.91,
+        "quality": 0.92
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-041",
+      "platform": "claude",
+      "promptCategory": "coding",
+      "promptHash": "sha256:cf6c96fbe2ae49a45f04971d27c7dcefe36812a2cfe00c45d71bd6633283afc1",
+      "responseText": "## `var`, `let`, and `const` in JavaScript\n= 3.14;const pi \nwith closures:This difference really shows up in loops \n- **Avoid `var`** in modern code — it's legacy from before ES6 (2015) and its scoping rules cause subtle bugs.",
+      "responseMetadata": {
+        "wordCount": 38,
+        "containsCode": true,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.88,
+        "reasoning": 0.83,
+        "completeness": 0.95,
+        "quality": 0.92
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-042",
+      "platform": "gemini",
+      "promptCategory": "coding",
+      "promptHash": "sha256:665975a853ac6d233c7980def38bac1d8892a7129557acde7c3a2887a4dce7eb",
+      "responseText": "Here is a standard, robust regular expression that handles almost all valid email formats while catching common typos:\ne edge cases like quoted strings with spaces (`\"john doe\"@domain.com`) or IP address domains (`user@[192.168.1.1]`).> Technically, the official standard for email addresses ([RFC 5322](https://emailregex.com/)) permits bizarr\n> *The absolute best way to validate an email in production?* Use a simple regex check like this one to filter out obvious typos, then send a confirmation/verification link to prove ownership.",
+      "responseMetadata": {
+        "wordCount": 76,
+        "containsCode": true,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.88,
+        "reasoning": 0.89,
+        "completeness": 0.9,
+        "quality": 0.88
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "holdout",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-043",
+      "platform": "chatgpt",
+      "promptCategory": "coding",
+      "promptHash": "sha256:f29af09321ea31084cc068bc1ccadb932f644be7168c7387c0e4fd667c05d700",
+      "responseText": "Deploying a Node.js app to a VPS is essentially a four-step process:\n-ysudo apt install git \nmand like:It prints a com\ns.forwards traffic to Node.j\npm2 restart my-app",
+      "responseMetadata": {
+        "wordCount": 28,
+        "containsCode": false,
+        "containsMarkdown": false,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.65,
+        "reasoning": 0.78,
+        "completeness": 0.88,
+        "quality": 0.64
+      },
+      "observedIssues": [],
+      "overallVerdict": "poor",
+      "split": "evaluation",
+      "labeledBy": "Dhanya",
+      "labelNotes": "Shows how after certain number of responses, llm starts to answer poorly"
+    },
+    {
+      "id": "resp-044",
+      "platform": "claude",
+      "promptCategory": "long_form",
+      "promptHash": "sha256:543f08938fb8060fc9475dbab4d08bd486b75bd009094b65280c9a48bd6dc91c",
+      "responseText": "Neural networks learn through a repeating cycle: guess, measure the error, and nudge every internal number a little bit in the direction that reduces that error. That's it — the \"intelligence\" comes from doing this millions of times. Let me build it up piece by piece.\ns outputs feeding into the next layer's inputs.## Forward pass: making a guessA network is just layers of these neurons, each layer'\nacross all your training examples.For classification tasks (is this a cat or a dog?) a different loss called cross-entropy is more common, but the idea is the same: a low number means \"good prediction,\" a high number means \"bad prediction.\" Training a network means finding weights that make this number small, on average, \ne gradient. The hard part is *computing* that gradient for every single weight in the network — and a modern network can have billions of them. This is where **backpropagation** comes in.Gradient descent tells you *what* to do with th\nscratch for each weight. This is why it's fast even for enormous networks: one forward pass, one backward pass, and you get the gradient for every weight simultaneously.The trick that makes this efficient is that you compute it **backward**, starting from the output layer and working toward the input. Each layer only needs the \"error signal\" passed back from the layer after it, combined with its own local computation — you never have to recompute things from \ntches**: you usually average the gradient over a small batch of examples rather than one at a time — it's more computationally efficient and gives a smoother, less noisy signal.- **Ba\nIf you want, I can go deeper on any piece — the different activation functions, why deep (many-layer) networks work better than wide shallow ones, or walk through backprop with actual numbers on a tiny 2-neuron example.",
+      "responseMetadata": {
+        "wordCount": 306,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.94,
+        "reasoning": 0.91,
+        "completeness": 0.91,
+        "quality": 0.93
+      },
+      "observedIssues": [],
+      "overallVerdict": "excellent",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-045",
+      "platform": "gemini",
+      "promptCategory": "long_form",
+      "promptHash": "sha256:627c5c3dc276f76ba31862174c14b1f987f293f6069f707d6274adc429458e02",
+      "responseText": "The 2008 financial crisis—often called the **Great Recession**—was the worst global economic crash since the Great Depression. It didn't happen overnight; rather, it was a chain reaction triggered by a combination of low interest rates, risky mortgage lending, complex financial engineering, and widespread lack of oversight.\nzation## 2. Wall Street's Financial Alchemy: Securiti\nders ran out of creditworthy home buyers (*prime borrowers*). To keep the pipeline full, they turned to **subprime borrowers**—people with low credit scores or unstable incomes.Because demand for MBS and CDOs was insatiable, len\nd the market through foreclosures, causing housing prices nationwide to plummet over 30%.3. **Falling Housing Prices:** Supply floode\nxposure via **Credit Default Swaps (CDS)** (insurance policies on CDOs). || **September 16, 2008** | Insurance giant **AIG** receives an $85 billion Fed bailout due to its massive e\n---",
+      "responseMetadata": {
+        "wordCount": 135,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.88,
+        "reasoning": 0.95,
+        "completeness": 0.89,
+        "quality": 0.87
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-046",
+      "platform": "chatgpt",
+      "promptCategory": "long_form",
+      "promptHash": "sha256:b2f8cd8e3a4bb08ce72544824e7314b715856304d8386f1fe554a2f89190de4b",
+      "responseText": "Developing a vaccine is a long, carefully regulated process that often takes **10–15 years**, although emergencies (such as the COVID-19 pandemic) can accelerate timelines without skipping core safety evaluations. The process can be divided into several stages.\n-------------------------------------- | ------------------------- || --------------- | ----------------\nns* Computer simulatio\njJaSMUnnuO0-oZxQCOmrje8qbh8qjTldshpoCuiK2nG-gOl6Ae1ZpI2TKbJ6bho3cfDYh_faOzP8LBKVLVmBTfhXXcKlXcKVl9sUcjw49b_3dcuJIg5sbKt7MaxK?purpose=fullsize)![Image](https://images.openai.com/static-rsc-4/r967PEX6lrbtp9Cz-fG4mwSa3-cxc6vWELy98gr6Afa7UmQDw8gvsevBzAoj9VWgfRbT\nng immune responses proceed to human testing.Only vaccines showing acceptable safety and promisi\nes immunity last?* Do\nM9niCqUlMEmVtNbNNVil-7uHKVTtUQXxU5MBhy6uUw54mzY2d7fcsy3S9NNwX?purpose=fullsize)![Image](https://images.openai.com/static-rsc-4/28YR7doxzVaMBasxhl2hg3qT8a8Nc_CKhIYpxVkNBhYf4H3AlghZd9Ll3uaMa4AaeFHZRyGPlaxsE39AbFDQAl-Vq5eLxD8RPVMS5x4f2-GmGEB4BrMTNHJZCjg-_vIj0lZ\nng information* Manufacturi\n infected cells.3. Activating T cells that help destroy\nII Clinical TrialPhase \n                                    || Phase I             | Is it safe in people?",
+      "responseMetadata": {
+        "wordCount": 89,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.65,
+        "reasoning": 0.8,
+        "completeness": 0.8,
+        "quality": 0.66
+      },
+      "observedIssues": [
+        "less_verbosity"
+      ],
+      "overallVerdict": "poor",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-047",
+      "platform": "claude",
+      "promptCategory": "long_form",
+      "promptHash": "sha256:6b6c6d767d3facd66a6804ce4624698dbe7d8e78ef8d06c4d107cd6cb7299944",
+      "responseText": "The decline of Rome wasn't a single event but a centuries-long process, and historians still argue over when it \"really\" started. Here's the arc:\ner of gravity eastward. This bought Rome another 150 years, but at the cost of heavier taxation and a more rigid, top-heavy state.Diocletian stabilized things by essentially re-founding the state: splitting rule between multiple emperors (the Tetrarchy), massively expanding the bureaucracy and army, and tightening economic control. Constantine later reunified the throne, legalized Christianity, and founded Constantinople — shifting the empire's cent\nc general Odoacer deposes the last Western emperor, Romulus Augustulus, and doesn't bother replacing him. Italy is now ruled by a barbarian king nominally loyal to Constantinople.- 476 AD — the traditional \"end date.\" The Germani\n itself rather than propping up the West.- *Administrative division* — splitting into East and West meant the wealthier East increasingly looked after\nWant me to go deeper on any one phase — the Crisis of the Third Century, or the barbarian kingdoms specifically?",
+      "responseMetadata": {
+        "wordCount": 165,
+        "containsCode": false,
+        "containsMarkdown": false,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.84,
+        "reasoning": 0.93,
+        "completeness": 0.95,
+        "quality": 0.88
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-048",
+      "platform": "gemini",
+      "promptCategory": "long_form",
+      "promptHash": "sha256:9a6a597a424ead139a4ab37b77dc592dd2f85da2222e6a0210afe33330f23b0b",
+      "responseText": "Imagine you have a pair of magical dice. You keep one in your pocket, and you give the other to a friend who travels to the opposite side of the planet.\n realm of atoms, electrons, and photons), particles act differently:In our everyday world, things are definite. A coin sitting on a table is either heads or tails. But in the quantum world (the tiny\nParticle A} &= \\uparrow \\implies \\text{Particle B} = \\downarrow \\\\ \\text{Particle A} &= \\downarrow \\implies \\text{Particle B} = \\uparrow \\end{aligned}$$$$\\begin{aligned} \\text{\nht communication?\"## 4. The Cosmic Misconception: \"Does this mean faster-than-lig\nd qubits that process massive amounts of possibilities at once, solving complex problems in seconds that would take supercomputers thousands of years.* **Quantum Computing:** Traditional computers use bits ($0$ or $1$). Quantum computers use entangle\n---",
+      "responseMetadata": {
+        "wordCount": 131,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.88,
+        "reasoning": 0.84,
+        "completeness": 0.89,
+        "quality": 0.87
+      },
+      "observedIssues": [],
+      "overallVerdict": "good",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-049",
+      "platform": "chatgpt",
+      "promptCategory": "long_form",
+      "promptHash": "sha256:8c38a4524637cd5b5f6005a8db0e88a4b7a2181aa1e06914153119071165db4d",
+      "responseText": "When a virus enters your body, your immune system doesn't rely on a single defense. Instead, it coordinates **multiple layers of protection** that work together to detect, contain, eliminate, and remember the invader. This response can be divided into **five major stages**.\ns to hours**.The innate immune system responds within **minute\nmicals cause:These che\nOSIS\"}}genui{\"biology_health_immunity_microbiology_learning_block_parameterized\":{\"type_id\":\"IMMUNE_CELL_PHAGOCYT\nruses replicate inside cells.Vi\n Cytotoxicity (ADCC)## Antibody-Dependent Cellular\n's greatest strengths is that it learns from infection.One of the immune system\noms are caused by your immune response rather than the virus itself.Many sympt\nes (depending on the vaccine type).3. Generate cytotoxic T-cell respons\n| Months–Years         | Memory B and T cells remain, enabling a faster and stronger response upon re-exposure. |",
+      "responseMetadata": {
+        "wordCount": 117,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.87,
+        "reasoning": 0.84,
+        "completeness": 0.82,
+        "quality": 0.85
+      },
+      "observedIssues": [],
+      "overallVerdict": "average",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
+    },
+    {
+      "id": "resp-050",
+      "platform": "claude",
+      "promptCategory": "long_form",
+      "promptHash": "sha256:a5ebd4cc23480b021e839e508602ab909aad79e1592d33bdef20ee3b0250ff2d",
+      "responseText": "# How Blockchain and Cryptocurrency Actually Work\nves each user a keypair:**Public-key cryptography** gi\nactions within a block are typically organized into a **Merkle tree**: transactions are hashed in pairs, those hashes are hashed together, and so on up to a single \"Merkle root\" stored in the block header. This lets anyone verify a specific transaction is included in a block by checking a short path of hashes, without downloading the whole block.Trans\nverification is cheap even though finding it was expensive) and extend the chain from it.- Whoever finds a valid nonce first broadcasts the block; other nodes verify it (\n\"The Merge\" in 2022) and most newer chains### Proof of Stake (PoS) — used by Ethereum (since \nn it with your private key.2. You sig\nsumes existing UTXOs as inputs and creates new UTXOs as outputs (like using bills and getting change).**UTXO (Bitcoin)**: There's no \"account balance\" stored anywhere. Your wallet's balance is just the sum of all \"unspent transaction outputs\" scattered across the chain that your keys can unlock. A transaction con\ntting on a server representing your coins. Ownership is just: *the ability to produce a valid cryptographic signature that the network-wide ledger recognizes as authorizing a spend from a given address/UTXO*. \"Having crypto\" means knowing a private key that corresponds to funds recorded in the globally-agreed-upon chain state.There's no file si\nWant me to go deeper on any piece — like the exact mechanics of Ethereum smart contracts/gas, Merkle trees in more detail, or how Lightning Network/rollups scale these base layers?",
+      "responseMetadata": {
+        "wordCount": 256,
+        "containsCode": false,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.98,
+        "reasoning": 0.99,
+        "completeness": 0.89,
+        "quality": 0.94
+      },
+      "observedIssues": [],
+      "overallVerdict": "excellent",
+      "split": "evaluation",
+      "labeledBy": "Dhanya"
     }
   ]
 }
