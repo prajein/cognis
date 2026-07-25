@@ -11,6 +11,9 @@ import { useSession } from "../session/hooks/useSession";
 import { SessionControls } from "../session/components/SessionControls";
 import { SessionTimer } from "../session/components/SessionTimer";
 import { TaskProfileCard } from "../session/components/TaskProfileCard";
+import { useInsights } from "./hooks/useInsights";
+import { SessionState } from "../session/types";
+
 
 // Load profiles once outside the component since they are static config
 const profiles = getAllActivationProfiles();
@@ -46,6 +49,32 @@ export function SurfaceB() {
         endSession,
         connectionStatus,
     } = useSession();
+
+    const insightContext =
+    currentSession &&
+    selectedProfile &&
+    currentSession.status === SessionState.SESSION_ENDED
+        ? {
+              currentSession,
+              activationProfile: selectedProfile,
+              generatedAt: new Date(),
+
+              // unavailable for now
+              previousSession: undefined,
+              sessionHistory: undefined,
+              sessionCount: undefined,
+          }
+        : null;
+
+    const { generateInsights } = useInsights();
+
+    const insights = useMemo(() => {
+        if (!insightContext) {
+            return [];
+        }
+
+     return generateInsights(insightContext);
+    }, [generateInsights, insightContext]);
 
     if (connectionStatus !== 'connected') {
         return (
@@ -91,6 +120,13 @@ export function SurfaceB() {
                 startSession={startSession}
                 endSession={endSession}
             />
+
+            {insights.map((insight) => (
+                <div key={insight.id}>
+                <h4>{insight.title}</h4>
+                <p>{insight.description}</p>
+                </div>
+                ))}
 
         </main>
     );
