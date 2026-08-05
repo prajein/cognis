@@ -2,12 +2,16 @@ import { EventBus } from '../core/event-bus/EventBus';
 import { ExtensionEventBridge } from '../core/event-bus/ExtensionEventBridge';
 import { ConsoleErrorReporter } from '../core/error/ConsoleErrorReporter';
 import { PlatformManager } from '../platforms/manager/PlatformManager';
+import { GapDetectionEngine } from '../engines/gap/GapDetectionEngine';
+import { GhostTextEngine } from '../engines/ghosttext/GhostTextEngine';
+import { StateEngine } from '../engines/state/StateEngine';
 import { DomainEvent } from '../core/event-bus/contracts';
 import {
   SessionEvents,
   PromptEvents,
   CognitiveEvents,
   ResponseEvents,
+  GhostTextEvents,
   EventType
 } from '../core/event-bus/registry';
 
@@ -15,6 +19,7 @@ const eventsToBridge: EventType[] = [
   ...Object.values(PromptEvents),
   ...Object.values(ResponseEvents),
   ...Object.values(CognitiveEvents),
+  ...Object.values(GhostTextEvents),
   SessionEvents.PAUSED,
   SessionEvents.RESUMED
 ];
@@ -31,7 +36,16 @@ function bootstrapContentScript(): void {
   const eventBridge = new ExtensionEventBridge('content-script', eventBus, eventsToBridge);
   eventBridge.initialize();
 
-  const platformManager = new PlatformManager(eventBus);
+  const gapEngine = new GapDetectionEngine(eventBus);
+  gapEngine.start();
+
+  const ghostEngine = new GhostTextEngine(eventBus);
+  ghostEngine.start();
+
+  const stateEngine = new StateEngine(eventBus);
+  stateEngine.start();
+
+  const platformManager = new PlatformManager(eventBus, gapEngine);
   platformManager.prepareAdapter(window.location.href);
 
   eventBus.subscribe(SessionEvents.STARTED, (event: DomainEvent<any>) => {

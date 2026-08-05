@@ -4,6 +4,7 @@ import { EventBus } from '../../core/event-bus/EventBus';
 import { SessionId, toSessionId } from '../../core/types/session.types';
 import { createDomainEvent } from '../../core/event-bus/createDomainEvent';
 import { SessionEvents } from '../../core/event-bus/registry';
+import { GapDetectionEngine } from '../../engines/gap/GapDetectionEngine';
 
 /**
  * Platform Manager
@@ -20,7 +21,10 @@ export class PlatformManager {
   private boundOnVisibilityChange = this.onVisibilityChange.bind(this);
   private boundOnBeforeUnload = this.onBeforeUnload.bind(this);
 
-  constructor(private readonly eventBus: EventBus) {}
+  constructor(
+    private readonly eventBus: EventBus,
+    private readonly gapEngine?: GapDetectionEngine
+  ) {}
 
   /**
    * Phase 1: Prepares the platform adapter based on URL. Does not start observation.
@@ -111,7 +115,7 @@ export class PlatformManager {
 
   private createAdapterForUrl(url: string): PlatformAdapter | null {
     if (url.includes('chatgpt.com')) {
-      return new ChatGPTAdapter(this.eventBus);
+      return new ChatGPTAdapter(this.eventBus, this.gapEngine);
     }
     return null;
   }
