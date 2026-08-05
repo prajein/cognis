@@ -76,6 +76,7 @@ export class SessionGateway implements SessionCommandGateway, SessionQueryGatewa
    * No-op (with warning) if no session is currently active.
    */
   public endSession(reason: 'explicit' | 'tab_closed' | 'navigation' | 'timeout' = 'explicit'): void {
+    console.log('[SessionGateway] endSession called. activeSessionId:', this.activeSessionId);
     if (!this.activeSessionId) {
       console.warn('[SessionGateway] endSession() called with no active session.');
       return;
@@ -88,8 +89,10 @@ export class SessionGateway implements SessionCommandGateway, SessionQueryGatewa
       { reason }
     );
 
+    console.log('[SessionGateway] Publishing session.ended event locally:', event.id);
     this.eventBus.publish(SessionEvents.ENDED, event);
     this.activeSessionId = null;
+    console.log('[SessionGateway] activeSessionId cleared.');
   }
 
   /**

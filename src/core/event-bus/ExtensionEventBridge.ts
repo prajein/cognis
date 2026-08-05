@@ -97,12 +97,17 @@ export class ExtensionEventBridge {
 
     try {
       if (this.localContext === 'content-script') {
-        // Send to Background
         chrome.runtime.sendMessage(envelope).catch(() => {});
       } else if (this.localContext === 'side-panel') {
-        // Send to Background via port
+        if (!this.port) {
+          console.warn(`[ExtensionEventBridge] Port is null. Attempting to reconnect...`);
+          this.connectPort();
+        }
         if (this.port) {
+          console.log(`[ExtensionEventBridge] Bridging OUT event ${event.type} to Background via port`, event.id);
           this.port.postMessage(envelope);
+        } else {
+          console.warn(`[ExtensionEventBridge] Cannot bridge OUT event ${event.type}. Port is STILL null!`);
         }
       } else if (this.localContext === 'background') {
         // Broadcast to all Side Panels
@@ -136,12 +141,15 @@ export class ExtensionEventBridge {
     // Loop prevention: Do not accept events that originated from our own context type.
     if (envelope.originContext === this.localContext) return;
 
+
     // We drop events we've already seen, EXCEPT when we are receiving the authoritative
     // confirmation of an event we originated (e.g. background confirming our session.started).
     if (this.recentlyBridgedIds.has(envelope.event.id) && !envelope.event.isAuthoritative) {
+      console.log(`[ExtensionEventBridge] Dropping INBOUND event ${envelope.event.type} (already seen, not authoritative)`);
       return;
     }
 
+    console.log(`[ExtensionEventBridge] Accepting INBOUND event ${envelope.event.type} from ${envelope.originContext}. isAuthoritative=${envelope.event.isAuthoritative}`);
     this.trackEventId(envelope.event.id);
 
     // Stamp inbound event with transport metadata indicating it arrived from a remote context
