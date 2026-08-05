@@ -415,6 +415,12 @@ export interface ResponseAnalysisCompletedPayload {
   
   /** Evaluated quality score (0.0 to 1.0). */
   readonly qualityScore: number;
+
+  readonly completenessScore: number;
+
+  readonly assumptionScore: number;
+
+  readonly gapCompletionScore: number;
   
   /** Array of semantic flags (e.g., 'heavy_code', 'step_by_step'). */
   readonly flags: ReadonlyArray<string>;

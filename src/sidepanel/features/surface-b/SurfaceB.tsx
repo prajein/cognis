@@ -13,6 +13,7 @@ import { SessionTimer } from "../session/components/SessionTimer";
 import { TaskProfileCard } from "../session/components/TaskProfileCard";
 import { useInsights } from "./hooks/useInsights";
 import { SessionState } from "../session/types";
+import { ProgressPanel } from "../progress";
 
 
 // Load profiles once outside the component since they are static config
@@ -121,6 +122,11 @@ export function SurfaceB() {
                 endSession={endSession}
             />
 
+            <ProgressPanel
+                session={currentSession}
+                insights={insights}
+            />
+
             {insights.map((insight) => (
                 <div key={insight.id}>
                 <h4>{insight.title}</h4>
@@ -129,5 +135,6 @@ export function SurfaceB() {
                 ))}
 
         </main>
+        
     );
 }
