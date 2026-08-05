@@ -1,3 +1,28 @@
 {
-  // TODO: Add manifest configuration
+  "manifest_version": 3,
+  "name": "Cognis",
+  "version": "0.1.0",
+  "description": "Cognitive Observation Engine",
+  "permissions": [
+    "sidePanel",
+    "storage",
+    "tabs",
+    "scripting"
+  ],
+  "background": {
+    "service_worker": "src/background/index.ts",
+    "type": "module"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "action": {
+    "default_title": "Open Cognis"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://chatgpt.com/*"],
+      "js": ["src/content/content-script.ts"]
+    }
+  ]
 }

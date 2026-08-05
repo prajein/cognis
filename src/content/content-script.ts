@@ -1,1 +1,1 @@
-// TODO: Content script initialization
+console.log('[Cognis] Content script initialized.');

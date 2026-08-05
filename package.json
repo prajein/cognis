@@ -6,14 +6,22 @@
     "generate:brain-maps": "npx tsx src/sidepanel/features/brain-map/utils/svg-generator.ts",
     "verify:brain-maps": "npx tsx src/sidepanel/features/brain-map/utils/verify-assets.ts",
     "build:brain-maps": "npm run generate:brain-maps && npm run verify:brain-maps",
+    "build": "vite build",
     "test": "npm run validate:schemas && npm run build:brain-maps"
   },
   "devDependencies": {
+    "@crxjs/vite-plugin": "^2.0.0-beta.33",
     "@types/chrome": "^0.2.0",
     "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.5",
     "ajv": "^8.20.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vite": "^8.2.0"
+  },
+  "dependencies": {
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   }
 }
