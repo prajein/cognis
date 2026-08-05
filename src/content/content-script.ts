@@ -5,6 +5,7 @@ import { PlatformManager } from '../platforms/manager/PlatformManager';
 import { GapDetectionEngine } from '../engines/gap/GapDetectionEngine';
 import { GhostTextEngine } from '../engines/ghosttext/GhostTextEngine';
 import { StateEngine } from '../engines/state/StateEngine';
+import { EnrichmentEngine } from '../engines/enrichment/EnrichmentEngine';
 import { DomainEvent } from '../core/event-bus/contracts';
 import {
   SessionEvents,
@@ -45,7 +46,10 @@ function bootstrapContentScript(): void {
   const stateEngine = new StateEngine(eventBus);
   stateEngine.start();
 
-  const platformManager = new PlatformManager(eventBus, gapEngine);
+  const enrichmentEngine = new EnrichmentEngine(eventBus);
+  enrichmentEngine.start();
+
+  const platformManager = new PlatformManager(eventBus, gapEngine, enrichmentEngine);
   platformManager.prepareAdapter(window.location.href);
 
   eventBus.subscribe(SessionEvents.STARTED, (event: DomainEvent<any>) => {

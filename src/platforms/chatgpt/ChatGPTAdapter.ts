@@ -6,6 +6,8 @@ import { TypingObserver } from '../observers/TypingObserver';
 import { GhostTextObserver } from '../observers/GhostTextObserver';
 import { SelectorRegistry } from '../selectors/registry';
 import { GapDetectionEngine } from '../../engines/gap/GapDetectionEngine';
+import { PromptEnricher } from '../interfaces/PromptEnricher';
+import { SubmitInterceptor } from '../observers/SubmitInterceptor';
 
 /**
  * ChatGPT Platform Adapter
@@ -19,10 +21,12 @@ export class ChatGPTAdapter implements PlatformAdapter {
   private responseObserver: ResponseObserver | null = null;
   private typingObserver: TypingObserver | null = null;
   private ghostTextObserver: GhostTextObserver | null = null;
+  private submitInterceptor: SubmitInterceptor | null = null;
 
   constructor(
     private readonly eventBus: EventBus,
-    private readonly gapEngine?: GapDetectionEngine
+    private readonly gapEngine?: GapDetectionEngine,
+    private readonly promptEnricher?: PromptEnricher
   ) {}
 
   public start(sessionId: SessionId): void {
@@ -35,10 +39,12 @@ export class ChatGPTAdapter implements PlatformAdapter {
     this.responseObserver = new ResponseObserver(this.eventBus, config, sessionId);
     this.typingObserver = new TypingObserver(this.eventBus, config, sessionId, this.gapEngine);
     this.ghostTextObserver = new GhostTextObserver(this.eventBus, config, sessionId);
+    this.submitInterceptor = new SubmitInterceptor(this.eventBus, config, sessionId, this.promptEnricher);
 
     this.responseObserver.connect();
     this.typingObserver.connect();
     this.ghostTextObserver.connect();
+    this.submitInterceptor.connect();
     
     console.log('[ChatGPTAdapter] Started observing ChatGPT via Composition Root.');
   }
@@ -55,6 +61,10 @@ export class ChatGPTAdapter implements PlatformAdapter {
     if (this.ghostTextObserver) {
       this.ghostTextObserver.destroy();
       this.ghostTextObserver = null;
+    }
+    if (this.submitInterceptor) {
+      this.submitInterceptor.destroy();
+      this.submitInterceptor = null;
     }
     
     console.log('[ChatGPTAdapter] Stopped observing ChatGPT.');
