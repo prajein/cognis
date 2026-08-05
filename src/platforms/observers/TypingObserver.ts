@@ -3,6 +3,7 @@ import { PlatformConfig } from '../selectors/interfaces';
 import { translateTypingSnapshot, TypingSnapshot } from '../translators/TypingTranslator';
 import { SessionId } from '../../core/types/session.types';
 import { ResponseEvents, SessionEvents } from '../../core/event-bus/registry';
+import { GapDetectionEngine } from '../../engines/gap/GapDetectionEngine';
 
 export class TypingObserver {
   private inputNode: HTMLElement | null = null;
@@ -30,7 +31,8 @@ export class TypingObserver {
   constructor(
     private readonly eventBus: EventBus,
     private readonly config: PlatformConfig,
-    private readonly sessionId: SessionId
+    private readonly sessionId: SessionId,
+    private readonly gapEngine?: GapDetectionEngine
   ) {}
 
   public connect(): boolean {
@@ -211,6 +213,10 @@ export class TypingObserver {
 
     const pauseDuration = Date.now() - this.lastTypingTime;
     
+    if (this.gapEngine) {
+      this.gapEngine.captureTransientText(this.getInputValue());
+    }
+
     this.publish({
       sessionId: this.sessionId,
       isTyping: false,
