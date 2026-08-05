@@ -18,19 +18,18 @@ export class ChatGPTAdapter implements PlatformAdapter {
   private typingObserver: TypingObserver | null = null;
 
   constructor(
-    private readonly eventBus: EventBus,
-    private readonly sessionId: SessionId
+    private readonly eventBus: EventBus
   ) {}
 
-  public start(): void {
+  public start(sessionId: SessionId): void {
     const config = SelectorRegistry.resolve(window.location.href);
     if (!config) {
       console.warn('[ChatGPTAdapter] Platform configuration not found for URL.');
       return;
     }
 
-    this.responseObserver = new ResponseObserver(this.eventBus, config, this.sessionId);
-    this.typingObserver = new TypingObserver(this.eventBus, config, this.sessionId);
+    this.responseObserver = new ResponseObserver(this.eventBus, config, sessionId);
+    this.typingObserver = new TypingObserver(this.eventBus, config, sessionId);
 
     this.responseObserver.connect();
     this.typingObserver.connect();
