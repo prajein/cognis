@@ -12,6 +12,13 @@ export function SessionControls({
     endSession,
 }: SessionControlsProps) {
 
+    console.log('[SessionControls] Rendering with state:', currentState);
+
+    const handleEndSession = () => {
+        console.log('[SessionControls] End Session button clicked');
+        endSession();
+    };
+
     switch (currentState) {
 
         case SessionState.TASK_SELECTED:
@@ -23,7 +30,7 @@ export function SessionControls({
 
         case SessionState.SESSION_ACTIVE:
             return (
-                <button onClick={endSession}>
+                <button onClick={handleEndSession}>
                     End Session
                 </button>
             );
