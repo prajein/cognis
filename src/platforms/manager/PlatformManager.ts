@@ -5,6 +5,7 @@ import { SessionId, toSessionId } from '../../core/types/session.types';
 import { createDomainEvent } from '../../core/event-bus/createDomainEvent';
 import { SessionEvents } from '../../core/event-bus/registry';
 import { GapDetectionEngine } from '../../engines/gap/GapDetectionEngine';
+import { PromptEnricher } from '../interfaces/PromptEnricher';
 
 /**
  * Platform Manager
@@ -23,7 +24,8 @@ export class PlatformManager {
 
   constructor(
     private readonly eventBus: EventBus,
-    private readonly gapEngine?: GapDetectionEngine
+    private readonly gapEngine?: GapDetectionEngine,
+    private readonly promptEnricher?: PromptEnricher
   ) {}
 
   /**
@@ -115,7 +117,7 @@ export class PlatformManager {
 
   private createAdapterForUrl(url: string): PlatformAdapter | null {
     if (url.includes('chatgpt.com')) {
-      return new ChatGPTAdapter(this.eventBus, this.gapEngine);
+      return new ChatGPTAdapter(this.eventBus, this.gapEngine, this.promptEnricher);
     }
     return null;
   }

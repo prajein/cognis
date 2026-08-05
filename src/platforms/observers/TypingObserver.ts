@@ -14,15 +14,7 @@ export class TypingObserver {
   private pauseTimer: ReturnType<typeof setTimeout> | null = null;
   private lastTypingTime = 0;
   private lastEmissionTime = 0;
-  
-  /**
-   * Known Architectural Constraint: The canonical runtime lifecycle currently has no terminal 
-   * event representing a failed prompt submission (e.g. network failure before response.started).
-   * Until a future prompt.submit_failed domain event is introduced, SubmissionPending can only 
-   * be cleared by response.started, response.abandoned, or session.ended. This is an intentional 
-   * limitation of the current event model, not of the observer implementation.
-   */
-  private submissionState: 'Idle' | 'SubmissionPending' = 'Idle';
+
   private unsubscribeAll: (() => void)[] = [];
   
   private readonly IDLE_THRESHOLD_MS = 2000;
@@ -66,14 +58,6 @@ export class TypingObserver {
       }
     }, options);
 
-    document.addEventListener('click', (e) => this.onClick(e), options);
-    
-    this.unsubscribeAll.push(
-      this.eventBus.subscribe(ResponseEvents.STARTED, () => this.resetSubmissionState()),
-      this.eventBus.subscribe(ResponseEvents.ABANDONED, () => this.resetSubmissionState()),
-      this.eventBus.subscribe(SessionEvents.ENDED, () => this.resetSubmissionState())
-    );
-
     console.log('[TypingObserver] Attached and observing.');
     return true;
   }
@@ -83,7 +67,6 @@ export class TypingObserver {
     this.clearTimer();
     this.unsubscribeAll.forEach(unsub => unsub());
     this.unsubscribeAll = [];
-    this.submissionState = 'Idle';
   }
 
   public destroy(): void {
@@ -91,10 +74,6 @@ export class TypingObserver {
     this.inputNode = null; // Prevent DOM leaks
     this.isDestroyed = true;
     console.log('[TypingObserver] Destroyed.');
-  }
-
-  private resetSubmissionState(): void {
-    this.submissionState = 'Idle';
   }
 
   private getInputValue(): string {
@@ -105,49 +84,10 @@ export class TypingObserver {
     return this.inputNode.innerText || this.inputNode.textContent || '';
   }
 
-  private onClick(e: MouseEvent): void {
-    if (this.isDestroyed) return;
-    const target = e.target as Element;
-    if (this.config.selectors.submitButton) {
-      const submitBtn = target.closest(this.config.selectors.submitButton);
-      if (submitBtn) {
-        this.onSent();
-      }
-    }
-  }
-
   private onKeyDown(e: KeyboardEvent): void {
     if (e.key === 'Backspace' || e.key === 'Delete') {
       this.revisionDepth++;
-    } else if (e.key === 'Enter' && !e.shiftKey) {
-      this.onSent();
     }
-  }
-
-  private onSent(): void {
-    if (!this.inputNode || this.isDestroyed) return;
-    if (this.submissionState === 'SubmissionPending') {
-      console.log('[TypingObserver] Suppressing duplicate submission trigger.');
-      return;
-    }
-    
-    this.submissionState = 'SubmissionPending';
-    const text = this.getInputValue();
-    const textLength = text.length;
-    const wordCount = text.split(/\s+/).filter(w => w.length > 0).length;
-    const hash = this.cyrb53(text).toString();
-    
-    this.publish({
-      sessionId: this.sessionId,
-      isTyping: false,
-      textLength,
-      wordCount,
-      currentTextHash: hash,
-      revisionDepth: this.revisionDepth,
-      isPause: false,
-      pauseDurationMs: 0,
-      isSent: true
-    });
   }
 
   private onInput(): void {
