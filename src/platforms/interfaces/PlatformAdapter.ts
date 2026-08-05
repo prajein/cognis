@@ -1,3 +1,5 @@
+import { SessionId } from '../../core/types/session.types';
+
 /**
  * Platform Adapter Interface
  *
@@ -10,7 +12,7 @@ export interface PlatformAdapter {
   /**
    * Starts DOM observation and binds necessary event listeners.
    */
-  start(): void;
+  start(sessionId: SessionId): void;
 
   /**
    * Stops all observation and cleans up listeners.

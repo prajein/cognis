@@ -5,7 +5,7 @@ import { SessionId } from '../../core/types/session.types';
 import { ResponseEvents, SessionEvents } from '../../core/event-bus/registry';
 
 export class TypingObserver {
-  private inputNode: HTMLTextAreaElement | null = null;
+  private inputNode: HTMLElement | null = null;
   private abortController: AbortController = new AbortController();
   private isDestroyed = false;
   
@@ -39,15 +39,31 @@ export class TypingObserver {
       return false;
     }
 
-    this.inputNode = document.querySelector(this.config.selectors.promptInput) as HTMLTextAreaElement | null;
+    this.inputNode = document.querySelector(this.config.selectors.promptInput) as HTMLElement | null;
     if (!this.inputNode) {
       return false;
     }
 
     const options = { signal: this.abortController.signal };
     
-    this.inputNode.addEventListener('input', () => this.onInput(), options);
-    this.inputNode.addEventListener('keydown', (e) => this.onKeyDown(e), options);
+    // Event Delegation: React frequently unmounts and recreates the input node.
+    // Attaching directly to the node is fragile. We attach to document and check the target.
+    document.addEventListener('input', (e) => {
+      const target = e.target as HTMLElement;
+      if (target && target.closest(this.config.selectors.promptInput)) {
+        this.inputNode = target.closest(this.config.selectors.promptInput) as HTMLElement;
+        this.onInput();
+      }
+    }, options);
+
+    document.addEventListener('keydown', (e) => {
+      const target = e.target as HTMLElement;
+      if (target && target.closest(this.config.selectors.promptInput)) {
+        this.inputNode = target.closest(this.config.selectors.promptInput) as HTMLElement;
+        this.onKeyDown(e as KeyboardEvent);
+      }
+    }, options);
+
     document.addEventListener('click', (e) => this.onClick(e), options);
     
     this.unsubscribeAll.push(
@@ -79,6 +95,14 @@ export class TypingObserver {
     this.submissionState = 'Idle';
   }
 
+  private getInputValue(): string {
+    if (!this.inputNode) return '';
+    if ('value' in this.inputNode) {
+      return (this.inputNode as HTMLInputElement | HTMLTextAreaElement).value || '';
+    }
+    return this.inputNode.innerText || this.inputNode.textContent || '';
+  }
+
   private onClick(e: MouseEvent): void {
     if (this.isDestroyed) return;
     const target = e.target as Element;
@@ -106,7 +130,7 @@ export class TypingObserver {
     }
     
     this.submissionState = 'SubmissionPending';
-    const text = this.inputNode.value;
+    const text = this.getInputValue();
     const textLength = text.length;
     const wordCount = text.split(/\s+/).filter(w => w.length > 0).length;
     const hash = this.cyrb53(text).toString();
@@ -137,7 +161,7 @@ export class TypingObserver {
     }
 
     this.lastEmissionTime = now;
-    const text = this.inputNode.value;
+    const text = this.getInputValue();
     const textLength = text.length;
     const wordCount = text.split(/\s+/).filter(w => w.length > 0).length;
     const hash = this.cyrb53(text).toString();
@@ -173,9 +197,16 @@ export class TypingObserver {
     if (!this.inputNode || this.isDestroyed) return;
 
     // Target Loss Detection
+    // In SPAs like ChatGPT, the node might be temporarily disconnected during re-renders.
+    // Instead of destroying the observer entirely, we just attempt to re-select it.
     if (!this.inputNode.isConnected) {
-      this.destroy();
-      return;
+      const newNode = document.querySelector(this.config.selectors.promptInput) as HTMLElement | null;
+      if (newNode) {
+        this.inputNode = newNode;
+      } else {
+        // If it's truly gone, we just wait for the next delegated event to find it.
+        return;
+      }
     }
 
     const pauseDuration = Date.now() - this.lastTypingTime;
@@ -183,7 +214,7 @@ export class TypingObserver {
     this.publish({
       sessionId: this.sessionId,
       isTyping: false,
-      textLength: this.inputNode.value.length,
+      textLength: this.getInputValue().length,
       wordCount: 0,
       currentTextHash: '',
       revisionDepth: this.revisionDepth,

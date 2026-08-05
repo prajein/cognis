@@ -133,10 +133,14 @@ export class ExtensionEventBridge {
 
     const envelope = message as BridgeEnvelope;
 
-    // Loop prevention: Do not accept events that originated from our own context type,
-    // or events we've already processed.
+    // Loop prevention: Do not accept events that originated from our own context type.
     if (envelope.originContext === this.localContext) return;
-    if (this.recentlyBridgedIds.has(envelope.event.id)) return;
+
+    // We drop events we've already seen, EXCEPT when we are receiving the authoritative
+    // confirmation of an event we originated (e.g. background confirming our session.started).
+    if (this.recentlyBridgedIds.has(envelope.event.id) && !envelope.event.isAuthoritative) {
+      return;
+    }
 
     this.trackEventId(envelope.event.id);
 
