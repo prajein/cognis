@@ -25,6 +25,7 @@ export interface SessionRecord
     startedAt?: Date;
     endedAt?: Date;
     durationMs?: number;
+    qualityScore?: number;
     sessionNumber: number;
 }
 
