@@ -23,8 +23,8 @@
 import { EventBus } from '../../core/event-bus/EventBus';
 import { ExtensionEventBridge } from '../../core/event-bus/ExtensionEventBridge';
 import { ConsoleErrorReporter } from '../../core/error/ConsoleErrorReporter';
-import { SessionGateway } from './SessionGateway';
-import { InsightGateway } from './InsightGateway';
+import { IpcSessionGateway } from './SessionGateway';
+import { IpcInsightGateway, InsightGateway } from './InsightGateway';
 import { SessionManager } from '../features/session/manager/SessionManager';
 import { SessionService } from './container';
 import type { SidepanelContainer, ConnectionStatus } from './container';
@@ -70,9 +70,9 @@ export async function bootstrapSidepanelRuntime(): Promise<SidepanelContainer> {
   bridge.initialize();
 
   // 3. Instantiate the SessionGateway (command + query facade over the transport).
-  const gateway = new SessionGateway(eventBus);
+  const gateway = new IpcSessionGateway(eventBus);
 
-  const insightGateway = new InsightGateway();
+  const insightGateway: InsightGateway = new IpcInsightGateway();
 
   // 4. Instantiate SessionManager and build the SessionService facade.
   //    SessionService delegates user-intent lifecycle methods to SessionManager,

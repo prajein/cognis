@@ -35,7 +35,7 @@ const QUERY_TIMEOUT_MS = 5_000;
 /** Platform tag recorded in `session.started` events from the sidepanel. */
 const SIDEPANEL_PLATFORM = 'side-panel';
 
-export class SessionGateway implements SessionCommandGateway, SessionQueryGateway {
+export class IpcSessionGateway implements SessionCommandGateway, SessionQueryGateway {
   /**
    * The sessionId currently associated with the active session lifecycle.
    * Set by startSession(); cleared by endSession().

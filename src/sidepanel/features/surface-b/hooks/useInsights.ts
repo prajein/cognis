@@ -1,42 +1,47 @@
 import { useState, useEffect } from "react";
 import { useSidepanelRuntime } from "../../../runtime/RuntimeContext";
 import { InsightReadModel } from "../../../../storage/projections/builders/InsightProjectionBuilder";
+import { InsightEvents } from "../../../../core/event-bus/registry";
 
-export function useInsights() {
-  const { insightGateway, runtimeState } = useSidepanelRuntime();
+export function useInsights(sessionId: string | undefined) {
+  const { insightGateway, runtimeState, eventBus } = useSidepanelRuntime();
   const [insights, setInsights] = useState<InsightReadModel | null>(null);
   
-  const sessionId = runtimeState.activeSession?.sessionId;
   const isStreaming = runtimeState.isStreaming;
 
+  const fetchInsights = () => {
+    if (!sessionId) return;
+    insightGateway.getSessionInsights(sessionId).then((readModel) => {
+      setInsights(readModel);
+    }).catch((err) => {
+      console.error('[useInsights] Failed to fetch insights:', err);
+    });
+  };
+
   useEffect(() => {
-    // If there's no session, clear insights
     if (!sessionId) {
       setInsights(null);
       return;
     }
 
-    // We fetch insights under two conditions:
-    // 1. Initial mount (we just got a sessionId)
-    // 2. The AI finishes streaming (isStreaming flips from true -> false)
-
-    // Actually, whenever isStreaming is false and we have a sessionId,
-    // we should try to fetch the latest insights.
     if (!isStreaming) {
-      // Add a small 300ms delay to allow the background InsightEngine to complete 
-      // its async reasoning and write the read model to IndexedDB.
-      const timerId = setTimeout(() => {
-        insightGateway.getSessionInsights(sessionId).then((readModel) => {
-          setInsights(readModel);
-        }).catch((err) => {
-          console.error('[useInsights] Failed to fetch insights:', err);
-        });
-      }, 300);
-      
+      const timerId = setTimeout(fetchInsights, 300);
       return () => clearTimeout(timerId);
     }
-
   }, [sessionId, isStreaming, insightGateway]);
+
+  useEffect(() => {
+    if (!sessionId) return;
+
+    // Real-time updates when an insight is generated (either by Engine or Mock)
+    return eventBus.subscribe(InsightEvents.GENERATED, (event) => {
+       if (!event.isAuthoritative && event.origin !== 'remote') return;
+       if (event.sessionId !== sessionId) return;
+       // The event signifies the Projection is being updated asynchronously. 
+       // Give IndexedDB 100ms to write before fetching the latest view.
+       setTimeout(fetchInsights, 100);
+    });
+  }, [sessionId, eventBus, insightGateway]);
 
   return {
     insights

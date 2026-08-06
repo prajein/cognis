@@ -5,4 +5,11 @@ import manifest from "./manifest.json";
 
 export default defineConfig({
   plugins: [react(), crx({ manifest })],
+  build: {
+    rollupOptions: {
+      input: {
+        mock: 'src/runtime/mock/index.html'
+      }
+    }
+  }
 });

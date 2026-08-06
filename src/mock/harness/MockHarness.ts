@@ -27,6 +27,7 @@ import {
   PromptEvents,
   CognitiveEvents,
   HardwareEvents,
+  InsightEvents,
 } from '../../core/event-bus/registry';
 import { SessionId, toSessionId } from '../../core/types/session.types';
 import { EventFactoryOptions } from '../../core/event-bus/createDomainEvent';
@@ -236,6 +237,23 @@ export class MockHarness {
     // Hash the prompt text (never store raw text)
     const promptHash = gen.promptSent(promptText).payload.promptHash;
     await sim.stream(promptHash, responseText, options);
+  }
+
+  // ── Insight Events ───────────────────────────────────────────────────────
+
+  /**
+   * Simulates an insight being generated.
+   * Useful for mocking specific insights in a demo scenario without needing
+   * the full InsightEngine heuristic pipeline to naturally derive them.
+   */
+  simulateInsightGenerated(
+    domain: import('../../core/types/insight.types').TaxonomyDomain,
+    title: string,
+    summary: string,
+  ): void {
+    const gen = this.requireGenerator();
+    const event = gen.insightGenerated(domain, title, summary);
+    this.eventBus.publish(InsightEvents.GENERATED, event);
   }
 
   // ── Hardware Simulation ────────────────────────────────────────────────

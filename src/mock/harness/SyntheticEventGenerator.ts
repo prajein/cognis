@@ -26,6 +26,7 @@ import {
   CognitiveEvents,
   ResponseEvents,
   HardwareEvents,
+  InsightEvents,
 } from '../../core/event-bus/registry';
 import { SessionId } from '../../core/types/session.types';
 import { StateLabel } from '../../core/types/state.types';
@@ -268,6 +269,31 @@ export class SyntheticEventGenerator {
       this.sessionId,
       SOURCE,
       { partialLength, durationMs },
+      this.options,
+    );
+  }
+
+  // ── Insight Events ───────────────────────────────────────────────────────
+
+  insightGenerated(
+    domain: import('../../core/types/insight.types').TaxonomyDomain,
+    title: string,
+    summary: string,
+    confidence: number = 0.95,
+    evidenceCount: number = 20,
+  ): DomainEvent<CognisEventMap['insight.generated']> {
+    return createDomainEvent(
+      InsightEvents.GENERATED,
+      this.sessionId,
+      SOURCE,
+      { 
+        insightId: crypto.randomUUID(), 
+        domain, 
+        title, 
+        summary, 
+        confidence, 
+        evidenceCount 
+      },
       this.options,
     );
   }
