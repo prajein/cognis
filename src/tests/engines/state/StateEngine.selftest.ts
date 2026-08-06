@@ -110,7 +110,7 @@ export async function runStateEngineTests(): Promise<{ passed: number; failed: n
     c.eq(coastingEvent.payload.previousState, 'stretch', 'Previous state was stretch');
   }
 
-  // 4. Trigger Overload: Slow typing (1 word over 12 seconds = 5 WPM) with heavy deletion (revisionDepth = 25)
+  // 4. Trigger Overload: Slow typing (1 word over 12 seconds = 5 WPM) with heavy deletion
   virtualTime += 6000; // Advance past 5s cooldown
   const lastStateCountBeforeOverload = capturedStateChanges.length;
 
@@ -119,7 +119,7 @@ export async function runStateEngineTests(): Promise<{ passed: number; failed: n
     virtualTime += 12000; // 12 seconds pass
     words += 1; // 1 word in 12s = 5 WPM
     textLen += 5;
-    revisions += 25; // 25 revisions over 12s = 2.08 revisions/sec (> 0.3)
+    revisions += 40; // 40 revisions per step -> total 160 over ~134s = 1.19 revisions/sec (> 0.6)
     eventBus.publish(PromptEvents.TYPED, createDomainEvent(
       PromptEvents.TYPED,
       sessionId,
@@ -136,7 +136,31 @@ export async function runStateEngineTests(): Promise<{ passed: number; failed: n
     c.eq(overloadEvent.payload.previousState, 'coasting', 'Previous state correctly records previous state (coasting)');
   }
 
-  // 5. Session Reset verification
+  // 5. Trigger Cognitive Pause (1500 ms >= 1200 ms threshold) to transition to Stretch
+  // Advance virtualTime so overall session duration reduces calculated revisionRate below stretch threshold (< 0.3)
+  virtualTime += 600000; // 10 minutes pass without new revisions (totalRevisions = 160 over ~734s = 0.21 rev/sec < 0.3)
+  const lastStateCountBeforePause = capturedStateChanges.length;
+
+  // Emit 4 pause.detected events at 1500ms duration to sustain hysteresis approval
+  for (let i = 1; i <= 4; i++) {
+    virtualTime += 6000; // Advance past 5s cooldown
+    eventBus.publish(CognitiveEvents.PAUSE_DETECTED, createDomainEvent(
+      CognitiveEvents.PAUSE_DETECTED,
+      sessionId,
+      'test',
+      { durationMs: 1500, textLength: textLen },
+      { clock, idFactory }
+    ));
+  }
+
+  c.ok(capturedStateChanges.length > lastStateCountBeforePause, 'Stretch transition approved upon cognitive pause');
+  const pauseStretchEvent = capturedStateChanges[capturedStateChanges.length - 1];
+  if (pauseStretchEvent) {
+    c.eq(pauseStretchEvent.payload.currentState, 'stretch', 'Current state transitioned to stretch on cognitive pause');
+    c.eq(pauseStretchEvent.payload.previousState, 'overload', 'Previous state was overload');
+  }
+
+  // 6. Session Reset verification
   eventBus.publish(SessionEvents.STARTED, createDomainEvent(
     SessionEvents.STARTED,
     toSessionId('new-session'),

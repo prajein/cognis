@@ -25,17 +25,17 @@ This implementation satisfies all Week 2 Sprint requirements without breaking ex
 ### Domain Engine & Metrics Accumulation
 - **[MODIFY]** `src/engines/state/InteractionTracker.ts`: Extended metric accumulation to compute instantaneous/cumulative WPM and maintain a session-scoped Exponential Moving Average (EMA) baseline (`emaWpm`).
 - **[MODIFY]** `src/engines/state/StateSnapshot.ts`: Extended the DTO interface to expose `wordsPerMinute`, `baselineWpm`, and `sampleCount`.
-- **[MODIFY]** `src/engines/state/StateEvaluator.ts`: Replaced absolute velocity heuristics with baseline-relative WPM evaluation rules (+20% WPM -> Coasting, -30% WPM + heavy deletion -> Overload, near baseline + low deletion -> Stretch) with cold-start fallback.
+- **[MODIFY]** `src/engines/state/StateEvaluator.ts`: Updated state inference evaluation to incorporate cognitive pauses (`pauseDurationMs`). Evaluates Stretch when WPM is near baseline, revision rate is low, and cognitive pause duration satisfies `pauseThresholds.stretch` (1200ms).
 - **[MODIFY]** `src/engines/state/TransitionPolicy.ts`: Added `getCurrentState()` getter and `reset()` method to support accurate transition reporting and clean session resets.
 - **[MODIFY]** `src/engines/state/StateEngine.ts`: Routed `wordCount` and `textLength` from `prompt.typed` payloads; updated `handleSessionStarted` typing; populated accurate `previousState`; injected optional `Clock` and `EventIdFactory` DI for testability.
 
 ### Core Configuration
-- **[MODIFY]** `src/core/config/state_engine_rules.json`: Added `baseline` configuration block specifying `emaAlpha: 0.3`, `minSamplesBeforeBaseline: 5`, and percentage deviation thresholds.
+- **[MODIFY]** `src/core/config/state_engine_rules.json`: Added `baseline` configuration block specifying `emaAlpha: 0.3`, `minSamplesBeforeBaseline: 5`, and percentage deviation thresholds; updated `thresholds.pauseDurationMs.stretch` to `1200` to align with the perception layer.
 - **[MODIFY]** `src/core/config/state-rules-loader.ts`: Extended `StateEngineRules` TypeScript interface with `StateBaselineConfig`.
 - **[MODIFY]** `src/core/config/state_engine_rules.schema.json`: Updated JSON Schema to validate the `baseline` configuration object.
 
 ### Verification & Testing
-- **[MODIFY]** `src/tests/engines/state/StateEngine.selftest.ts`: Replaced placeholder test with a comprehensive, framework-free self-test validating WPM derivation, EMA baseline convergence, baseline-relative transitions, hysteresis, and lifecycle resets.
+- **[MODIFY]** `src/tests/engines/state/StateEngine.selftest.ts`: Replaced placeholder test with a comprehensive, framework-free self-test validating WPM derivation, EMA baseline convergence, baseline-relative transitions, cognitive pause stretch transitions, hysteresis, and lifecycle resets.
 - **[NEW]** `docs/implementation-overviews/week2-state-inference-overview.md`: Architectural overview (this document).
 
 ---
@@ -44,11 +44,11 @@ This implementation satisfies all Week 2 Sprint requirements without breaking ex
 
 | Sprint Requirement | Architecture & Implementation Result |
 | --- | --- |
-| **C-01 / F-06: Pause Threshold 1200ms** | Updated `IDLE_THRESHOLD_MS` in `TypingObserver.ts` to `1200`. Pause events emit when user halts typing for 1.2 seconds. |
+| **C-01 / F-06: Pause Threshold 1200ms** | Updated `IDLE_THRESHOLD_MS` in `TypingObserver.ts` and `thresholds.pauseDurationMs.stretch` in `state_engine_rules.json` to `1200`. |
 | **F-02: WPM Derivation** | Derived inside `InteractionTracker.trackTyping()` by dividing word-count deltas by elapsed time intervals. Raw prompt text is never stored or processed. |
 | **F-07: Coasting (~+20% WPM above baseline)** | `StateEvaluator` classifies Coasting when `WPM >= baseline * (1 + 0.20)` AND `revisionRate < coastingThreshold`. |
 | **F-08: Overload (~-30% WPM + heavy deletion)** | `StateEvaluator` classifies Overload when `WPM <= baseline * (1 - 0.30)` AND `revisionRate >= overloadThreshold`. |
-| **F-09: Stretch (Productive Zone)** | `StateEvaluator` classifies Stretch when WPM operates within normal baseline tolerance and low deletion rate. |
+| **F-09: Stretch (Productive Zone & Cognitive Pause)** | `StateEvaluator` classifies Stretch when WPM is near baseline (`stretchTolerancePercent`), revision rate is low (`< stretchThreshold`), AND pause duration `snapshot.pauseDurationMs >= pauseThresholds.stretch` (1200ms). |
 | **Cold-Start Fallback** | When `sampleCount < minSamplesBeforeBaseline` (5 samples), `StateEvaluator` falls back gracefully to static velocity thresholds. |
 
 ---

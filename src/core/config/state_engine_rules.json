@@ -14,7 +14,7 @@
     },
     "pauseDurationMs": {
       "coasting": 5000,
-      "stretch": 2000,
+      "stretch": 1200,
       "overload": 1000
     }
   },

@@ -3,7 +3,7 @@ import { StateLabel } from '../../core/types/state.types';
 import { StateEngineRules } from '../../core/config/state-rules-loader';
 
 export class StateEvaluator {
-  constructor(private readonly rules: StateEngineRules) {}
+  constructor(private readonly rules: StateEngineRules) { }
 
   public evaluate(snapshot: StateSnapshot): StateLabel {
     const minSamples = this.rules.baseline?.minSamplesBeforeBaseline ?? 5;
@@ -15,13 +15,15 @@ export class StateEvaluator {
 
     const baseline = snapshot.baselineWpm;
     const wpm = snapshot.wordsPerMinute;
-    const { coastingAbovePercent, overloadBelowPercent } = this.rules.baseline.wpmDeviation;
+    const revisionThresholds = this.rules.thresholds.revisionRate;
+    const pauseThresholds = this.rules.thresholds.pauseDurationMs;
+    const { coastingAbovePercent, overloadBelowPercent, stretchTolerancePercent = 0.15 } = this.rules.baseline.wpmDeviation;
 
     // 1. Coasting Check: ~+20% WPM above baseline with low revision rate
     const coastingWpmThreshold = baseline * (1 + coastingAbovePercent);
     if (
       wpm >= coastingWpmThreshold &&
-      snapshot.revisionRate < this.rules.thresholds.revisionRate.coasting
+      snapshot.revisionRate < revisionThresholds.coasting
     ) {
       return 'coasting';
     }
@@ -30,12 +32,22 @@ export class StateEvaluator {
     const overloadWpmThreshold = baseline * (1 - overloadBelowPercent);
     if (
       wpm <= overloadWpmThreshold &&
-      snapshot.revisionRate >= this.rules.thresholds.revisionRate.stretch
+      snapshot.revisionRate >= revisionThresholds.overload
     ) {
       return 'overload';
     }
 
     // 3. Stretch Check: Productive zone (near baseline, low deletion, cognitive pauses)
+    const isNearBaseline = Math.abs(wpm - baseline) / baseline <= stretchTolerancePercent;
+    const isLowRevision = snapshot.revisionRate < revisionThresholds.stretch;
+    const isLongPause = snapshot.pauseDurationMs >= pauseThresholds.stretch;
+
+    if (isNearBaseline && isLowRevision && isLongPause) {
+      return 'stretch';
+    }
+
+    // Default fallback to stretch for steady-state baseline interaction
+    // to maintain state continuity prior to long pause detection.
     return 'stretch';
   }
 
