@@ -16,6 +16,7 @@
 
 import { EventBusContract } from '../../core/event-bus/types';
 import { SessionReadModel } from '../../storage/projections/builders/SessionProjectionBuilder';
+import { InsightGateway } from './InsightGateway';
 
 // ---------------------------------------------------------------------------
 // SessionService — UI-facing façade
@@ -67,6 +68,18 @@ export type ConnectionStatus = 'connected' | 'reconnecting' | 'disconnected';
 // ---------------------------------------------------------------------------
 
 /**
+ * RuntimeState
+ * 
+ * Snapshot of the current sidepanel context and state.
+ */
+export interface RuntimeState {
+  readonly activeSession: SessionReadModel | null;
+  readonly isStreaming: boolean;
+  readonly platform: string;
+  readonly connectionStatus: ConnectionStatus;
+}
+
+/**
  * The frozen container returned by `bootstrapSidepanelRuntime()`.
  *
  * React components access services and state exclusively through this object.
@@ -93,12 +106,12 @@ export interface SidepanelContainer {
   readonly eventBus: EventBusContract;
 
   /**
-   * State snapshot hydrated at bootstrap time by querying the background.
-   * - `activeSession`: The currently active/paused SessionReadModel, or null.
-   * - `connectionStatus`: Whether the background Transport is reachable.
+   * Gateway for querying insights from the background.
    */
-  readonly runtimeState: {
-    readonly activeSession: SessionReadModel | null;
-    readonly connectionStatus: ConnectionStatus;
-  };
+  readonly insightGateway: InsightGateway;
+
+  /**
+   * Snapshot captured at bootstrap and updated via hooks.
+   */
+  readonly runtimeState: RuntimeState;
 }

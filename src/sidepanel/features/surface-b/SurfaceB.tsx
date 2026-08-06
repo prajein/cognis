@@ -13,6 +13,8 @@ import { SessionTimer } from "../session/components/SessionTimer";
 import { TaskProfileCard } from "../session/components/TaskProfileCard";
 import { useInsights } from "./hooks/useInsights";
 import { SessionState } from "../session/types";
+import { useSidepanelRuntime } from "../../runtime/RuntimeContext";
+import { InsightCard } from "./components/InsightCard";
 
 
 // Load profiles once outside the component since they are static config
@@ -50,31 +52,8 @@ export function SurfaceB() {
         connectionStatus,
     } = useSession();
 
-    const insightContext =
-    currentSession &&
-    selectedProfile &&
-    currentSession.status === SessionState.SESSION_ENDED
-        ? {
-              currentSession,
-              activationProfile: selectedProfile,
-              generatedAt: new Date(),
-
-              // unavailable for now
-              previousSession: undefined,
-              sessionHistory: undefined,
-              sessionCount: undefined,
-          }
-        : null;
-
-    const { generateInsights } = useInsights();
-
-    const insights = useMemo(() => {
-        if (!insightContext) {
-            return [];
-        }
-
-     return generateInsights(insightContext);
-    }, [generateInsights, insightContext]);
+    const { runtimeState } = useSidepanelRuntime();
+    const { insights } = useInsights();
 
     if (connectionStatus !== 'connected') {
         return (
@@ -102,6 +81,7 @@ export function SurfaceB() {
 
             <BrainMap
                 profile={selectedProfile}
+                isStreaming={runtimeState.isStreaming}
             />
 
             <DisclosureLabel />
@@ -121,12 +101,7 @@ export function SurfaceB() {
                 endSession={endSession}
             />
 
-            {insights.map((insight) => (
-                <div key={insight.id}>
-                <h4>{insight.title}</h4>
-                <p>{insight.description}</p>
-                </div>
-                ))}
+            <InsightCard insightsModel={insights} />
 
         </main>
     );
