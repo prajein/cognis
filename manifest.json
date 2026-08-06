@@ -24,5 +24,11 @@
       "matches": ["*://chatgpt.com/*"],
       "js": ["src/content/content-script.ts"]
     }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["src/runtime/mock/index.html"],
+      "matches": ["<all_urls>"]
+    }
   ]
 }

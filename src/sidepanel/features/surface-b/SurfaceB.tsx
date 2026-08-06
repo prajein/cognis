@@ -35,15 +35,7 @@ export function SurfaceB() {
         []
     );
 
-  const selectedProfile = useMemo(
-        () =>
-            profiles.find(
-                profile => profile.task_id === selectedTaskId
-            ),
-        [selectedTaskId]
-    );
-  
-    const {
+  const {
         currentState,
         currentSession,
         selectTask,
@@ -52,8 +44,18 @@ export function SurfaceB() {
         connectionStatus,
     } = useSession();
 
+  const activeTaskId = currentSession?.taskId ?? selectedTaskId;
+
+  const selectedProfile = useMemo(
+        () =>
+            profiles.find(
+                profile => profile.task_id === activeTaskId
+            ),
+        [activeTaskId]
+    );
+
     const { runtimeState } = useSidepanelRuntime();
-    const { insights } = useInsights();
+    const { insights } = useInsights(currentSession?.id !== 'pending' ? currentSession?.id : undefined);
 
     if (connectionStatus !== 'connected') {
         return (

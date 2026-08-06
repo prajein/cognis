@@ -10,11 +10,20 @@ const QUERY_TIMEOUT_MS = 5_000;
 /**
  * InsightGateway
  *
- * Concrete implementation for querying insights from the background.
+ * Interface for querying insights.
+ */
+export interface InsightGateway {
+  getSessionInsights(sessionId: string): Promise<InsightReadModel | null>;
+}
+
+/**
+ * IpcInsightGateway
+ *
+ * Concrete implementation for querying insights from the background via IPC.
  * Caches the most recently requested InsightReadModel for the active session 
  * to avoid redundant IPC traffic across React re-renders.
  */
-export class InsightGateway {
+export class IpcInsightGateway implements InsightGateway {
   private cache: Map<string, { model: InsightReadModel; timestamp: number }> = new Map();
   private readonly CACHE_TTL_MS = 2000; // 2 seconds cache ttl to debounce rapid re-renders
 
