@@ -11,6 +11,15 @@ export function runTransitionPolicyTests(): void {
       revisionRate: { coasting: 1, stretch: 5, overload: 10 },
       pauseDurationMs: { coasting: 1, stretch: 5, overload: 10 }
     },
+    baseline: {
+      emaAlpha: 0.3,
+      minSamplesBeforeBaseline: 5,
+      wpmDeviation: {
+        coastingAbovePercent: 0.20,
+        overloadBelowPercent: 0.30,
+        stretchTolerancePercent: 0.15
+      }
+    },
     hysteresis: {
       cooldownMs: 1000,
       requiredSustainedMeasurements: 3

@@ -17,7 +17,7 @@ export class TypingObserver {
 
   private unsubscribeAll: (() => void)[] = [];
   
-  private readonly IDLE_THRESHOLD_MS = 2000;
+  private readonly IDLE_THRESHOLD_MS = 1200;
   private readonly THROTTLE_MS = 100; // Max 10 events per second
 
   constructor(
