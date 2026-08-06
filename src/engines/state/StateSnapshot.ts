@@ -1,4 +1,7 @@
 export interface StateSnapshot {
+  readonly wordsPerMinute: number;
+  readonly baselineWpm: number;
+  readonly sampleCount: number;
   readonly typingVelocity: number;
   readonly rollingTypingAverage: number;
   readonly revisionRate: number;

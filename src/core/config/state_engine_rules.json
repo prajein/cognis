@@ -18,6 +18,15 @@
       "overload": 1000
     }
   },
+  "baseline": {
+    "emaAlpha": 0.3,
+    "minSamplesBeforeBaseline": 5,
+    "wpmDeviation": {
+      "coastingAbovePercent": 0.20,
+      "overloadBelowPercent": 0.30,
+      "stretchTolerancePercent": 0.15
+    }
+  },
   "hysteresis": {
     "cooldownMs": 5000,
     "requiredSustainedMeasurements": 3
