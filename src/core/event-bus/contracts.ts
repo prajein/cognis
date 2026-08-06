@@ -396,14 +396,16 @@ export interface ResponseAbandonedPayload {
 }
 
 /**
- * Payload for response.analysis.completed
+ * ResponseAnalysis
  *
- * Purpose: Records the heuristic evaluation of a completed response.
- *          Contains derived metrics ONLY, no transient text.
- * Producer: Response Intelligence Engine
- * Consumer: Storage Layer, Projection Builders
+ * The output contract of the ResponseIntelligenceEngine.
+ * Everything downstream (InsightEngine, Projection Builders, Surface B)
+ * must depend on this type, not on internal analyzer results.
+ *
+ * All scores are in the range [0.0, 1.0].
+ * Flags are stable string identifiers produced by individual analyzers.
  */
-export interface ResponseAnalysisCompletedPayload {
+export interface ResponseAnalysis {
   /** Hash of the prompt that triggered this response. */
   readonly promptHash: string;
   
@@ -419,6 +421,16 @@ export interface ResponseAnalysisCompletedPayload {
   /** Array of semantic flags (e.g., 'heavy_code', 'step_by_step'). */
   readonly flags: ReadonlyArray<string>;
 }
+
+/**
+ * Payload for response.analysis.completed
+ *
+ * Purpose: Records the heuristic evaluation of a completed response.
+ *          Contains derived metrics ONLY, no transient text.
+ * Producer: Response Intelligence Engine
+ * Consumer: Storage Layer, Projection Builders
+ */
+export interface ResponseAnalysisCompletedPayload extends ResponseAnalysis {}
 
 // ---------------------------------------------------------------------------
 // Insight Event Payloads

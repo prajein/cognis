@@ -6,13 +6,13 @@ export const chatgptV1: PlatformConfig = {
   urlPattern: /^https:\/\/chatgpt\.com/,
   selectors: {
     // Current ChatGPT main chat view container
-    responseContainer: 'main .flex.flex-col.items-center',
+    responseContainer: 'main',
     
     // Each assistant message has specific data-testid attributes
     responseBlock: '[data-testid^="conversation-turn-"] [data-message-author-role="assistant"]',
     
-    // Stop generating button is usually active when streaming
-    streamingIndicator: 'button[aria-label="Stop generating"]',
+    // Stop generating button is usually active when streaming. We add fallbacks just in case.
+    streamingIndicator: 'button[aria-label="Stop generating"], button[data-testid="stop-button"], [data-message-author-role="assistant"].result-streaming',
     
     // Prompt textarea ID
     promptInput: '#prompt-textarea',

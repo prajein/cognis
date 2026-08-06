@@ -19,6 +19,8 @@ export class ResponseObserver {
 
   private rafId: number | null = null;
   private hasPendingMutations = false;
+  private completionTimeout: ReturnType<typeof setTimeout> | null = null;
+  private isGenerating = false;
 
   constructor(
     private readonly eventBus: EventBus,
@@ -54,6 +56,10 @@ export class ResponseObserver {
     if (this.rafId !== null) {
       cancelAnimationFrame(this.rafId);
       this.rafId = null;
+    }
+    if (this.completionTimeout !== null) {
+      clearTimeout(this.completionTimeout);
+      this.completionTimeout = null;
     }
   }
 
@@ -97,13 +103,14 @@ export class ResponseObserver {
     // Regenerated response / New response
     // If the node changed, or if the text shrunk (e.g. wiped for regen)
     if (this.currentResponseNode !== latestNode || currentText.length < this.cursor.textLength) {
-      if (this.currentResponseNode) {
+      if (this.currentResponseNode && this.isGenerating) {
         this.emitCompletion();
       }
 
       this.currentResponseNode = latestNode;
       this.cursor = { textLength: 0 };
       this.startTime = Date.now();
+      this.isGenerating = true;
 
       this.publish({
         sessionId: this.sessionId,
@@ -139,15 +146,33 @@ export class ResponseObserver {
       }
     }
 
-    // 3. Completion Check
-    if (!isStreaming && this.currentResponseNode) {
-      // Stream indicator vanished, finish
-      this.emitCompletion();
-      this.currentResponseNode = null;
+    // 3. Completion Check via Debounce
+    // We clear any existing completion timeout since we just received a mutation.
+    if (this.completionTimeout !== null) {
+      clearTimeout(this.completionTimeout);
+      this.completionTimeout = null;
+    }
+
+    // If there is an explicit streaming indicator, we definitely aren't done.
+    // If there ISN'T an explicit streaming indicator, we wait 1000ms. If no mutations happen in that time, we consider it done.
+    if (!isStreaming && this.isGenerating) {
+      this.completionTimeout = setTimeout(() => {
+        if (this.isGenerating) {
+          this.emitCompletion();
+        }
+      }, 1000);
     }
   }
 
   private emitCompletion(): void {
+    if (!this.isGenerating) return;
+    this.isGenerating = false;
+    
+    if (this.completionTimeout !== null) {
+      clearTimeout(this.completionTimeout);
+      this.completionTimeout = null;
+    }
+
     const currentText = this.currentResponseNode?.textContent || '';
     
     // Safety check: don't fabricate events if we never started

@@ -24,6 +24,7 @@ import { EventBus } from '../../core/event-bus/EventBus';
 import { ExtensionEventBridge } from '../../core/event-bus/ExtensionEventBridge';
 import { ConsoleErrorReporter } from '../../core/error/ConsoleErrorReporter';
 import { SessionGateway } from './SessionGateway';
+import { InsightGateway } from './InsightGateway';
 import { SessionManager } from '../features/session/manager/SessionManager';
 import { SessionService } from './container';
 import type { SidepanelContainer, ConnectionStatus } from './container';
@@ -71,6 +72,8 @@ export async function bootstrapSidepanelRuntime(): Promise<SidepanelContainer> {
   // 3. Instantiate the SessionGateway (command + query facade over the transport).
   const gateway = new SessionGateway(eventBus);
 
+  const insightGateway = new InsightGateway();
+
   // 4. Instantiate SessionManager and build the SessionService facade.
   //    SessionService delegates user-intent lifecycle methods to SessionManager,
   //    which enforces state machine invariants before dispatching via SessionGateway.
@@ -92,6 +95,8 @@ export async function bootstrapSidepanelRuntime(): Promise<SidepanelContainer> {
   //    to ensure bootstrap always succeeds.
   let activeSession = null;
   let connectionStatus: ConnectionStatus = 'connected';
+  const platform = 'ChatGPT';
+  const isStreaming = false;
 
   try {
     activeSession = await gateway.getActiveSession();
@@ -116,9 +121,12 @@ export async function bootstrapSidepanelRuntime(): Promise<SidepanelContainer> {
   const container: SidepanelContainer = Object.freeze({
     sessionService,
     eventBus,
+    insightGateway,
     runtimeState: Object.freeze({
       activeSession,
       connectionStatus,
+      platform,
+      isStreaming
     }),
   });
 

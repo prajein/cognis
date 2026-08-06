@@ -1,5 +1,5 @@
 import { EventBusContract } from '../../core/event-bus/types';
-import { SessionEvents, PromptEvents } from '../../core/event-bus/registry';
+import { SessionEvents, PromptEvents, ResponseEvents } from '../../core/event-bus/registry';
 import { DomainEvent } from '../../core/event-bus/contracts';
 import { ReasoningPipeline } from './pipeline/ReasoningPipeline';
 
@@ -49,6 +49,11 @@ export class InsightScheduler {
     this.unsubscribeHandlers.push(
       this.eventBus.subscribe(PromptEvents.SENT, this.handlePromptSent.bind(this))
     );
+
+    // Strategy 3: Response Completed (Immediate feedback loop)
+    this.unsubscribeHandlers.push(
+      this.eventBus.subscribe(ResponseEvents.COMPLETED, this.handleResponseCompleted.bind(this))
+    );
   }
 
   public stop(): void {
@@ -63,6 +68,11 @@ export class InsightScheduler {
     const { sessionId } = event;
     await this.runPipeline(sessionId, 'session.ended', /* terminal */ true);
     this.promptsSinceLastEval = 0;
+  }
+
+  private async handleResponseCompleted(event: DomainEvent<any>): Promise<void> {
+    const { sessionId } = event;
+    await this.runPipeline(sessionId, 'response.completed', /* terminal */ false);
   }
 
   private async handlePromptSent(event: DomainEvent<any>): Promise<void> {

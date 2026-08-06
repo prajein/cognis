@@ -15,9 +15,11 @@
  *   main.tsx shows a loading shell until bootstrap completes.
  */
 
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import type { SidepanelContainer } from './container';
+import type { SidepanelContainer, RuntimeState } from './container';
+import { SessionEvents } from '../../core/event-bus/registry';
+import { ResponseLifecycleTracker } from './ResponseLifecycleTracker';
 
 // ---------------------------------------------------------------------------
 // Context
@@ -48,8 +50,37 @@ export function SidepanelRuntimeProvider({
   container,
   children,
 }: SidepanelRuntimeProviderProps) {
+  const [runtimeState, setRuntimeState] = useState<RuntimeState>(container.runtimeState);
+
+  useEffect(() => {
+    const unsubscribes: Array<() => void> = [];
+    const eventBus = container.eventBus;
+
+    // Track activeSession updates via eventBus (optional implementation for later, 
+    // but ensures the infrastructure is ready for session.started/ended etc.)
+    // Note: To fully track active session state, we would listen to session.* events 
+    // and query SessionGateway, or background would push read models.
+    // For now, we assume initial snapshot handles connection, and focus on isStreaming:
+
+    const tracker = new ResponseLifecycleTracker(eventBus, (isStreaming) => {
+      setRuntimeState((prev) => ({ ...prev, isStreaming }));
+    });
+    tracker.start();
+    unsubscribes.push(() => tracker.stop());
+
+    return () => {
+      unsubscribes.forEach((unsub) => unsub());
+    };
+  }, [container]);
+
+  // Merge the dynamic runtimeState into the provided container
+  const contextValue: SidepanelContainer = {
+    ...container,
+    runtimeState
+  };
+
   return (
-    <SidepanelRuntimeContext.Provider value={container}>
+    <SidepanelRuntimeContext.Provider value={contextValue}>
       {children}
     </SidepanelRuntimeContext.Provider>
   );
