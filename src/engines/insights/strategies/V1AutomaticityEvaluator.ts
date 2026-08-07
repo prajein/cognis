@@ -26,7 +26,7 @@ export class V1AutomaticityEvaluator implements InsightStrategy {
     // If the user has many recent successes and few errors, they are transitioning to Autonomous.
     
     // For V1, we simulate a simple heuristic:
-    if (successfulCompilationsCount > 20 && syntaxErrors < 5) {
+    if (successfulCompilationsCount > 0 && syntaxErrors < 5) {
       
       const confidence = this.calculator.calculate(
         simulatedRecentActivity, 

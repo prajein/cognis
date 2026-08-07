@@ -35,7 +35,7 @@ const QUERY_TIMEOUT_MS = 5_000;
 /** Platform tag recorded in `session.started` events from the sidepanel. */
 const SIDEPANEL_PLATFORM = 'side-panel';
 
-export class SessionGateway implements SessionCommandGateway, SessionQueryGateway {
+export class IpcSessionGateway implements SessionCommandGateway, SessionQueryGateway {
   /**
    * The sessionId currently associated with the active session lifecycle.
    * Set by startSession(); cleared by endSession().
@@ -76,6 +76,7 @@ export class SessionGateway implements SessionCommandGateway, SessionQueryGatewa
    * No-op (with warning) if no session is currently active.
    */
   public endSession(reason: 'explicit' | 'tab_closed' | 'navigation' | 'timeout' = 'explicit'): void {
+    console.log('[SessionGateway] endSession called. activeSessionId:', this.activeSessionId);
     if (!this.activeSessionId) {
       console.warn('[SessionGateway] endSession() called with no active session.');
       return;
@@ -88,8 +89,10 @@ export class SessionGateway implements SessionCommandGateway, SessionQueryGatewa
       { reason }
     );
 
+    console.log('[SessionGateway] Publishing session.ended event locally:', event.id);
     this.eventBus.publish(SessionEvents.ENDED, event);
     this.activeSessionId = null;
+    console.log('[SessionGateway] activeSessionId cleared.');
   }
 
   /**

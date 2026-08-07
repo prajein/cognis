@@ -12,6 +12,7 @@ import { GapProfileProjectionBuilder } from '../storage/projections/builders/Gap
 import { IdentityProjectionBuilder } from '../storage/projections/builders/IdentityProjectionBuilder';
 import { AutomaticityProjectionBuilder } from '../storage/projections/builders/AutomaticityProjectionBuilder';
 import { ResponseMetricsProjectionBuilder } from '../storage/projections/builders/ResponseMetricsProjectionBuilder';
+import { InsightProjectionBuilder } from '../storage/projections/builders/InsightProjectionBuilder';
 
 import {
   SessionEvents,
@@ -35,7 +36,9 @@ const allEvents: EventType[] = [
 ];
 
 import { InsightEngine } from '../engines/insights/InsightEngine';
+import { ResponseIntelligenceEngine } from '../engines/response/ResponseIntelligenceEngine';
 import { SessionQueryHandler } from './handlers/SessionQueryHandler';
+import { InsightQueryHandler } from './handlers/InsightQueryHandler';
 
 /**
  * Background Service Worker Composition Root
@@ -70,7 +73,8 @@ async function bootstrapBackground(): Promise<void> {
       new GapProfileProjectionBuilder(readModelRepo),
       new IdentityProjectionBuilder(readModelRepo),
       new AutomaticityProjectionBuilder(readModelRepo),
-      new ResponseMetricsProjectionBuilder(readModelRepo)
+      new ResponseMetricsProjectionBuilder(readModelRepo),
+      new InsightProjectionBuilder(readModelRepo)
     ];
     const projectionManager = new ProjectionManager(builders, eventBus, eventRepo, errorReporter);
     projectionManager.startLiveSubscriptions();
@@ -80,7 +84,13 @@ async function bootstrapBackground(): Promise<void> {
     const sessionQueryHandler = new SessionQueryHandler(readModelRepo);
     sessionQueryHandler.register();
 
-    // 6. Start Insight Engine (Apex Reasoning Layer)
+    const insightQueryHandler = new InsightQueryHandler(readModelRepo);
+    insightQueryHandler.register();
+
+    // 6. Start Engines
+    const responseIntelligenceEngine = new ResponseIntelligenceEngine();
+    responseIntelligenceEngine.start(eventBus);
+
     const insightEngine = new InsightEngine();
     insightEngine.start(eventBus, readModelRepo);
 

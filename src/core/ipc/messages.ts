@@ -14,6 +14,7 @@
  */
 
 import { SessionReadModel } from '../../storage/projections/builders/SessionProjectionBuilder';
+import { InsightReadModel } from '../../storage/projections/builders/InsightProjectionBuilder';
 
 // ---------------------------------------------------------------------------
 // Query — QUERY_ACTIVE_SESSION
@@ -41,8 +42,22 @@ export interface QueryActiveSessionResponse {
 }
 
 // ---------------------------------------------------------------------------
+// Query — QUERY_SESSION_INSIGHTS
+// ---------------------------------------------------------------------------
+
+export interface QuerySessionInsightsRequest {
+  readonly type: 'QUERY_SESSION_INSIGHTS';
+  readonly sessionId: string;
+}
+
+export interface QuerySessionInsightsResponse {
+  readonly insights: InsightReadModel | null;
+  readonly error?: string;
+}
+
+// ---------------------------------------------------------------------------
 // Discriminated union for future extensibility
 // ---------------------------------------------------------------------------
 
 /** All query request types that the background message router recognises. */
-export type BackgroundQueryRequest = QueryActiveSessionRequest;
+export type BackgroundQueryRequest = QueryActiveSessionRequest | QuerySessionInsightsRequest;

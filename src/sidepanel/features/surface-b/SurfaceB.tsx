@@ -34,15 +34,7 @@ export function SurfaceB() {
         []
     );
 
-  const selectedProfile = useMemo(
-        () =>
-            profiles.find(
-                profile => profile.task_id === selectedTaskId
-            ),
-        [selectedTaskId]
-    );
-  
-    const {
+  const {
         currentState,
         currentSession,
         selectTask,
@@ -51,31 +43,18 @@ export function SurfaceB() {
         connectionStatus,
     } = useSession();
 
-    const insightContext =
-    currentSession &&
-    selectedProfile &&
-    currentSession.status === SessionState.SESSION_ENDED
-        ? {
-              currentSession,
-              activationProfile: selectedProfile,
-              generatedAt: new Date(),
+  const activeTaskId = currentSession?.taskId ?? selectedTaskId;
 
-              // unavailable for now
-              previousSession: undefined,
-              sessionHistory: undefined,
-              sessionCount: undefined,
-          }
-        : null;
+  const selectedProfile = useMemo(
+        () =>
+            profiles.find(
+                profile => profile.task_id === activeTaskId
+            ),
+        [activeTaskId]
+    );
 
-    const { generateInsights } = useInsights();
-
-    const insights = useMemo(() => {
-        if (!insightContext) {
-            return [];
-        }
-
-     return generateInsights(insightContext);
-    }, [generateInsights, insightContext]);
+    const { runtimeState } = useSidepanelRuntime();
+    const { insights } = useInsights(currentSession?.id !== 'pending' ? currentSession?.id : undefined);
 
     if (connectionStatus !== 'connected') {
         return (
@@ -103,6 +82,7 @@ export function SurfaceB() {
 
             <BrainMap
                 profile={selectedProfile}
+                isStreaming={runtimeState.isStreaming}
             />
 
             <DisclosureLabel />

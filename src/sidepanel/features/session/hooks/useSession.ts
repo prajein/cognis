@@ -66,7 +66,12 @@ export function useSession() {
     );
 
     const unsubEnded = eventBus.subscribe(SessionEvents.ENDED, (event) => {
-      if (!event.isAuthoritative && event.origin !== 'remote') return;
+      console.log('[useSession] Received session.ended event:', event);
+      if (!event.isAuthoritative && event.origin !== 'remote') {
+        console.log('[useSession] Ignored non-authoritative session.ended event.');
+        return;
+      }
+      console.log('[useSession] Processing authoritative session.ended event.');
 
       setCurrentState(SessionState.SESSION_ENDED);
       setCurrentSession((prev) => {
@@ -121,7 +126,13 @@ export function useSession() {
   };
 
   const endSession = () => {
-    sessionService.endSession();
+    console.log('[useSession] endSession called. Delegating to sessionService...');
+    try {
+      sessionService.endSession();
+      console.log('[useSession] sessionService.endSession() succeeded.');
+    } catch (err) {
+      console.error('[useSession] sessionService.endSession() threw:', err);
+    }
     // State transitions ONLY when SessionEvents.ENDED is authoritatively received
   };
 

@@ -72,8 +72,8 @@ function bootstrapContentScript(): void {
     }
 
     // 2. Initialize Platform Adapter Wiring
-    const platformManager = new PlatformManager(eventBus);
-    platformManager.detectAndStart(window.location.href);
+    const platformManager = new PlatformManager(eventBus, gapEngine);
+    platformManager.prepareAdapter(window.location.href);
 
     console.log('[Content Script] Bootstrap complete. Cognis Surface A is active.');
   } catch (error) {

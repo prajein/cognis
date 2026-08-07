@@ -4,6 +4,8 @@ import { EventBus } from '../../core/event-bus/EventBus';
 import { SessionId, toSessionId } from '../../core/types/session.types';
 import { createDomainEvent } from '../../core/event-bus/createDomainEvent';
 import { SessionEvents } from '../../core/event-bus/registry';
+import { GapDetectionEngine } from '../../engines/gap/GapDetectionEngine';
+import { PromptEnricher } from '../interfaces/PromptEnricher';
 
 /**
  * Platform Manager
@@ -20,61 +22,63 @@ export class PlatformManager {
   private boundOnVisibilityChange = this.onVisibilityChange.bind(this);
   private boundOnBeforeUnload = this.onBeforeUnload.bind(this);
 
-  constructor(private readonly eventBus: EventBus) {}
+  constructor(
+    private readonly eventBus: EventBus,
+    private readonly gapEngine?: GapDetectionEngine,
+    private readonly promptEnricher?: PromptEnricher
+  ) {}
 
   /**
-   * Detects the platform based on the current window location and starts the adapter.
+   * Phase 1: Prepares the platform adapter based on URL. Does not start observation.
    */
-  public detectAndStart(currentUrl: string = window.location.href): void {
+  public prepareAdapter(currentUrl: string = window.location.href): void {
     if (this.activeAdapter) {
-      this.stop();
+      this.endObservation();
     }
-
-    this.currentSessionId = toSessionId(crypto.randomUUID());
 
     this.activeAdapter = this.createAdapterForUrl(currentUrl);
     
-    if (this.activeAdapter) {
-      // 1. Emit Session Started event before instantiating adapters
-      this.eventBus.publish(SessionEvents.STARTED, createDomainEvent(
-        SessionEvents.STARTED,
-        this.currentSessionId,
-        'perception.lifecycle',
-        { platform: this.getPlatformName(currentUrl) }
-      ));
-
-      // 2. Start the platform adapter
-      this.activeAdapter.start();
-      
-      // 3. Bind lifecycle listeners for session pause/end logic
-      document.addEventListener('visibilitychange', this.boundOnVisibilityChange);
-      window.addEventListener('beforeunload', this.boundOnBeforeUnload);
-    } else {
+    if (!this.activeAdapter) {
       console.warn('[PlatformManager] No supported platform detected for URL:', currentUrl);
     }
   }
 
   /**
-   * Stops the currently active adapter and emits session.ended.
+   * Phase 2: Begins observation when a session is explicitly started by the user.
    */
-  public stop(): void {
+  public beginObservation(sessionId: SessionId): void {
+    if (!this.activeAdapter) {
+      console.warn('[PlatformManager] Cannot begin observation: no active adapter prepared.');
+      return;
+    }
+
+    if (this.currentSessionId) {
+      console.warn('[PlatformManager] Observation already active for session:', this.currentSessionId);
+      return;
+    }
+
+    this.currentSessionId = sessionId;
+    
+    // Start the platform adapter
+    this.activeAdapter.start(this.currentSessionId);
+    
+    // Bind lifecycle listeners for session pause/end logic
+    document.addEventListener('visibilitychange', this.boundOnVisibilityChange);
+    window.addEventListener('beforeunload', this.boundOnBeforeUnload);
+  }
+
+  /**
+   * Phase 3: Ends observation when a session is explicitly ended by the user.
+   */
+  public endObservation(): void {
     if (this.activeAdapter) {
       this.activeAdapter.stop();
-      this.activeAdapter = null;
     }
     
     document.removeEventListener('visibilitychange', this.boundOnVisibilityChange);
     window.removeEventListener('beforeunload', this.boundOnBeforeUnload);
 
-    if (this.currentSessionId) {
-      this.eventBus.publish(SessionEvents.ENDED, createDomainEvent(
-        SessionEvents.ENDED,
-        this.currentSessionId,
-        'perception.lifecycle',
-        { reason: 'explicit' }
-      ));
-      this.currentSessionId = null;
-    }
+    this.currentSessionId = null;
   }
 
   private onVisibilityChange(): void {
@@ -113,7 +117,7 @@ export class PlatformManager {
 
   private createAdapterForUrl(url: string): PlatformAdapter | null {
     if (url.includes('chatgpt.com')) {
-      return new ChatGPTAdapter(this.eventBus, this.currentSessionId!);
+      return new ChatGPTAdapter(this.eventBus, this.gapEngine, this.promptEnricher);
     }
     return null;
   }

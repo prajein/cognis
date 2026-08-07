@@ -9,6 +9,17 @@ export class TransitionPolicy {
 
   constructor(private readonly rules: StateEngineRules) {}
 
+  public getCurrentState(): StateLabel {
+    return this.currentState;
+  }
+
+  public reset(initialState: StateLabel = 'stretch'): void {
+    this.currentState = initialState;
+    this.lastTransitionTime = 0;
+    this.sustainedState = null;
+    this.sustainedCount = 0;
+  }
+
   public approveTransition(proposedState: StateLabel, now: number): StateLabel | null {
     // 1. Cooldown Enforcement
     if (now - this.lastTransitionTime < this.rules.hysteresis.cooldownMs) {

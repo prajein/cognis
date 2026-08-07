@@ -11,6 +11,18 @@ export interface StateEngineHysteresis {
   requiredSustainedMeasurements: number;
 }
 
+export interface WpmDeviationConfig {
+  coastingAbovePercent: number;
+  overloadBelowPercent: number;
+  stretchTolerancePercent: number;
+}
+
+export interface StateBaselineConfig {
+  emaAlpha: number;
+  minSamplesBeforeBaseline: number;
+  wpmDeviation: WpmDeviationConfig;
+}
+
 export interface StateEngineRules {
   version: string;
   note?: string;
@@ -19,6 +31,7 @@ export interface StateEngineRules {
     revisionRate: StateThresholds;
     pauseDurationMs: StateThresholds;
   };
+  baseline?: StateBaselineConfig;
   hysteresis: StateEngineHysteresis;
 }
 

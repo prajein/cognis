@@ -38,6 +38,23 @@
       },
       "required": ["velocity", "revisionRate", "pauseDurationMs"]
     },
+    "baseline": {
+      "type": "object",
+      "properties": {
+        "emaAlpha": { "type": "number" },
+        "minSamplesBeforeBaseline": { "type": "number" },
+        "wpmDeviation": {
+          "type": "object",
+          "properties": {
+            "coastingAbovePercent": { "type": "number" },
+            "overloadBelowPercent": { "type": "number" },
+            "stretchTolerancePercent": { "type": "number" }
+          },
+          "required": ["coastingAbovePercent", "overloadBelowPercent", "stretchTolerancePercent"]
+        }
+      },
+      "required": ["emaAlpha", "minSamplesBeforeBaseline", "wpmDeviation"]
+    },
     "hysteresis": {
       "type": "object",
       "properties": {
@@ -47,5 +64,5 @@
       "required": ["cooldownMs", "requiredSustainedMeasurements"]
     }
   },
-  "required": ["version", "thresholds", "hysteresis"]
+  "required": ["version", "thresholds", "baseline", "hysteresis"]
 }

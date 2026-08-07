@@ -20,11 +20,13 @@ export interface Migration {
 }
 
 export class CognisDatabase {
-  private static readonly DB_NAME = 'cognis_v1';
   private db: IDBDatabase | null = null;
   private openPromise: Promise<IDBDatabase> | null = null;
 
-  constructor(private readonly migrations: Migration[]) {
+  constructor(
+    private readonly migrations: Migration[],
+    private readonly dbName: string = 'cognis_v1'
+  ) {
     // Sort migrations by version ascending to ensure correct order
     this.migrations.sort((a, b) => a.version - b.version);
   }
@@ -73,11 +75,11 @@ export class CognisDatabase {
   private attemptOpen(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
       const targetVersion = this.getTargetVersion();
-      const request = indexedDB.open(CognisDatabase.DB_NAME, targetVersion);
+      const request = indexedDB.open(this.dbName, targetVersion);
 
       request.onblocked = () => {
         // Log and wait. Do not force close.
-        console.warn(`[CognisDatabase] Blocked from opening ${CognisDatabase.DB_NAME}. Please close other tabs of this application.`);
+        console.warn(`[CognisDatabase] Blocked from opening ${this.dbName}. Please close other tabs of this application.`);
       };
 
       request.onupgradeneeded = (event) => {
@@ -108,7 +110,7 @@ export class CognisDatabase {
         
         // Handle unexpected closure by the browser or another process
         db.onversionchange = () => {
-          console.warn(`[CognisDatabase] Another connection wants to upgrade ${CognisDatabase.DB_NAME}. Closing connection.`);
+          console.warn(`[CognisDatabase] Another connection wants to upgrade ${this.dbName}. Closing connection.`);
           db.close();
           this.db = null;
         };
@@ -132,12 +134,12 @@ export class CognisDatabase {
         this.db = null;
       }
 
-      const request = indexedDB.deleteDatabase(CognisDatabase.DB_NAME);
+      const request = indexedDB.deleteDatabase(this.dbName);
 
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
       request.onblocked = () => {
-        console.warn(`[CognisDatabase] Blocked from deleting ${CognisDatabase.DB_NAME}.`);
+        console.warn(`[CognisDatabase] Blocked from deleting ${this.dbName}.`);
       };
     });
   }

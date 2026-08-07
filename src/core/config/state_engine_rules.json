@@ -14,8 +14,17 @@
     },
     "pauseDurationMs": {
       "coasting": 5000,
-      "stretch": 2000,
+      "stretch": 1200,
       "overload": 1000
+    }
+  },
+  "baseline": {
+    "emaAlpha": 0.3,
+    "minSamplesBeforeBaseline": 5,
+    "wpmDeviation": {
+      "coastingAbovePercent": 0.20,
+      "overloadBelowPercent": 0.30,
+      "stretchTolerancePercent": 0.15
     }
   },
   "hysteresis": {

@@ -60,6 +60,13 @@ export class GapDetectionEngine {
   private revisionDepth = 0;
   private currentSessionId: SessionId | null = null;
 
+  /** 
+   * Transient text buffer. Single-use.
+   * It must be consumed exactly once during the next `pause.detected` event and immediately cleared.
+   * It is never persisted, replayed, or reused.
+   */
+  private pendingText: string | null = null;
+
   /** Subscriptions to tear down on dispose(). */
   private readonly unsubscribes: Array<() => void> = [];
   private started = false;
@@ -97,7 +104,26 @@ export class GapDetectionEngine {
       }),
     );
 
+    this.unsubscribes.push(
+      this.eventBus.subscribe("pause.detected", (event) => {
+        this.currentSessionId = event.sessionId;
+        if (this.pendingText !== null) {
+          const textToAnalyze = this.pendingText;
+          this.pendingText = null;
+          this.analyze(textToAnalyze);
+        }
+      }),
+    );
+
     return () => this.dispose();
+  }
+
+  /**
+   * Supply the raw transient text in-memory just before `pause.detected` is fired.
+   * This respects ADR-019 (raw text is not put onto the EventBus).
+   */
+  public captureTransientText(text: string): void {
+    this.pendingText = text;
   }
 
   /**
