@@ -95,6 +95,8 @@ export class ExtensionEventBridge {
       event: outboundEvent,
     };
 
+    console.log(`\n[Bridge] OUT → ${this.localContext === 'background' ? 'clients' : 'background'}\nevent=${event.type}\neventId=${event.id}\nsessionId=${event.sessionId || 'N/A'}\nsource=${this.localContext}\n`);
+
     try {
       if (this.localContext === 'content-script') {
         chrome.runtime.sendMessage(envelope).catch(() => {});
@@ -145,11 +147,11 @@ export class ExtensionEventBridge {
     // We drop events we've already seen, EXCEPT when we are receiving the authoritative
     // confirmation of an event we originated (e.g. background confirming our session.started).
     if (this.recentlyBridgedIds.has(envelope.event.id) && !envelope.event.isAuthoritative) {
-      console.log(`[ExtensionEventBridge] Dropping INBOUND event ${envelope.event.type} (already seen, not authoritative)`);
+      // Drop silently or keep the existing drop log if needed
       return;
     }
 
-    console.log(`[ExtensionEventBridge] Accepting INBOUND event ${envelope.event.type} from ${envelope.originContext}. isAuthoritative=${envelope.event.isAuthoritative}`);
+    console.log(`\n[Bridge] IN ← ${envelope.originContext}\nevent=${envelope.event.type}\neventId=${envelope.event.id}\nsessionId=${envelope.event.sessionId || 'N/A'}\n`);
     this.trackEventId(envelope.event.id);
 
     // Stamp inbound event with transport metadata indicating it arrived from a remote context
