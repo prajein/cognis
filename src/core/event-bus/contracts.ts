@@ -323,7 +323,7 @@ export interface GhostTextDismissedPayload {
   readonly stem: string;
 
   /** How the ghost text was dismissed. */
-  readonly reason: 'explicit' | 'timeout' | 'continued_typing';
+  readonly reason: 'explicit' | 'timeout' | 'continued_typing' | 'caret_moved' | 'node_removed' | 'lost_focus';
 }
 
 // ---------------------------------------------------------------------------
