@@ -43,6 +43,17 @@ export class ResponseObserver {
     this.observer = new MutationObserver(this.handleMutations.bind(this));
     this.observer.observe(container, { childList: true, subtree: true, characterData: true });
     
+    // Ignore historical messages already in the DOM (unless actively streaming right now)
+    const responseNodes = document.querySelectorAll(this.config.selectors.responseBlock);
+    if (responseNodes.length > 0) {
+      const isStreaming = document.querySelector(this.config.selectors.streamingIndicator) !== null;
+      if (!isStreaming) {
+        const latestNode = responseNodes[responseNodes.length - 1];
+        this.currentResponseNode = latestNode;
+        this.cursor.textLength = latestNode.textContent?.length || 0;
+      }
+    }
+
     console.log('[ResponseObserver] Attached and observing.');
     return true;
   }
@@ -103,25 +114,34 @@ export class ResponseObserver {
     // Regenerated response / New response
     // If the node changed, or if the text shrunk (e.g. wiped for regen)
     if (this.currentResponseNode !== latestNode || currentText.length < this.cursor.textLength) {
-      if (this.currentResponseNode && this.isGenerating) {
+      
+      // Is this just ChatGPT swapping an empty placeholder for the real node?
+      const isPlaceholderSwap = this.isGenerating && 
+                                this.currentResponseNode !== latestNode && 
+                                this.cursor.textLength === 0;
+
+      if (this.currentResponseNode && this.isGenerating && !isPlaceholderSwap) {
         this.emitCompletion();
       }
 
       this.currentResponseNode = latestNode;
       this.cursor = { textLength: 0 };
       this.startTime = Date.now();
-      this.isGenerating = true;
+      
+      if (!isPlaceholderSwap) {
+        this.isGenerating = true;
 
-      this.publish({
-        sessionId: this.sessionId,
-        promptHash: this.promptHashCache,
-        isStarting: true,
-        deltaText: null,
-        isCompleted: false,
-        chunkLength: 0,
-        totalLength: 0,
-        durationMs: 0
-      });
+        this.publish({
+          sessionId: this.sessionId,
+          promptHash: this.promptHashCache,
+          isStarting: true,
+          deltaText: null,
+          isCompleted: false,
+          chunkLength: 0,
+          totalLength: 0,
+          durationMs: 0
+        });
+      }
     }
 
     // 2. Process chunk delta using Cursor
