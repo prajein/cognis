@@ -2,11 +2,14 @@
   "name": "cognis",
   "version": "0.1.0",
   "scripts": {
-    "validate:schemas": "node scripts/validate-schemas.mjs"
+    "validate:schemas": "node scripts/validate-schemas.mjs",
+    "benchmark:intelligence": "ts-node -P tsconfig.benchmark.json src/tests/benchmarks/intelligence-benchmark.ts"
   },
   "devDependencies": {
     "@types/chrome": "^0.2.0",
+    "@types/node": "^26.1.1",
     "ajv": "^8.20.0",
+    "ts-node": "^10.9.2",
     "typescript": "^6.0.3"
   }
 }

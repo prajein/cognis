@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "outDir": "dist-benchmark",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/tests/benchmarks/**/*.ts",
+    "src/tests/evaluation/**/*.ts",
+    "src/engines/response/**/*.ts"
+  ]
+}

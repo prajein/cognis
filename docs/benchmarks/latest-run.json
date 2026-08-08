@@ -1,0 +1,1234 @@
+[
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "evaluation:overall",
+    "sampleCount": 45,
+    "mae": 0.3617777777777778,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 75,
+      "falseNegatives": 1
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "evaluation:platform=chatgpt",
+    "sampleCount": 15,
+    "mae": 0.3366666666666667,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 30,
+      "falseNegatives": 1
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "evaluation:platform=claude",
+    "sampleCount": 16,
+    "mae": 0.38812500000000005,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 28,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "evaluation:platform=gemini",
+    "sampleCount": 14,
+    "mae": 0.35857142857142865,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 17,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "evaluation:promptCategory=factual",
+    "sampleCount": 12,
+    "mae": 0.36500000000000005,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 23,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "evaluation:promptCategory=reasoning",
+    "sampleCount": 12,
+    "mae": 0.3916666666666668,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 19,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "evaluation:promptCategory=coding",
+    "sampleCount": 14,
+    "mae": 0.29000000000000004,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 20,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "evaluation:promptCategory=long_form",
+    "sampleCount": 7,
+    "mae": 0.44857142857142857,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 13,
+      "falseNegatives": 1
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "evaluation:containsCode=false",
+    "sampleCount": 33,
+    "mae": 0.4027272727272728,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 63,
+      "falseNegatives": 1
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "evaluation:containsCode=true",
+    "sampleCount": 12,
+    "mae": 0.24916666666666665,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 12,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "evaluation:wordCount=short(<100)",
+    "sampleCount": 37,
+    "mae": 0.33648648648648655,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 60,
+      "falseNegatives": 1
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "evaluation:wordCount=medium(100-500)",
+    "sampleCount": 8,
+    "mae": 0.47874999999999995,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 15,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "holdout:overall",
+    "sampleCount": 5,
+    "mae": 0.476,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 10,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "holdout:platform=chatgpt",
+    "sampleCount": 2,
+    "mae": 0.45999999999999996,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 4,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "holdout:platform=claude",
+    "sampleCount": 1,
+    "mae": 0.5,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 2,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "holdout:platform=gemini",
+    "sampleCount": 2,
+    "mae": 0.48,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 4,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "holdout:promptCategory=factual",
+    "sampleCount": 2,
+    "mae": 0.5,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 4,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "holdout:promptCategory=reasoning",
+    "sampleCount": 2,
+    "mae": 0.44999999999999996,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 4,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "holdout:promptCategory=coding",
+    "sampleCount": 1,
+    "mae": 0.48,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 2,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "holdout:containsCode=false",
+    "sampleCount": 4,
+    "mae": 0.475,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 8,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "holdout:containsCode=true",
+    "sampleCount": 1,
+    "mae": 0.48,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 2,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "StructureAnalyzer",
+    "breakdown": "holdout:wordCount=short(<100)",
+    "sampleCount": 5,
+    "mae": 0.476,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 10,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "evaluation:overall",
+    "sampleCount": 45,
+    "mae": 0.5693333333333334,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 31,
+      "falseNegatives": 1
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "evaluation:platform=chatgpt",
+    "sampleCount": 15,
+    "mae": 0.5600000000000002,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 11,
+      "falseNegatives": 1
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "evaluation:platform=claude",
+    "sampleCount": 16,
+    "mae": 0.6037500000000001,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 9,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "evaluation:platform=gemini",
+    "sampleCount": 14,
+    "mae": 0.5399999999999999,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 11,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "evaluation:promptCategory=factual",
+    "sampleCount": 12,
+    "mae": 0.5875,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 11,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "evaluation:promptCategory=reasoning",
+    "sampleCount": 12,
+    "mae": 0.5824999999999999,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 4,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "evaluation:promptCategory=coding",
+    "sampleCount": 14,
+    "mae": 0.5335714285714287,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 11,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "evaluation:promptCategory=long_form",
+    "sampleCount": 7,
+    "mae": 0.5871428571428571,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 5,
+      "falseNegatives": 1
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "evaluation:containsCode=false",
+    "sampleCount": 33,
+    "mae": 0.5778787878787879,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 22,
+      "falseNegatives": 1
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "evaluation:containsCode=true",
+    "sampleCount": 12,
+    "mae": 0.5458333333333334,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 9,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "evaluation:wordCount=short(<100)",
+    "sampleCount": 37,
+    "mae": 0.5651351351351354,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 27,
+      "falseNegatives": 1
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "evaluation:wordCount=medium(100-500)",
+    "sampleCount": 8,
+    "mae": 0.5887500000000001,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 4,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "holdout:overall",
+    "sampleCount": 5,
+    "mae": 0.5539999999999999,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 3,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "holdout:platform=chatgpt",
+    "sampleCount": 2,
+    "mae": 0.39,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 1,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "holdout:platform=claude",
+    "sampleCount": 1,
+    "mae": 0.7,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 1,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "holdout:platform=gemini",
+    "sampleCount": 2,
+    "mae": 0.645,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 1,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "holdout:promptCategory=factual",
+    "sampleCount": 2,
+    "mae": 0.615,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 2,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "holdout:promptCategory=reasoning",
+    "sampleCount": 2,
+    "mae": 0.475,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 0,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "holdout:promptCategory=coding",
+    "sampleCount": 1,
+    "mae": 0.5900000000000001,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 1,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "holdout:containsCode=false",
+    "sampleCount": 4,
+    "mae": 0.5449999999999999,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 2,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "holdout:containsCode=true",
+    "sampleCount": 1,
+    "mae": 0.5900000000000001,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 1,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "ReasoningAnalyzer",
+    "breakdown": "holdout:wordCount=short(<100)",
+    "sampleCount": 5,
+    "mae": 0.5539999999999999,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 3,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "evaluation:overall",
+    "sampleCount": 45,
+    "mae": 0.1826666666666666,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 7,
+      "falseNegatives": 1
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "evaluation:platform=chatgpt",
+    "sampleCount": 15,
+    "mae": 0.10399999999999997,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 0,
+      "falseNegatives": 1
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "evaluation:platform=claude",
+    "sampleCount": 16,
+    "mae": 0.19124999999999995,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 3,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "evaluation:platform=gemini",
+    "sampleCount": 14,
+    "mae": 0.25714285714285706,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 4,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "evaluation:promptCategory=factual",
+    "sampleCount": 12,
+    "mae": 0.14416666666666667,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 0,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "evaluation:promptCategory=reasoning",
+    "sampleCount": 12,
+    "mae": 0.1958333333333333,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 2,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "evaluation:promptCategory=coding",
+    "sampleCount": 14,
+    "mae": 0.25642857142857134,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 5,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "evaluation:promptCategory=long_form",
+    "sampleCount": 7,
+    "mae": 0.07857142857142853,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 0,
+      "falseNegatives": 1
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "evaluation:containsCode=false",
+    "sampleCount": 33,
+    "mae": 0.12424242424242421,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 0,
+      "falseNegatives": 1
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "evaluation:containsCode=true",
+    "sampleCount": 12,
+    "mae": 0.34333333333333327,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 7,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "evaluation:wordCount=short(<100)",
+    "sampleCount": 37,
+    "mae": 0.19918918918918913,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 7,
+      "falseNegatives": 1
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "evaluation:wordCount=medium(100-500)",
+    "sampleCount": 8,
+    "mae": 0.10624999999999996,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 0,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "holdout:overall",
+    "sampleCount": 5,
+    "mae": 0.15399999999999997,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 0,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "holdout:platform=chatgpt",
+    "sampleCount": 2,
+    "mae": 0.13499999999999995,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 0,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "holdout:platform=claude",
+    "sampleCount": 1,
+    "mae": 0.19999999999999996,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 0,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "holdout:platform=gemini",
+    "sampleCount": 2,
+    "mae": 0.14999999999999997,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 0,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "holdout:promptCategory=factual",
+    "sampleCount": 2,
+    "mae": 0.18499999999999994,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 0,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "holdout:promptCategory=reasoning",
+    "sampleCount": 2,
+    "mae": 0.14999999999999997,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 0,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "holdout:promptCategory=coding",
+    "sampleCount": 1,
+    "mae": 0.09999999999999998,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 0,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "holdout:containsCode=false",
+    "sampleCount": 4,
+    "mae": 0.16749999999999995,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 0,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "holdout:containsCode=true",
+    "sampleCount": 1,
+    "mae": 0.09999999999999998,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 0,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "CompletenessAnalyzer",
+    "breakdown": "holdout:wordCount=short(<100)",
+    "sampleCount": 5,
+    "mae": 0.15399999999999997,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 0,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "evaluation:overall",
+    "sampleCount": 45,
+    "mae": 0.33688888888888885,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 113,
+      "falseNegatives": 1
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "evaluation:platform=chatgpt",
+    "sampleCount": 15,
+    "mae": 0.298,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 41,
+      "falseNegatives": 1
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "evaluation:platform=claude",
+    "sampleCount": 16,
+    "mae": 0.391875,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 40,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "evaluation:platform=gemini",
+    "sampleCount": 14,
+    "mae": 0.31571428571428567,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 32,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "evaluation:promptCategory=factual",
+    "sampleCount": 12,
+    "mae": 0.2941666666666667,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 34,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "evaluation:promptCategory=reasoning",
+    "sampleCount": 12,
+    "mae": 0.36749999999999994,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 25,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "evaluation:promptCategory=coding",
+    "sampleCount": 14,
+    "mae": 0.35,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 36,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "evaluation:promptCategory=long_form",
+    "sampleCount": 7,
+    "mae": 0.3314285714285714,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 18,
+      "falseNegatives": 1
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "evaluation:containsCode=false",
+    "sampleCount": 33,
+    "mae": 0.3275757575757576,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 85,
+      "falseNegatives": 1
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "evaluation:containsCode=true",
+    "sampleCount": 12,
+    "mae": 0.3625,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 28,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "evaluation:wordCount=short(<100)",
+    "sampleCount": 37,
+    "mae": 0.33108108108108103,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 94,
+      "falseNegatives": 1
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "evaluation:wordCount=medium(100-500)",
+    "sampleCount": 8,
+    "mae": 0.36374999999999996,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 19,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "holdout:overall",
+    "sampleCount": 5,
+    "mae": 0.36599999999999994,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 13,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "holdout:platform=chatgpt",
+    "sampleCount": 2,
+    "mae": 0.30499999999999994,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 5,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "holdout:platform=claude",
+    "sampleCount": 1,
+    "mae": 0.45999999999999996,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 3,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "holdout:platform=gemini",
+    "sampleCount": 2,
+    "mae": 0.37999999999999995,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 5,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "holdout:promptCategory=factual",
+    "sampleCount": 2,
+    "mae": 0.41,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 6,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "holdout:promptCategory=reasoning",
+    "sampleCount": 2,
+    "mae": 0.3249999999999999,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 4,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "holdout:promptCategory=coding",
+    "sampleCount": 1,
+    "mae": 0.36,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 3,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "holdout:containsCode=false",
+    "sampleCount": 4,
+    "mae": 0.36749999999999994,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 10,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "holdout:containsCode=true",
+    "sampleCount": 1,
+    "mae": 0.36,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 3,
+      "falseNegatives": 0
+    }
+  },
+  {
+    "analyzerName": "QualityAnalyzer",
+    "breakdown": "holdout:wordCount=short(<100)",
+    "sampleCount": 5,
+    "mae": 0.36599999999999994,
+    "flagMetrics": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "truePositives": 0,
+      "falsePositives": 13,
+      "falseNegatives": 0
+    }
+  }
+]
