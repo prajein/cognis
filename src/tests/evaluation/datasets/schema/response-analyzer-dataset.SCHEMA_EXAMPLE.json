@@ -37,12 +37,6 @@
       "observedIssues": ["verbosity", "redundant_reasoning"],
       "overallVerdict": "good",
       "labelConfidence": 0.92,
-      "scoreRationale": {
-        "structure": "Clear headers and one clean code block, well organized.",
-        "reasoning": "Explanation is correct but repeats the same justification twice.",
-        "completeness": "Fully closes the code block and answers the full question.",
-        "quality": "Solid overall, minor verbosity drags the reasoning sub-score."
-      },
       "split": "evaluation",
       "labeledBy": "Dhanya",
       "labelNotes": "Good example of redundant-but-not-wrong reasoning."
@@ -68,12 +62,6 @@
       "observedIssues": ["verbosity", "marker_stuffing"],
       "overallVerdict": "average",
       "labelConfidence": 0.88,
-      "scoreRationale": {
-        "structure": "Wall of prose, no headers, borderline prose_heavy territory.",
-        "reasoning": "Marker density is high but each 'because' restates the same shallow point.",
-        "completeness": "Technically answers the question in full.",
-        "quality": "Dragged down almost entirely by reasoning shallowness."
-      },
       "split": "evaluation",
       "labeledBy": "Dhanya",
       "labelNotes": "Deliberate stress-test case for the reasoning marker bias."
@@ -99,12 +87,6 @@
       "observedIssues": ["unclosed_markdown", "prose_heavy"],
       "overallVerdict": "poor",
       "labelConfidence": 0.95,
-      "scoreRationale": {
-        "structure": "Structure breaks down entirely once the code fence is left open.",
-        "reasoning": "What reasoning exists before the cutoff is sound.",
-        "completeness": "Response is truncated mid-thought, clearly incomplete.",
-        "quality": "Incompleteness is severe enough to dominate the composite score."
-      },
       "split": "holdout",
       "labeledBy": "Dhanya",
       "labelNotes": "Directly tests CompletenessAnalyzer's backtick-counting logic."
