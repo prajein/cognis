@@ -4,4 +4,4 @@ build/
 *.log
 .env
 .DS_Store
-scripts/prompt-reference.local.json
+scripts/prompt-reference.local.jsondist-benchmark/
