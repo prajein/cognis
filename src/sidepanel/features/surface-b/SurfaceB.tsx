@@ -1,120 +1,80 @@
 // surface-b/SurfaceB.tsx
 
-
-import { useState, useMemo } from "react";
-import { TaskPicker } from "./components/TaskPicker";
-import { BrainMap } from "./components/BrainMap";
-import { DisclosureLabel } from "./components/DisclosureLabel";
-import { getAllActivationProfiles } from "../../../core/config";
-import type {TaskOption} from "./types";
+import { useState } from "react";
 import { useSession } from "../session/hooks/useSession";
-import { SessionControls } from "../session/components/SessionControls";
-import { SessionTimer } from "../session/components/SessionTimer";
-import { TaskProfileCard } from "../session/components/TaskProfileCard";
 import { useInsights } from "./hooks/useInsights";
 import { SessionState } from "../session/types";
 import { ProgressPanel } from "../progress";
 
+import { useSidepanelRuntime } from "../../runtime/RuntimeContext";
+import { SessionState } from "../session/types";
 
-// Load profiles once outside the component since they are static config
-const profiles = getAllActivationProfiles();
+// New UI Components
+import { Header } from "./components/Header";
+import { EmptyState } from "./components/EmptyState";
+import { CurrentState } from "./components/CurrentState";
+import { CognitiveTopology } from "./components/CognitiveTopology";
+import { ObservationsTimeline } from "./components/ObservationsTimeline";
+import { SessionMetrics } from "./components/SessionMetrics";
+import { SessionReview } from "./components/SessionReview";
 
 export function SurfaceB() {
-  
-  const [selectedTaskId, setSelectedTaskId] =
-    useState<string | null>(null);
-
-  
-  const taskOptions: TaskOption[] = useMemo(
-        () =>
-            profiles.map(profile => ({
-                id: profile.task_id,
-                label: profile.display_name,
-            })),
-        []
-    );
-
   const {
         currentState,
         currentSession,
-        selectTask,
         startSession,
         endSession,
         connectionStatus,
     } = useSession();
 
-  const activeTaskId = currentSession?.taskId ?? selectedTaskId;
-
-  const selectedProfile = useMemo(
-        () =>
-            profiles.find(
-                profile => profile.task_id === activeTaskId
-            ),
-        [activeTaskId]
-    );
-
     const { runtimeState } = useSidepanelRuntime();
     const { insights } = useInsights(currentSession?.id !== 'pending' ? currentSession?.id : undefined);
 
-    if (connectionStatus !== 'connected') {
+    const isStreaming = runtimeState.isStreaming;
+
+    // Handle completely disconnected error state
+    if (connectionStatus !== 'connected' && connectionStatus !== 'reconnecting') {
         return (
-            <main style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '240px', color: '#666', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-                <div>
-                    {connectionStatus === 'reconnecting'
-                        ? 'Reconnecting to Cognis service...'
-                        : 'Disconnected from Cognis background service.'}
+            <div className="surface-container">
+                <Header connectionStatus={connectionStatus} sessionState={currentState} isStreaming={isStreaming} />
+                <div style={{ marginTop: '64px' }}>
+                    <p className="state-desc" style={{ color: 'var(--text-primary)' }}>Cognis is temporarily disconnected.</p>
+                    <p className="state-desc" style={{ marginTop: '8px' }}>Your ChatGPT session is not affected.</p>
                 </div>
-            </main>
+            </div>
         );
     }
 
-  return (
-        <main>
+    // Determine the view based on the UI State Machine
+    let view;
 
-            <TaskPicker
-                tasks={taskOptions}
-                selectedTaskId={selectedTaskId}
-                onTaskSelect={(id) => {
-                        setSelectedTaskId(id);
-                        selectTask(id);
-                }}
-            />
+    if (currentState === SessionState.SESSION_ENDED) {
+        view = <SessionReview session={currentSession} insightsModel={insights} />;
+    } else if (currentState === SessionState.IDLE || currentState === SessionState.TASK_SELECTED) {
+        // Technically TASK_SELECTED is when they picked a task but haven't started. 
+        // We simplified the flow to just "Start Session".
+        view = <EmptyState startSession={startSession} />;
+    } else {
+        // OBSERVING / LIVE STATE
+        view = (
+            <>
+                <CurrentState sessionState={currentState} isStreaming={isStreaming} />
+                <CognitiveTopology isStreaming={isStreaming} isActive={currentState === SessionState.SESSION_ACTIVE} />
+                <ObservationsTimeline insightsModel={insights} />
+                <SessionMetrics session={currentSession} />
+                
+                {/* Temporary manual end session button for development flow */}
+                <button className="btn-ghost" onClick={endSession} style={{ alignSelf: 'center', marginTop: '16px' }}>
+                    End Session
+                </button>
+            </>
+        );
+    }
 
-            <BrainMap
-                profile={selectedProfile}
-                isStreaming={runtimeState.isStreaming}
-            />
-
-            <DisclosureLabel />
-
-            <TaskProfileCard
-                session={currentSession}
-            />
-
-            <SessionTimer
-                currentState={currentState}
-                startedAt={currentSession?.startedAt}
-            />
-
-            <SessionControls
-                currentState={currentState}
-                startSession={startSession}
-                endSession={endSession}
-            />
-
-            <ProgressPanel
-                session={currentSession}
-                insights={insights}
-            />
-
-            {insights.map((insight) => (
-                <div key={insight.id}>
-                <h4>{insight.title}</h4>
-                <p>{insight.description}</p>
-                </div>
-                ))}
-
-        </main>
-        
+    return (
+        <div className="surface-container">
+            <Header connectionStatus={connectionStatus} sessionState={currentState} isStreaming={isStreaming} />
+            {view}
+        </div>
     );
 }

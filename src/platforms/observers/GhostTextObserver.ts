@@ -15,6 +15,9 @@ export class GhostTextObserver {
   // State machine: 'idle' -> 'showing' -> 'idle'
   private state: 'idle' | 'showing' = 'idle';
 
+  private updatePositionFrameId: number | null = null;
+  private initialCaretOffset: number | null = null;
+
   constructor(
     private readonly eventBus: EventBus,
     private readonly config: PlatformConfig,
@@ -37,10 +40,10 @@ export class GhostTextObserver {
       this.eventBus.subscribe(SessionEvents.ENDED, () => this.destroy())
     );
 
-    // Listen for DOM events to interact with ghost text
-    const options = { capture: true }; // Capture to intercept keys before other listeners
+    const options = { capture: true };
     document.addEventListener('keydown', this.handleKeyDown, options);
-    document.addEventListener('blur', this.handleBlur, options);
+    document.addEventListener('selectionchange', this.handleSelectionChange, options);
+    window.addEventListener('blur', this.handleBlur, options);
 
     console.log('[GhostTextObserver] Attached and observing.');
     return true;
@@ -48,7 +51,8 @@ export class GhostTextObserver {
 
   public disconnect(): void {
     document.removeEventListener('keydown', this.handleKeyDown, { capture: true });
-    document.removeEventListener('blur', this.handleBlur, { capture: true });
+    document.removeEventListener('selectionchange', this.handleSelectionChange, { capture: true });
+    window.removeEventListener('blur', this.handleBlur, { capture: true });
     this.unsubscribeAll.forEach(unsub => unsub());
     this.unsubscribeAll = [];
     this.clearOverlay();
@@ -62,38 +66,67 @@ export class GhostTextObserver {
 
   private injectStyles(): void {
     const styleId = 'cognis-ghost-text-styles';
-    if (document.getElementById(styleId)) return; // Idempotent
+    if (document.getElementById(styleId)) return;
 
     const style = document.createElement('style');
     style.id = styleId;
     style.textContent = `
       .cognis-ghost-overlay {
-        position: absolute;
+        position: fixed;
         pointer-events: none;
-        color: #999;
-        font-style: italic;
-        white-space: pre-wrap;
+        color: #9CA3AF;
+        white-space: pre;
         z-index: 10000;
-        /* Visual adjustments */
-        padding: 4px;
-        background: rgba(255, 255, 255, 0.8);
-        border-radius: 4px;
+        opacity: 0;
+        transform: translateX(2px);
+        transition: opacity 200ms ease-out, transform 200ms ease-out;
+        max-width: 60ch;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .cognis-ghost-overlay.visible {
+        opacity: 0.5;
+        transform: translateX(0);
+      }
+      .cognis-ghost-overlay.fade-out {
+        opacity: 0;
+        transition: opacity 100ms ease-out;
       }
     `;
     document.head.appendChild(style);
   }
 
   private onGhostTextGenerated(payload: GhostTextGeneratedPayload): void {
-    if (this.isDestroyed || this.state === 'showing') return;
+    if (this.isDestroyed) return;
 
     const inputNode = document.querySelector(this.config.selectors.promptInput) as HTMLElement;
     if (!inputNode) return;
 
-    this.currentStem = payload.stem;
-    this.currentGapType = payload.gapType as any;
-    this.state = 'showing';
+    // Truncate stem to ~80 chars to ensure it's a small nudge
+    let stem = payload.stem;
+    if (stem.length > 80) {
+      stem = stem.slice(0, 80) + '...';
+    }
 
-    this.renderOverlay(inputNode, payload.stem);
+    this.currentStem = stem;
+    this.currentGapType = payload.gapType as any;
+    
+    if (this.state === 'showing') {
+        // If already showing, just update text
+        if (this.overlayNode) {
+            this.overlayNode.textContent = stem;
+        }
+    } else {
+        this.state = 'showing';
+        this.initialCaretOffset = this.getCaretOffset();
+        this.renderOverlay(inputNode, stem);
+    }
+  }
+
+  private getCaretOffset(): number | null {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return null;
+    return selection.focusOffset;
   }
 
   private renderOverlay(inputNode: HTMLElement, stem: string): void {
@@ -101,24 +134,87 @@ export class GhostTextObserver {
     this.overlayNode.className = 'cognis-ghost-overlay';
     this.overlayNode.textContent = stem;
 
-    // A simple inline rendering in a visually convincing way per review feedback.
-    const rect = inputNode.getBoundingClientRect();
-    this.overlayNode.style.top = `${rect.top + 10}px`;
-    this.overlayNode.style.left = `${rect.right - 150}px`; // Display near the right edge of input
-    
-    // Append to body to avoid being stripped by React
+    // Mirror typography
+    const styles = window.getComputedStyle(inputNode);
+    this.overlayNode.style.fontFamily = styles.fontFamily;
+    this.overlayNode.style.fontSize = styles.fontSize;
+    this.overlayNode.style.lineHeight = styles.lineHeight;
+    this.overlayNode.style.letterSpacing = styles.letterSpacing;
+    this.overlayNode.style.fontWeight = styles.fontWeight;
+
     document.body.appendChild(this.overlayNode);
+
+    // Force reflow
+    void this.overlayNode.offsetWidth;
+    this.overlayNode.classList.add('visible');
+
+    this.startPositionTracking();
+  }
+
+  private startPositionTracking(): void {
+    const updatePosition = () => {
+      if (this.state !== 'showing' || !this.overlayNode) return;
+
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        
+        // Use fixed positioning based on the caret's viewport rect.
+        // If it's an empty paragraph in ProseMirror, rect width might be 0, but height is valid.
+        if (rect.height > 0) {
+           this.overlayNode.style.top = `${rect.top}px`;
+           this.overlayNode.style.left = `${rect.right}px`;
+        }
+      }
+
+      // Check if input node is still in DOM
+      const inputNode = document.querySelector(this.config.selectors.promptInput);
+      if (!inputNode) {
+          this.dismissGhostText('node_removed');
+          return;
+      }
+
+      this.updatePositionFrameId = requestAnimationFrame(updatePosition);
+    };
+
+    this.updatePositionFrameId = requestAnimationFrame(updatePosition);
   }
 
   private clearOverlay(): void {
-    if (this.overlayNode && this.overlayNode.parentNode) {
-      this.overlayNode.parentNode.removeChild(this.overlayNode);
+    if (this.updatePositionFrameId) {
+      cancelAnimationFrame(this.updatePositionFrameId);
+      this.updatePositionFrameId = null;
     }
+
+    if (this.overlayNode) {
+      const node = this.overlayNode;
+      node.classList.remove('visible');
+      node.classList.add('fade-out');
+      setTimeout(() => {
+        if (node.parentNode) node.parentNode.removeChild(node);
+      }, 100);
+    }
+    
     this.overlayNode = null;
     this.currentStem = null;
     this.currentGapType = null;
+    this.initialCaretOffset = null;
     this.state = 'idle';
   }
+
+  private handleSelectionChange = (): void => {
+    if (this.state !== 'showing') return;
+    
+    const inputNode = document.querySelector(this.config.selectors.promptInput);
+    if (!inputNode) return;
+
+    const currentOffset = this.getCaretOffset();
+    // If caret moved due to arrow keys or mouse click
+    if (currentOffset !== null && currentOffset !== this.initialCaretOffset) {
+        this.dismissGhostText('caret_moved');
+    }
+  };
 
   private handleKeyDown = (e: KeyboardEvent): void => {
     if (this.state !== 'showing' || !this.currentStem) return;
@@ -129,33 +225,40 @@ export class GhostTextObserver {
     if (e.key === 'Tab') {
       e.preventDefault();
       e.stopPropagation();
-      this.acceptGhostText(target);
-    } else if (e.key.length === 1 || e.key === 'Backspace' || e.key === 'Delete' || e.key === 'Enter') {
-      // Continued typing or enter
+      this.acceptGhostText();
+    } else {
+      // Dismiss if it's a character or structural edit.
+      // Ignore meta keys (Ctrl, Alt, Shift, Meta) by themselves.
+      if (['Shift', 'Control', 'Alt', 'Meta', 'CapsLock'].includes(e.key)) {
+          return;
+      }
+      
+      // If a modifier is held, don't dismiss blindly (e.g. Cmd+C) 
+      // but let selectionChange handle it if the caret moves or text changes.
+      if (e.metaKey || e.ctrlKey || e.altKey) {
+          return; 
+      }
+      
       this.dismissGhostText('continued_typing');
     }
   };
 
-  private handleBlur = (e: FocusEvent): void => {
+  private handleBlur = (): void => {
     if (this.state !== 'showing') return;
-    this.dismissGhostText('timeout'); // Using timeout or explicit per event contract
+    this.dismissGhostText('lost_focus');
   };
 
-  private acceptGhostText(inputNode: HTMLElement): void {
+  private acceptGhostText(): void {
     if (!this.currentStem || !this.currentGapType) return;
 
     const stemToInsert = this.currentStem;
     const gapType = this.currentGapType;
 
-    // React-compatible value setter or contenteditable insertion
-    if ('value' in inputNode) {
-      const el = inputNode as HTMLTextAreaElement | HTMLInputElement;
-      el.value = el.value + stemToInsert;
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-    } else {
-      // contenteditable fallback
-      inputNode.innerText = inputNode.innerText + stemToInsert;
-      inputNode.dispatchEvent(new Event('input', { bubbles: true }));
+    // Use the verified browser-native insertion method
+    const success = document.execCommand('insertText', false, stemToInsert);
+    
+    if (!success) {
+        console.warn('[GhostTextObserver] document.execCommand failed.');
     }
 
     this.eventBus.publish(
@@ -165,10 +268,9 @@ export class GhostTextObserver {
         gapType: gapType as any
       })
     );
-    // clearOverlay will be called via EventBus subscription
   }
 
-  private dismissGhostText(reason: 'continued_typing' | 'timeout' | 'explicit'): void {
+  private dismissGhostText(reason: 'explicit' | 'timeout' | 'continued_typing' | 'caret_moved' | 'node_removed' | 'lost_focus'): void {
     if (!this.currentStem) return;
 
     this.eventBus.publish(
@@ -178,6 +280,5 @@ export class GhostTextObserver {
         reason
       })
     );
-    // clearOverlay will be called via EventBus subscription
   }
 }
