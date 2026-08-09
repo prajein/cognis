@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useSession } from "../session/hooks/useSession";
 import { useInsights } from "./hooks/useInsights";
+import { SessionState } from "../session/types";
+import { ProgressPanel } from "../progress";
+
 import { useSidepanelRuntime } from "../../runtime/RuntimeContext";
 import { SessionState } from "../session/types";
 

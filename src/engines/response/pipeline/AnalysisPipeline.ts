@@ -6,6 +6,8 @@ import { StructureAnalyzer } from '../analyzers/StructureAnalyzer';
 import { ReasoningAnalyzer } from '../analyzers/ReasoningAnalyzer';
 import { CompletenessAnalyzer } from '../analyzers/CompletenessAnalyzer';
 import { QualityAnalyzer } from '../analyzers/QualityAnalyzer';
+import { AssumptionAnalyzer } from "../analyzers/AssumptionAnalyzer";
+import { GapCompletionAnalyzer } from "../analyzers/GapCompletionAnalyzer";
 
 import { EventId, SessionId, Timestamp } from '../../../core/types/session.types';
 
@@ -18,8 +20,10 @@ export class AnalysisPipeline {
     const structure = new StructureAnalyzer();
     const reasoning = new ReasoningAnalyzer();
     const completeness = new CompletenessAnalyzer();
+    const assumption = new AssumptionAnalyzer();
+    const gapCompletion = new GapCompletionAnalyzer();
     
-    this.qualityAnalyzer = new QualityAnalyzer(structure, reasoning, completeness);
+    this.qualityAnalyzer = new QualityAnalyzer(structure, reasoning, completeness, assumption, gapCompletion);
     
     // We only need the quality analyzer because it internally calls the others and aggregates.
     // However, if we wanted to run them in parallel, we could loop through them.
@@ -39,6 +43,9 @@ export class AnalysisPipeline {
       promptHash,
       structuralScore: Number(result.metadata.structureScore) || 0,
       reasoningScore: Number(result.metadata.reasoningScore) || 0,
+      completenessScore: Number(result.metadata.completenessScore) || 0, 
+      assumptionScore: Number(result.metadata.assumptionScore) || 0,
+      gapCompletionScore: Number(result.metadata.gapCompletionScore) || 0,
       qualityScore: result.score,
       flags: result.flags
     };
