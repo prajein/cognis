@@ -5,7 +5,8 @@
     "outDir": "dist-benchmark",
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noEmit": false
   },
   "include": [
     "src/tests/benchmarks/**/*.ts",
