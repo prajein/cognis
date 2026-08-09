@@ -7,7 +7,6 @@ import { SessionState } from "../session/types";
 import { ProgressPanel } from "../progress";
 
 import { useSidepanelRuntime } from "../../runtime/RuntimeContext";
-import { SessionState } from "../session/types";
 
 // New UI Components
 import { Header } from "./components/Header";
