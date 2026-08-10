@@ -543,6 +543,33 @@ export interface AutomaticityUpdatedPayload {
 }
 
 // ---------------------------------------------------------------------------
+// Identity Event Payloads
+// ---------------------------------------------------------------------------
+
+/**
+ * Synthetic session identifier used exclusively by the onboarding event.
+ *
+ * Workaround: the DomainEvent envelope structurally requires a SessionId,
+ * although onboarding is not associated with a cognitive session.
+ */
+export const ONBOARDING_SESSION_ID = 'system-onboarding' as SessionId;
+
+/**
+ * Payload for identity.onboarding.completed
+ *
+ * Purpose: Records the user's initial onboarding configuration answers.
+ *          Field names are intentionally generic placeholders (answer1, answer2, answer3)
+ *          until the product team defines the final semantic domains.
+ * Producer: Side Panel (Onboarding Flow)
+ * Consumer: Identity Profile Writer, Storage Layer
+ */
+export interface OnboardingCompletedPayload {
+  readonly answer1: string;
+  readonly answer2: string;
+  readonly answer3: string;
+}
+
+// ---------------------------------------------------------------------------
 // Hardware Event Payloads
 // ---------------------------------------------------------------------------
 
@@ -686,5 +713,8 @@ export interface CognisEventMap {
 
   // Adaptation
   'adaptation.configured': AdaptationConfiguredPayload;
+
+  // Identity
+  'identity.onboarding.completed': OnboardingCompletedPayload;
 }
 

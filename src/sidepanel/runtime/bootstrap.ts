@@ -23,10 +23,12 @@
 import { EventBus } from '../../core/event-bus/EventBus';
 import { ExtensionEventBridge } from '../../core/event-bus/ExtensionEventBridge';
 import { ConsoleErrorReporter } from '../../core/error/ConsoleErrorReporter';
+import { createDomainEvent } from '../../core/event-bus/createDomainEvent';
+import { ONBOARDING_SESSION_ID, OnboardingCompletedPayload } from '../../core/event-bus/contracts';
 import { IpcSessionGateway } from './SessionGateway';
 import { IpcInsightGateway, InsightGateway } from './InsightGateway';
 import { SessionManager } from '../features/session/manager/SessionManager';
-import { SessionService } from './container';
+import { SessionService, IdentityService } from './container';
 import type { SidepanelContainer, ConnectionStatus } from './container';
 import {
   SessionEvents,
@@ -36,6 +38,7 @@ import {
   ResponseEvents,
   InsightEvents,
   HardwareEvents,
+  IdentityEvents,
   EventType,
 } from '../../core/event-bus/registry';
 
@@ -48,6 +51,7 @@ const BRIDGED_EVENTS: EventType[] = [
   ...Object.values(ResponseEvents),
   ...Object.values(InsightEvents),
   ...Object.values(HardwareEvents),
+  ...Object.values(IdentityEvents),
 ];
 
 /**
@@ -89,6 +93,18 @@ export async function bootstrapSidepanelRuntime(): Promise<SidepanelContainer> {
     resumeSession: () => sessionManager.resumeSession(),
   };
 
+  const identityService: IdentityService = {
+    completeOnboarding: (payload: OnboardingCompletedPayload) => {
+      const event = createDomainEvent(
+        'identity.onboarding.completed',
+        ONBOARDING_SESSION_ID,
+        'sidepanel.onboarding',
+        payload
+      );
+      eventBus.publish('identity.onboarding.completed', event);
+    }
+  };
+
   // 5. Hydrate initial state from the background.
   //    Performed before React renders so the first render has real data.
   //    The gateway's getActiveSession() rejects on timeout; we catch here
@@ -120,6 +136,7 @@ export async function bootstrapSidepanelRuntime(): Promise<SidepanelContainer> {
   //    accidentally replacing service references after bootstrap.
   const container: SidepanelContainer = Object.freeze({
     sessionService,
+    identityService,
     eventBus,
     insightGateway,
     runtimeState: Object.freeze({
