@@ -1,7 +1,10 @@
 import { EventBusContract } from '../../core/event-bus/types';
 import { PromptEvents, CognitiveEvents, SessionEvents } from '../../core/event-bus/registry';
-import { DomainEvent, GapDetectedPayload } from '../../core/event-bus/contracts';
+import { DomainEvent, GapDetectedPayload, StateChangedPayload } from '../../core/event-bus/contracts';
 import { GapType } from '../../core/types/gap.types';
+import { StateLabel } from '../../core/types/state.types';
+import { createDomainEvent } from '../../core/event-bus/createDomainEvent';
+import { toSessionId } from '../../core/types/session.types';
 import rawConfig from '../../core/config/enrichment_layers.json';
 
 interface EnrichmentConfig {
@@ -34,7 +37,7 @@ export class EnrichmentEngine {
   private readonly layers: Layer[] = [];
   
   // In-memory state collected from EventBus
-  private currentStateLabel: 'focused' | 'fatigued' | 'distracted' | 'idle' | 'unknown' = 'unknown';
+  private currentStateLabel: StateLabel = 'unknown';
   private readonly activeGaps = new Set<GapType>();
   
   constructor(
@@ -47,8 +50,8 @@ export class EnrichmentEngine {
 
   public start(): void {
     // Listen to State changes to dynamically adjust layer priorities or templates
-    this.eventBus.subscribe('state.changed', (event) => {
-      this.currentStateLabel = event.payload.currentState as any;
+    this.eventBus.subscribe('state.changed', (event: DomainEvent<StateChangedPayload>) => {
+      this.currentStateLabel = event.payload.currentState;
     });
 
     this.eventBus.subscribe(PromptEvents.TYPED, () => {
@@ -148,18 +151,16 @@ export class EnrichmentEngine {
     const payload = {
       enrichmentVersion: '1.0.0',
       appliedLayers,
-      stateLabel: this.currentStateLabel as any
+      stateLabel: this.currentStateLabel
     };
 
-    const event: DomainEvent<typeof payload> = {
-      id: crypto.randomUUID() as any,
-      type: PromptEvents.ENRICHED,
-      timestamp: Date.now() as any,
-      sessionId: sessionId as any,
-      source: 'EnrichmentEngine',
+    const event = createDomainEvent(
+      PromptEvents.ENRICHED,
+      toSessionId(sessionId),
+      'EnrichmentEngine',
       payload
-    };
+    );
 
-    this.eventBus.publish(PromptEvents.ENRICHED, event as any);
+    this.eventBus.publish(PromptEvents.ENRICHED, event);
   }
 }

@@ -12,6 +12,8 @@ export interface ResponseSnapshot {
   chunkLength: number;
   totalLength: number;
   durationMs: number;
+  promptEventId?: string;
+  wasEnriched?: boolean;
 }
 
 /**
@@ -28,7 +30,11 @@ export function translateResponseSnapshot(snapshot: ResponseSnapshot): DomainEve
       ResponseEvents.STARTED,
       snapshot.sessionId,
       'perception.response',
-      { promptHash: snapshot.promptHash }
+      { 
+        promptHash: snapshot.promptHash,
+        promptEventId: snapshot.promptEventId,
+        wasEnriched: snapshot.wasEnriched
+      }
     ));
   }
   

@@ -347,6 +347,12 @@ export interface GhostTextDismissedPayload {
 export interface ResponseStartedPayload {
   /** Hash of the prompt that triggered this response. */
   readonly promptHash: string;
+
+  /** The unique event ID of the prompt.sent event that triggered this response. */
+  readonly promptEventId?: string;
+
+  /** Whether the triggering prompt was enriched. */
+  readonly wasEnriched?: boolean;
 }
 
 /**
@@ -416,6 +422,12 @@ export interface ResponseAnalysis {
   /** Hash of the prompt that triggered this response. */
   readonly promptHash: string;
   
+  /** Link to the specific prompt.sent event. */
+  readonly promptEventId?: string;
+
+  /** Whether the triggering prompt was enriched. */
+  readonly wasEnriched?: boolean;
+
   /** Evaluated structural completeness (0.0 to 1.0). */
   readonly structuralScore: number;
   

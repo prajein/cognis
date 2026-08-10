@@ -2,6 +2,8 @@ import { EventBus } from '../../core/event-bus/EventBus';
 import { PlatformConfig } from '../selectors/interfaces';
 import { translateResponseSnapshot, ResponseSnapshot } from '../translators/ResponseTranslator';
 import { SessionId } from '../../core/types/session.types';
+import { PromptEvents, SessionEvents } from '../../core/event-bus/registry';
+import { DomainEvent } from '../../core/event-bus/contracts';
 
 export interface ResponseCursor {
   textLength: number;
@@ -14,8 +16,14 @@ export class ResponseObserver {
   private currentResponseNode: Element | null = null;
   private cursor: ResponseCursor = { textLength: 0 };
   private startTime = 0;
-  private promptHashCache = 'pending_hash';
+  
+  // Correlation cache
+  private lastPromptEventId?: string;
+  private lastPromptHash?: string;
+  private lastWasEnriched?: boolean;
+
   private isDestroyed = false;
+  private unsubscribes: Array<() => void> = [];
 
   private rafId: number | null = null;
   private hasPendingMutations = false;
@@ -38,6 +46,24 @@ export class ResponseObserver {
     if (!container) {
       return false;
     }
+
+    // Subscribe to PromptEvents.SENT to capture metadata for correlation
+    this.unsubscribes.push(
+      this.eventBus.subscribe(PromptEvents.SENT, (event: DomainEvent<any>) => {
+        this.lastPromptEventId = event.id;
+        this.lastPromptHash = event.payload.promptHash;
+        this.lastWasEnriched = event.payload.wasEnriched;
+      })
+    );
+
+    // Explicitly reset on session boundary events
+    const clearCache = () => {
+      this.lastPromptEventId = undefined;
+      this.lastPromptHash = undefined;
+      this.lastWasEnriched = undefined;
+    };
+    this.unsubscribes.push(this.eventBus.subscribe(SessionEvents.STARTED, clearCache));
+    this.unsubscribes.push(this.eventBus.subscribe(SessionEvents.ENDED, clearCache));
 
     // Bind AbortController to any DOM events if needed, but MutationObserver uses disconnect
     this.observer = new MutationObserver(this.handleMutations.bind(this));
@@ -71,6 +97,10 @@ export class ResponseObserver {
     if (this.completionTimeout !== null) {
       clearTimeout(this.completionTimeout);
       this.completionTimeout = null;
+    }
+    // Clean up subscriptions
+    while (this.unsubscribes.length > 0) {
+      this.unsubscribes.pop()?.();
     }
   }
 
@@ -133,7 +163,9 @@ export class ResponseObserver {
 
         this.publish({
           sessionId: this.sessionId,
-          promptHash: this.promptHashCache,
+          promptHash: this.lastPromptHash ?? 'unattributed_hash',
+          promptEventId: this.lastPromptEventId,
+          wasEnriched: this.lastWasEnriched,
           isStarting: true,
           deltaText: null,
           isCompleted: false,
@@ -152,7 +184,9 @@ export class ResponseObserver {
       if (delta.length > 0) {
         this.publish({
           sessionId: this.sessionId,
-          promptHash: this.promptHashCache,
+          promptHash: this.lastPromptHash ?? 'unattributed_hash',
+          promptEventId: this.lastPromptEventId,
+          wasEnriched: this.lastWasEnriched,
           isStarting: false,
           deltaText: delta,
           isCompleted: false,
@@ -199,7 +233,9 @@ export class ResponseObserver {
     // But since we are calling this when a node exists, it started.
     this.publish({
       sessionId: this.sessionId,
-      promptHash: this.promptHashCache,
+      promptHash: this.lastPromptHash ?? 'unattributed_hash',
+      promptEventId: this.lastPromptEventId,
+      wasEnriched: this.lastWasEnriched,
       isStarting: false,
       deltaText: null,
       isCompleted: true,

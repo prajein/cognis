@@ -5,7 +5,7 @@ import { StateRulesLoader } from '../../core/config/state-rules-loader';
 import { InteractionTracker } from './InteractionTracker';
 import { StateEvaluator } from './StateEvaluator';
 import { TransitionPolicy } from './TransitionPolicy';
-import { toSessionId } from '../../core/types/session.types';
+import { toSessionId, toTimestamp } from '../../core/types/session.types';
 
 export interface StateEngineOptions {
   readonly clock?: Clock;
@@ -29,7 +29,7 @@ export class StateEngine {
     this.tracker = new InteractionTracker(rules.baseline?.emaAlpha ?? 0.3);
     this.evaluator = new StateEvaluator(rules);
     this.policy = new TransitionPolicy(rules);
-    this.clock = options.clock ?? (() => Date.now() as any);
+    this.clock = options.clock ?? (() => toTimestamp(Date.now()));
     this.idFactory = options.idFactory;
   }
 
@@ -101,7 +101,7 @@ export class StateEngine {
         toSessionId(this.activeSessionId),
         'StateEngine',
         payload,
-        { clock: () => now as any, idFactory: this.idFactory }
+        { clock: () => toTimestamp(now), idFactory: this.idFactory }
       );
 
       this.eventBus.publish(CognitiveEvents.STATE_CHANGED, event);
