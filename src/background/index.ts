@@ -22,6 +22,7 @@ import {
   ResponseEvents,
   InsightEvents,
   HardwareEvents,
+  AdaptationEvents,
   EventType
 } from '../core/event-bus/registry';
 
@@ -33,12 +34,14 @@ const allEvents: EventType[] = [
   ...Object.values(ResponseEvents),
   ...Object.values(InsightEvents),
   ...Object.values(HardwareEvents),
+  ...Object.values(AdaptationEvents),
 ];
 
 import { InsightEngine } from '../engines/insights/InsightEngine';
 import { ResponseIntelligenceEngine } from '../engines/response/ResponseIntelligenceEngine';
 import { SessionQueryHandler } from './handlers/SessionQueryHandler';
 import { InsightQueryHandler } from './handlers/InsightQueryHandler';
+import { GhostTextAdaptor } from './adaptation/GhostTextAdaptor';
 
 /**
  * Background Service Worker Composition Root
@@ -93,6 +96,10 @@ async function bootstrapBackground(): Promise<void> {
 
     const insightEngine = new InsightEngine();
     insightEngine.start(eventBus, readModelRepo);
+
+    // 7. Start Adaptation loop
+    const ghostTextAdaptor = new GhostTextAdaptor(eventBus);
+    ghostTextAdaptor.start();
 
     console.log('[Background] Bootstrap complete. Cognis is active.');
   } catch (error) {

@@ -15,6 +15,7 @@ import {
   ResponseEvents,
   InsightEvents,
   HardwareEvents,
+  AdaptationEvents,
   EventType
 } from '../core/event-bus/registry';
 
@@ -26,6 +27,7 @@ const allEvents: EventType[] = [
   ...Object.values(ResponseEvents),
   ...Object.values(InsightEvents),
   ...Object.values(HardwareEvents),
+  ...Object.values(AdaptationEvents),
 ];
 
 /**

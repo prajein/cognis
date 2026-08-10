@@ -1,4 +1,4 @@
-import { DomainEvent, GapDetectedPayload, GhostTextAcceptedPayload, GhostTextDismissedPayload } from '../../../core/event-bus/contracts';
+import { DomainEvent, GapDetectedPayload, GhostTextDisplayedPayload, GhostTextAcceptedPayload, GhostTextDismissedPayload } from '../../../core/event-bus/contracts';
 import { CognitiveEvents, GhostTextEvents, EventType } from '../../../core/event-bus/registry';
 import { ProjectionBuilder } from '../interfaces';
 import { ReadModelRepository } from '../../repositories/ReadModelRepository';
@@ -9,8 +9,10 @@ export interface GapProfileReadModel {
   sessionId: string;
   gaps: Record<GapType, {
     detectedCount: number;
+    displayedCount: number;
     acceptedCount: number;
     dismissedCount: number;
+    rejectionCount: number;
     lastDetectedAt: number;
   }>;
   lastUpdated: number;
@@ -20,6 +22,7 @@ export class GapProfileProjectionBuilder implements ProjectionBuilder {
   public readonly projectionId = 'gap-profile-v1';
   public readonly consumedEvents: ReadonlyArray<EventType> = [
     CognitiveEvents.GAP_DETECTED,
+    GhostTextEvents.DISPLAYED,
     GhostTextEvents.ACCEPTED,
     GhostTextEvents.DISMISSED
   ];
@@ -44,8 +47,10 @@ export class GapProfileProjectionBuilder implements ProjectionBuilder {
       if (!model!.gaps[type]) {
         model!.gaps[type] = {
           detectedCount: 0,
+          displayedCount: 0,
           acceptedCount: 0,
           dismissedCount: 0,
+          rejectionCount: 0,
           lastDetectedAt: 0
         };
       }
@@ -57,6 +62,12 @@ export class GapProfileProjectionBuilder implements ProjectionBuilder {
         initGapType(payload.gapType);
         model.gaps[payload.gapType].detectedCount++;
         model.gaps[payload.gapType].lastDetectedAt = event.timestamp;
+        break;
+      }
+      case GhostTextEvents.DISPLAYED: {
+        const payload = event.payload as GhostTextDisplayedPayload;
+        initGapType(payload.gapType);
+        model.gaps[payload.gapType].displayedCount++;
         break;
       }
       case GhostTextEvents.ACCEPTED: {
@@ -73,6 +84,9 @@ export class GapProfileProjectionBuilder implements ProjectionBuilder {
         if (payload.gapType) {
           initGapType(payload.gapType);
           model.gaps[payload.gapType].dismissedCount++;
+          if (payload.reason === 'continued_typing' || payload.reason === 'caret_moved') {
+            model.gaps[payload.gapType].rejectionCount++;
+          }
         }
         break;
       }

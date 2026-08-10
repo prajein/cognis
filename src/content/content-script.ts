@@ -13,6 +13,7 @@ import {
   CognitiveEvents,
   ResponseEvents,
   GhostTextEvents,
+  AdaptationEvents,
   EventType
 } from '../core/event-bus/registry';
 
@@ -21,6 +22,7 @@ const eventsToBridge: EventType[] = [
   ...Object.values(ResponseEvents),
   ...Object.values(CognitiveEvents),
   ...Object.values(GhostTextEvents),
+  ...Object.values(AdaptationEvents),
   SessionEvents.PAUSED,
   SessionEvents.RESUMED
 ];
