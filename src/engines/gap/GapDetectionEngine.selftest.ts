@@ -64,7 +64,7 @@ const FIXTURE_CONFIG: GapRulesConfig = {
   // maxSignals deliberately high so logic tests are not clipped by the cap;
   // the cap itself is exercised separately below.
   settings: { minTextLength: 12, emitThreshold: 0.5, maxSignals: 8, cognitivePauseMs: 1200 },
-  stateModifiers: { stretch: 0, coasting: -0.1, overload: 0.1 },
+  stateModifiers: { stretch: 0, coasting: -0.1, overload: 0.1, unknown: 0 },
   revisionModifier: { perRevision: 0.02, max: 0.1 },
   rules: [
     { gapType: "intentionality", baseConfidence: 0.6, satisfiedWhenAnyPresent: ["so that", "the goal"] },

@@ -2,7 +2,7 @@ import { StateLabel } from '../../core/types/state.types';
 import { StateEngineRules } from '../../core/config/state-rules-loader';
 
 export class TransitionPolicy {
-  private currentState: StateLabel = 'stretch'; // default starting state
+  private currentState: StateLabel = 'unknown'; // default starting state
   private lastTransitionTime: number = 0;
   private sustainedState: StateLabel | null = null;
   private sustainedCount: number = 0;
@@ -13,7 +13,7 @@ export class TransitionPolicy {
     return this.currentState;
   }
 
-  public reset(initialState: StateLabel = 'stretch'): void {
+  public reset(initialState: StateLabel = 'unknown'): void {
     this.currentState = initialState;
     this.lastTransitionTime = 0;
     this.sustainedState = null;

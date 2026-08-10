@@ -86,14 +86,14 @@ export class StateEngine {
 
     const previousState = this.policy.getCurrentState();
     const snapshot = this.tracker.generateSnapshot(now);
-    const proposedState = this.evaluator.evaluate(snapshot);
-    const approvedState = this.policy.approveTransition(proposedState, now);
+    const evaluation = this.evaluator.evaluate(snapshot);
+    const approvedState = this.policy.approveTransition(evaluation.state, now);
 
     if (approvedState) {
       const payload: StateChangedPayload = {
         previousState,
         currentState: approvedState,
-        confidence: 0.9
+        confidence: evaluation.confidence
       };
 
       const event = createDomainEvent(

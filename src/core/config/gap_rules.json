@@ -10,7 +10,8 @@
   "stateModifiers": {
     "stretch": 0.0,
     "coasting": -0.1,
-    "overload": 0.1
+    "overload": 0.1,
+    "unknown": 0.0
   },
   "revisionModifier": {
     "perRevision": 0.02,

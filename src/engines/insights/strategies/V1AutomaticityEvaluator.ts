@@ -10,47 +10,17 @@ export class V1AutomaticityEvaluator implements InsightStrategy {
   private readonly calculator = new ConfidenceCalculator();
 
   public execute(context: ReasoningContext): InsightCandidate[] {
-    const candidates: InsightCandidate[] = [];
-    
-    // Evaluate TypeScript mastery progression as an example skill.
-    // In a full implementation, this would iterate over known skills.
-    
-    // 1. Gather evidence from fully materialized Read Models
-    const syntaxErrors = context.gapProfile.gaps['mechanism']?.detectedCount ?? 0;
-    const successfulCompilationsCount = context.responseMetrics.totalResponses;
-
-    // We synthesize an evidence array for the calculator based on the Read Model's metrics
-    const simulatedRecentActivity = Array.from({ length: successfulCompilationsCount }, () => context.responseMetrics.lastUpdated);
-
-    // Hysteresis & Thresholding: 
-    // If the user has many recent successes and few errors, they are transitioning to Autonomous.
-    
-    // For V1, we simulate a simple heuristic:
-    if (successfulCompilationsCount > 0 && syntaxErrors < 5) {
-      
-      const confidence = this.calculator.calculate(
-        simulatedRecentActivity, 
-        20, // required threshold
-        0.9, // high baseline for this strong heuristic
-        false, 
-        0, 
-        context.now
-      );
-
-      candidates.push({
-        id: crypto.randomUUID(),
-        domain: 'Automaticity',
-        title: 'TypeScript Skill Progression',
-        summary: 'User has transitioned to Autonomous phase for TypeScript syntax.',
-        confidence,
-        evidenceCount: successfulCompilationsCount,
-        metadata: {
-          skill: 'TypeScript',
-          newPhase: 'Autonomous'
-        }
-      });
-    }
-
-    return candidates;
+    // Automaticity inference unavailable: current telemetry does not contain 
+    // sufficient skill-specific longitudinal evidence to support an automaticity claim.
+    // (Note: No evidence ≠ no automaticity)
+    //
+    // To reinstate, this strategy requires:
+    //   1. A mechanism to identify the skill domain the user is practising.
+    //   2. Cross-session read models tracking gap acceptance trends per domain.
+    //   3. A declining gap-detection trend across >= N sessions for a given skill.
+    //
+    // Returning [] is the honest response until those signals exist.
+    // See: M7 architecture audit (2026-08-10).
+    return [];
   }
 }
