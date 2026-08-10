@@ -35,11 +35,12 @@ export class QualityAnalyzer implements ResponseAnalyzer {
 
 
     // 1. Calculate composite score
-    // Weighting: Completeness (20%), Reasoning (25%), Structure (25%), Assumption(15%), Gap(15%)
+    // Weighting: Completeness (20%), Reasoning (25%), Structure (25%), Assumption (15%), Gap (15%)
+    // Note: Assumption density is inverted because a higher assumption density means worse quality.
     let score =(structureResult.score * 0.20) +
                (reasoningResult.score * 0.25) +
                (completenessResult.score * 0.25) +
-              (assumptionResult.score * 0.15) +
+              ((1 - assumptionResult.score) * 0.15) +
               (gapResult.score * 0.15);
 
     score = Math.max(0, Math.min(1, score));
