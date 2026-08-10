@@ -206,6 +206,7 @@ export class GhostTextMeasurementObserver {
         continuationLatencyMs: latency,
         typedTextLength: typedLength,
         stemLength: m.stem.length,
+        baselineTextLength: m.baselineText.length,
         lexicalOverlap: isReliableDelta ? this.calculateLexicalOverlap(m.stem, rawDelta!) : null,
         editDistance: isReliableDelta ? this.calculateEditDistance(m.stem, rawDelta!) : null
       },

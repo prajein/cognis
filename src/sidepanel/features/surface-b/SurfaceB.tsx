@@ -26,6 +26,30 @@ export function SurfaceB() {
         connectionStatus,
     } = useSession();
 
+    const handleExportM11Telemetry = () => {
+        const request = indexedDB.open('cognis_v1');
+        request.onsuccess = (e) => {
+            const db = (e.target as IDBOpenDBRequest).result;
+            const transaction = db.transaction(['events'], 'readonly');
+            const objectStore = transaction.objectStore('events');
+            const req = objectStore.getAll();
+            req.onsuccess = () => {
+                const allEvents = req.result;
+                const metrics = allEvents.filter(ev => ev.type === 'ghosttext.measurement.computed');
+                const blob = new Blob([JSON.stringify(metrics, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `cognis_m11_telemetry_${Date.now()}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            };
+        };
+        request.onerror = (e) => {
+            console.error('Failed to export telemetry:', e);
+        };
+    };
+
     const { runtimeState } = useSidepanelRuntime();
     const { insights } = useInsights(currentSession?.id !== 'pending' ? currentSession?.id : undefined);
 
@@ -63,9 +87,14 @@ export function SurfaceB() {
                 <SessionMetrics session={currentSession} />
                 
                 {/* Temporary manual end session button for development flow */}
-                <button className="btn-ghost" onClick={endSession} style={{ alignSelf: 'center', marginTop: '16px' }}>
-                    End Session
-                </button>
+                <div style={{ display: 'flex', gap: '8px', alignSelf: 'center', marginTop: '16px' }}>
+                    <button className="btn-ghost" onClick={handleExportM11Telemetry}>
+                        Export M11 Telemetry
+                    </button>
+                    <button className="btn-ghost" onClick={endSession}>
+                        End Session
+                    </button>
+                </div>
             </>
         );
     }
