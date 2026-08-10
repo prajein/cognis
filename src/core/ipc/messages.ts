@@ -56,8 +56,21 @@ export interface QuerySessionInsightsResponse {
 }
 
 // ---------------------------------------------------------------------------
+// Query — QUERY_IDENTITY_PROFILE
+// ---------------------------------------------------------------------------
+
+export interface QueryIdentityProfileRequest {
+  readonly type: 'QUERY_IDENTITY_PROFILE';
+}
+
+export interface QueryIdentityProfileResponse {
+  readonly hasOnboarded: boolean;
+  readonly error?: string;
+}
+
+// ---------------------------------------------------------------------------
 // Discriminated union for future extensibility
 // ---------------------------------------------------------------------------
 
 /** All query request types that the background message router recognises. */
-export type BackgroundQueryRequest = QueryActiveSessionRequest | QuerySessionInsightsRequest;
+export type BackgroundQueryRequest = QueryActiveSessionRequest | QuerySessionInsightsRequest | QueryIdentityProfileRequest;

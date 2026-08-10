@@ -92,6 +92,7 @@ export interface RuntimeState {
   readonly isStreaming: boolean;
   readonly platform: string;
   readonly connectionStatus: ConnectionStatus;
+  readonly identityStatus: 'loading' | 'onboarded' | 'not_onboarded' | 'error';
 }
 
 /**

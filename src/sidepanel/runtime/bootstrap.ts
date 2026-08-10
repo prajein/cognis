@@ -27,6 +27,7 @@ import { createDomainEvent } from '../../core/event-bus/createDomainEvent';
 import { ONBOARDING_SESSION_ID, OnboardingCompletedPayload } from '../../core/event-bus/contracts';
 import { IpcSessionGateway } from './SessionGateway';
 import { IpcInsightGateway, InsightGateway } from './InsightGateway';
+import { IpcIdentityGateway } from './IdentityQueryGateway';
 import { SessionManager } from '../features/session/manager/SessionManager';
 import { SessionService, IdentityService } from './container';
 import type { SidepanelContainer, ConnectionStatus } from './container';
@@ -113,9 +114,17 @@ export async function bootstrapSidepanelRuntime(): Promise<SidepanelContainer> {
   let connectionStatus: ConnectionStatus = 'connected';
   const platform = 'ChatGPT';
   const isStreaming = false;
+  let identityStatus: 'loading' | 'onboarded' | 'not_onboarded' | 'error' = 'loading';
+
+  const identityGateway = new IpcIdentityGateway();
 
   try {
-    activeSession = await gateway.getActiveSession();
+    const [sessionResult, identityResult] = await Promise.all([
+      gateway.getActiveSession(),
+      identityGateway.getIdentityProfile()
+    ]);
+
+    activeSession = sessionResult;
 
     // If a session was restored, reattach the gateway's internal sessionId
     // and synchronize SessionManager so subsequent lifecycle commands reference
@@ -124,12 +133,19 @@ export async function bootstrapSidepanelRuntime(): Promise<SidepanelContainer> {
       gateway.restoreSession(activeSession.sessionId);
       sessionManager.restoreSession(activeSession.taskId ?? 'restored-task');
     }
+
+    if (identityResult.error) {
+      identityStatus = 'error';
+    } else {
+      identityStatus = identityResult.hasOnboarded ? 'onboarded' : 'not_onboarded';
+    }
   } catch (error) {
     console.warn(
       '[SidepanelRuntime] Background hydration failed — rendering disconnected state.',
       error
     );
     connectionStatus = 'disconnected';
+    identityStatus = 'error';
   }
 
   // 6. Return a frozen container. Object.freeze() prevents consumer code from
@@ -143,7 +159,8 @@ export async function bootstrapSidepanelRuntime(): Promise<SidepanelContainer> {
       activeSession,
       connectionStatus,
       platform,
-      isStreaming
+      isStreaming,
+      identityStatus
     }),
   });
 

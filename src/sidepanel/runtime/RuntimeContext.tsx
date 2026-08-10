@@ -68,6 +68,11 @@ export function SidepanelRuntimeProvider({
     tracker.start();
     unsubscribes.push(() => tracker.stop());
 
+    const unsubOnboard = eventBus.subscribe('identity.onboarding.completed', () => {
+      setRuntimeState((prev) => ({ ...prev, identityStatus: 'onboarded' }));
+    });
+    unsubscribes.push(unsubOnboard);
+
     return () => {
       unsubscribes.forEach((unsub) => unsub());
     };

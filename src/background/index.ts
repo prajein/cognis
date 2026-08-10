@@ -44,6 +44,7 @@ import { InsightEngine } from '../engines/insights/InsightEngine';
 import { ResponseIntelligenceEngine } from '../engines/response/ResponseIntelligenceEngine';
 import { SessionQueryHandler } from './handlers/SessionQueryHandler';
 import { InsightQueryHandler } from './handlers/InsightQueryHandler';
+import { IdentityQueryHandler } from './handlers/IdentityQueryHandler';
 import { GhostTextAdaptor } from './adaptation/GhostTextAdaptor';
 import { IdentityProfileWriter } from '../engines/identity/IdentityProfileWriter';
 
@@ -94,6 +95,9 @@ async function bootstrapBackground(): Promise<void> {
 
     const insightQueryHandler = new InsightQueryHandler(readModelRepo);
     insightQueryHandler.register();
+
+    const identityQueryHandler = new IdentityQueryHandler(profileRepo);
+    identityQueryHandler.register();
 
     // 6. Start Engines
     const responseIntelligenceEngine = new ResponseIntelligenceEngine();

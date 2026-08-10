@@ -20,7 +20,8 @@ import { SessionService, IdentityService, SidepanelContainer, ConnectionStatus }
 import { MockHarness } from '../../mock/harness/MockHarness';
 import { ScenarioPlayer } from './ScenarioPlayer';
 import { GhostTextAdaptor } from '../../background/adaptation/GhostTextAdaptor';
-import { OnboardingCompletedPayload } from '../../core/event-bus/contracts';
+import { createDomainEvent } from '../../core/event-bus/createDomainEvent';
+import { OnboardingCompletedPayload, ONBOARDING_SESSION_ID } from '../../core/event-bus/contracts';
 
 /**
  * Bootstraps the Mock Runtime.
@@ -91,8 +92,14 @@ export async function bootstrapMockRuntime(): Promise<{
 
   const identityService: IdentityService = {
     completeOnboarding: (payload: OnboardingCompletedPayload) => {
-      // Mock implementation can just log or publish directly
       console.log('[MockRuntime] completeOnboarding called', payload);
+      const event = createDomainEvent(
+        'identity.onboarding.completed',
+        ONBOARDING_SESSION_ID,
+        'mock.onboarding',
+        payload
+      );
+      eventBus.publish('identity.onboarding.completed', event);
     }
   };
 
@@ -101,6 +108,7 @@ export async function bootstrapMockRuntime(): Promise<{
   let connectionStatus: ConnectionStatus = 'connected';
   const platform = 'mock-harness';
   const isStreaming = false;
+  const identityStatus = 'not_onboarded';
 
   try {
     activeSession = await sessionGateway.getActiveSession();
@@ -109,8 +117,7 @@ export async function bootstrapMockRuntime(): Promise<{
       sessionManager.restoreSession(activeSession.taskId ?? 'restored-task');
     }
   } catch (error) {
-    console.warn('[MockRuntime] Hydration failed', error);
-    connectionStatus = 'disconnected';
+    console.warn('[MockRuntime] Session hydrate failed:', error);
   }
 
   // 8. Prepare Mock Harness & Scenario Player
@@ -136,7 +143,8 @@ export async function bootstrapMockRuntime(): Promise<{
       activeSession,
       connectionStatus,
       platform,
-      isStreaming
+      isStreaming,
+      identityStatus
     }),
   });
 
