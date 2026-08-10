@@ -322,6 +322,13 @@ export interface GhostTextDismissedPayload {
   /** The ghost text stem that was dismissed. */
   readonly stem: string;
 
+  /**
+   * The gap type the dismissed suggestion was addressing.
+   * Optional for defensive replay of legacy events that pre-date this field.
+   * Projection consumers must handle absence gracefully.
+   */
+  readonly gapType?: GapType;
+
   /** How the ghost text was dismissed. */
   readonly reason: 'explicit' | 'timeout' | 'continued_typing' | 'caret_moved' | 'node_removed' | 'lost_focus';
 }

@@ -4,11 +4,17 @@ import { SessionId } from '../../core/types/session.types';
 import { GhostTextEvents, SessionEvents } from '../../core/event-bus/registry';
 import { GhostTextGeneratedPayload } from '../../core/event-bus/contracts';
 import { createDomainEvent } from '../../core/event-bus/createDomainEvent';
+import { GapType } from '../../core/types/gap.types';
 
 export class GhostTextObserver {
   private overlayNode: HTMLElement | null = null;
-  private currentStem: string | null = null;
-  private currentGapType: string | null = null;
+  /**
+   * The suggestion currently being displayed. Treated as an immutable pair:
+   * both stem and gapType are captured atomically when the overlay appears,
+   * and cleared atomically when it is dismissed or accepted. This guarantees
+   * that every dismissal event carries the exact gapType of the visible suggestion.
+   */
+  private currentSuggestion: { stem: string; gapType: GapType } | null = null;
   private isDestroyed = false;
   private unsubscribeAll: (() => void)[] = [];
   
@@ -108,16 +114,20 @@ export class GhostTextObserver {
       stem = stem.slice(0, 80) + '...';
     }
 
-    this.currentStem = stem;
-    this.currentGapType = payload.gapType as any;
-    
+    // Capture stem and gapType as a single immutable pair. This ensures
+    // that every downstream accept/dismiss event carries the gapType of
+    // exactly the suggestion that was visible at the time.
+    const suggestion: { stem: string; gapType: GapType } = { stem, gapType: payload.gapType };
+
     if (this.state === 'showing') {
-        // If already showing, just update text
+        // Already showing: replace the visible suggestion atomically.
+        this.currentSuggestion = suggestion;
         if (this.overlayNode) {
             this.overlayNode.textContent = stem;
         }
     } else {
         this.state = 'showing';
+        this.currentSuggestion = suggestion;
         this.initialCaretOffset = this.getCaretOffset();
         this.renderOverlay(inputNode, stem);
     }
@@ -197,8 +207,7 @@ export class GhostTextObserver {
     }
     
     this.overlayNode = null;
-    this.currentStem = null;
-    this.currentGapType = null;
+    this.currentSuggestion = null;
     this.initialCaretOffset = null;
     this.state = 'idle';
   }
@@ -217,7 +226,7 @@ export class GhostTextObserver {
   };
 
   private handleKeyDown = (e: KeyboardEvent): void => {
-    if (this.state !== 'showing' || !this.currentStem) return;
+    if (this.state !== 'showing' || !this.currentSuggestion) return;
 
     const target = e.target as HTMLElement;
     if (!target.closest(this.config.selectors.promptInput)) return;
@@ -249,14 +258,14 @@ export class GhostTextObserver {
   };
 
   private acceptGhostText(): void {
-    if (!this.currentStem || !this.currentGapType) return;
+    if (!this.currentSuggestion) return;
 
-    const stemToInsert = this.currentStem;
-    const gapType = this.currentGapType;
+    // Snapshot the suggestion before clearOverlay() nullifies it.
+    const { stem: stemToInsert, gapType } = this.currentSuggestion;
 
     // Use the verified browser-native insertion method
     const success = document.execCommand('insertText', false, stemToInsert);
-    
+
     if (!success) {
         console.warn('[GhostTextObserver] document.execCommand failed.');
     }
@@ -265,18 +274,22 @@ export class GhostTextObserver {
       GhostTextEvents.ACCEPTED,
       createDomainEvent(GhostTextEvents.ACCEPTED, this.sessionId, 'perception.ui', {
         stem: stemToInsert,
-        gapType: gapType as any
+        gapType
       })
     );
   }
 
   private dismissGhostText(reason: 'explicit' | 'timeout' | 'continued_typing' | 'caret_moved' | 'node_removed' | 'lost_focus'): void {
-    if (!this.currentStem) return;
+    if (!this.currentSuggestion) return;
+
+    // Snapshot the suggestion before clearOverlay() nullifies it.
+    const { stem, gapType } = this.currentSuggestion;
 
     this.eventBus.publish(
       GhostTextEvents.DISMISSED,
       createDomainEvent(GhostTextEvents.DISMISSED, this.sessionId, 'perception.ui', {
-        stem: this.currentStem,
+        stem,
+        gapType,
         reason
       })
     );

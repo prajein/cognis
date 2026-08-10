@@ -66,10 +66,14 @@ export class GapProfileProjectionBuilder implements ProjectionBuilder {
         break;
       }
       case GhostTextEvents.DISMISSED: {
-        // We might not know the exact gap type that was dismissed from the payload in contracts.ts, 
-        // but for now let's assume we can map it or it's recorded. Wait, contracts.ts says GhostTextDismissedPayload
-        // only has `stem` and `reason`. We can't map to gapType easily without a broader lookup, 
-        // so we'll skip incrementing dismissed gap specifically here unless the contract updates.
+        const payload = event.payload as GhostTextDismissedPayload;
+        // gapType is optional on GhostTextDismissedPayload to ensure defensive replay of
+        // legacy events that pre-date this field. If absent, the dismissal is unattributed
+        // and we skip it rather than corrupting the projection with an invalid bucket.
+        if (payload.gapType) {
+          initGapType(payload.gapType);
+          model.gaps[payload.gapType].dismissedCount++;
+        }
         break;
       }
     }
