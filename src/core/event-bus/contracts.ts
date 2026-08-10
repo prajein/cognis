@@ -371,6 +371,7 @@ export interface GhostTextMeasurementComputedPayload {
     readonly continuationLatencyMs: number | null;
     readonly typedTextLength: number | null;
     readonly stemLength: number;
+    readonly baselineTextLength: number;
     readonly lexicalOverlap: number | null;
     readonly editDistance: number | null;
   };

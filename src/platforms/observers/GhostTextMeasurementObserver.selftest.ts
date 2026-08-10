@@ -146,6 +146,7 @@ export function runGhostTextMeasurementObserverTests(c: any): void {
     c.eq(m.measurementCompletionReason, 'intervention_replaced', 'Terminated correctly');
     c.eq(m.confidence, 'unknown', 'Confidence is unknown due to lack of typing');
     c.eq(m.features.continuationLatencyMs, null, 'No latency');
+    c.eq(m.features.baselineTextLength, 47, 'Baseline length is captured');
     c.eq(m.features.lexicalOverlap, null, 'No overlap');
     
     harness.disconnect();
