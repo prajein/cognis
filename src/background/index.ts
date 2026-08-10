@@ -14,6 +14,7 @@ import { IdentityProjectionBuilder } from '../storage/projections/builders/Ident
 import { AutomaticityProjectionBuilder } from '../storage/projections/builders/AutomaticityProjectionBuilder';
 import { ResponseMetricsProjectionBuilder } from '../storage/projections/builders/ResponseMetricsProjectionBuilder';
 import { InsightProjectionBuilder } from '../storage/projections/builders/InsightProjectionBuilder';
+import { AdaptationPreferenceRepository } from '../storage/repositories/AdaptationPreferenceRepository';
 
 import {
   SessionEvents,
@@ -107,7 +108,8 @@ async function bootstrapBackground(): Promise<void> {
     insightEngine.start(eventBus, readModelRepo);
 
     // 7. Start Adaptation loop
-    const ghostTextAdaptor = new GhostTextAdaptor(eventBus);
+    const adaptationPrefRepo = new AdaptationPreferenceRepository(db);
+    const ghostTextAdaptor = new GhostTextAdaptor(eventBus, adaptationPrefRepo);
     ghostTextAdaptor.start();
 
     const identityProfileWriter = new IdentityProfileWriter(profileRepo);

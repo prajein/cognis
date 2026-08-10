@@ -3,6 +3,8 @@ import { GhostTextEvents, SessionEvents, AdaptationEvents } from '../../core/eve
 import { DomainEvent, GhostTextDisplayedPayload, GhostTextDismissedPayload } from '../../core/event-bus/contracts';
 import { GapType } from '../../core/types/gap.types';
 import { SessionId } from '../../core/types/session.types';
+import { AdaptationPreferenceRepository } from '../../storage/repositories/AdaptationPreferenceRepository';
+import { PersistedGapPreference, ADAPTATION_PROFILE_ID } from '../../core/types/adaptation.types';
 
 type PreferenceState = 'ACTIVE' | 'SUPPRESSED' | 'PROBING';
 
@@ -21,6 +23,9 @@ interface GapPreference {
   
   // Probe Attribution
   activeProbeInterventionId: string | null;
+
+  // Persistence metadata
+  firstSeenAt: number;
 }
 
 export class GhostTextAdaptor {
@@ -29,17 +34,20 @@ export class GhostTextAdaptor {
   private readonly preferences = new Map<GapType, GapPreference>();
   private unsubscribes: Array<() => void> = [];
 
-  constructor(private readonly eventBus: EventBusContract) {}
+  constructor(
+    private readonly eventBus: EventBusContract,
+    private readonly repository: AdaptationPreferenceRepository | null = null
+  ) {}
 
   public start(): void {
     if (this.unsubscribes.length > 0) return;
 
     this.unsubscribes.push(
       this.eventBus.subscribe(SessionEvents.STARTED, (event) => {
-        this.reset(event.sessionId);
+        this.handleSessionStarted(event.sessionId);
       }),
       this.eventBus.subscribe(SessionEvents.ENDED, () => {
-        this.reset(null);
+        this.handleSessionEnded();
       }),
       this.eventBus.subscribe('gap.detected', (event) => {
         this.handleGapDetected(event);
@@ -61,12 +69,96 @@ export class GhostTextAdaptor {
       unsub();
     }
     this.unsubscribes = [];
-    this.reset(null);
+    this.handleSessionEnded();
   }
 
-  private reset(sessionId: SessionId | null): void {
+  private async handleSessionStarted(sessionId: SessionId): Promise<void> {
     this.currentSessionId = sessionId;
     this.preferences.clear();
+
+    if (!this.repository) {
+      return; // Skip persistence when repository is null (e.g. M9 tests)
+    }
+
+    try {
+      const persistedPrefs = await this.repository.getAll(ADAPTATION_PROFILE_ID);
+      for (const record of persistedPrefs) {
+        // Reconstruct nextProbeThreshold based on evidence
+        let threshold = 5;
+        if (record.persistedState === 'SUPPRESSED') {
+          const rejectionRate = record.totalExplicitRejections / Math.max(record.totalExposures, 1);
+          if (rejectionRate >= 0.90) threshold = 20;
+          else if (rejectionRate >= 0.75) threshold = 10;
+        }
+
+        const pref: GapPreference = {
+          gapType: record.gapType,
+          state: record.persistedState,
+          exposures: 0, // In-session accumulation starts at 0
+          acceptances: 0,
+          explicitRejections: 0,
+          suppressedDetections: 0,
+          nextProbeThreshold: threshold,
+          activeProbeInterventionId: null,
+          firstSeenAt: record.firstSeenAt,
+        };
+        this.preferences.set(record.gapType, pref);
+        
+        // If it was already suppressed in a previous session, emit configuration now
+        if (pref.state === 'SUPPRESSED') {
+          this.emitAdaptationConfig(sessionId, pref.gapType, 'suppress', 'Restored suppression from persistent model');
+        }
+      }
+    } catch (error) {
+      console.error('[GhostTextAdaptor] Failed to load persistent preferences:', error);
+    }
+  }
+
+  private async handleSessionEnded(): Promise<void> {
+    const sessionId = this.currentSessionId;
+    this.currentSessionId = null;
+
+    if (!sessionId || !this.repository) {
+      this.preferences.clear();
+      return;
+    }
+
+    // Flush all preferences
+    const now = Date.now();
+    const promises: Promise<void>[] = [];
+
+    for (const pref of this.preferences.values()) {
+      // Only flush if we actually have some evidence from this session or a past session
+      // Wait, if exposures == 0, we still want to flush if it was loaded from DB? No, if exposures=0, nothing changed. 
+      // But we still flush it because we use atomic update which handles it. We just pass the in-session deltas.
+      if (pref.exposures === 0 && pref.acceptances === 0 && pref.explicitRejections === 0) {
+        continue;
+      }
+
+      const record: PersistedGapPreference = {
+        id: `${ADAPTATION_PROFILE_ID}::${pref.gapType}`,
+        profileId: ADAPTATION_PROFILE_ID,
+        gapType: pref.gapType,
+        totalExposures: pref.exposures,
+        totalAcceptances: pref.acceptances,
+        totalExplicitRejections: pref.explicitRejections,
+        persistedState: pref.state === 'PROBING' ? 'SUPPRESSED' : pref.state,
+        policyVersion: 'm10.0',
+        firstSeenAt: pref.firstSeenAt,
+        lastUpdatedAt: now,
+        lastSessionId: sessionId,
+      };
+
+      promises.push(this.repository.flush(record, sessionId));
+    }
+
+    try {
+      await Promise.all(promises);
+    } catch (error) {
+      console.error('[GhostTextAdaptor] Failed to flush persistent preferences:', error);
+    } finally {
+      this.preferences.clear();
+    }
   }
 
   private getOrCreatePreference(gapType: GapType): GapPreference {
@@ -80,7 +172,8 @@ export class GhostTextAdaptor {
         explicitRejections: 0,
         suppressedDetections: 0,
         nextProbeThreshold: 5,
-        activeProbeInterventionId: null
+        activeProbeInterventionId: null,
+        firstSeenAt: Date.now(),
       };
       this.preferences.set(gapType, pref);
     }
@@ -139,7 +232,7 @@ export class GhostTextAdaptor {
       pref.explicitRejections = 0;
       pref.nextProbeThreshold = 5;
       console.log(`[GhostTextAdaptor] Probe accepted for '${gapType}'. Restored to ACTIVE.`);
-      // No need to emit AdaptationConfigured because 'restore' was already emitted during SUPPRESSED -> PROBING
+      // No need to emit AdaptationConfigured because 'active' was already emitted during SUPPRESSED -> PROBING
       return;
     }
 
