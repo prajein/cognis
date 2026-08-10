@@ -348,6 +348,36 @@ export interface GhostTextDismissedPayload {
   readonly reason: 'explicit' | 'timeout' | 'continued_typing' | 'caret_moved' | 'node_removed' | 'lost_focus' | 'replaced';
 }
 
+/**
+ * Payload for ghosttext.measurement.computed
+ *
+ * Purpose: Records observable behavioral signatures surrounding ghost-text dismissals.
+ * Producer: Perception Layer (GhostTextMeasurementObserver)
+ * Consumer: Telemetry/Analytics
+ */
+export interface GhostTextMeasurementComputedPayload {
+  readonly interventionId: string;
+  readonly gapType: GapType;
+  
+  readonly dismissalReason: 'explicit' | 'timeout' | 'continued_typing' | 'caret_moved' | 'node_removed' | 'lost_focus' | 'replaced';
+  readonly measurementCompletionReason: 'idle_timeout' | 'hard_timeout' | 'prompt_sent' | 'focus_lost' | 'intervention_replaced' | 'node_removed';
+  
+  readonly context: {
+    readonly origin: string;
+    readonly domRole: string;
+  };
+  
+  readonly features: {
+    readonly continuationLatencyMs: number | null;
+    readonly typedTextLength: number | null;
+    readonly stemLength: number;
+    readonly lexicalOverlap: number | null;
+    readonly editDistance: number | null;
+  };
+  
+  readonly confidence: 'high' | 'medium' | 'low' | 'unknown';
+}
+
 // ---------------------------------------------------------------------------
 // Response Event Payloads
 // ---------------------------------------------------------------------------
@@ -693,6 +723,7 @@ export interface CognisEventMap {
   'ghosttext.displayed': GhostTextDisplayedPayload;
   'ghosttext.accepted': GhostTextAcceptedPayload;
   'ghosttext.dismissed': GhostTextDismissedPayload;
+  'ghosttext.measurement.computed': GhostTextMeasurementComputedPayload;
 
   // Response
   'response.started': ResponseStartedPayload;
