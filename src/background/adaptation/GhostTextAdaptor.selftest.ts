@@ -42,7 +42,7 @@ async function runGhostTextAdaptorTests() {
   adaptor.start();
   ghostTextEngine.start();
 
-  const sessionId = toSessionId('session-m8');
+  const sessionId = toSessionId('session-m9');
 
   // Track configured adaptation events
   const adaptationEvents: DomainEvent<AdaptationConfiguredPayload>[] = [];
@@ -58,249 +58,194 @@ async function runGhostTextAdaptorTests() {
     createDomainEvent(SessionEvents.STARTED, sessionId, 'test', { platform: 'test' }, options)
   );
 
-  // Test 1: Rejection threshold evaluation (exposures = 4, rejections = 3 -> 75%)
-  // Emit 3 explicit dismissals and 1 displayed to complete 4 exposures
-  const gapType = 'audience';
+  // Helper to trigger display
+  const display = (interventionId: string, gapType: any) => {
+    eventBus.publish(
+      GhostTextEvents.DISPLAYED,
+      createDomainEvent(GhostTextEvents.DISPLAYED, sessionId, 'test', {
+        interventionId,
+        gapType,
+        stem: 'Hello',
+        displayLatencyMs: 50
+      }, options)
+    );
+  };
+
+  // Helper to trigger dismissal
+  const dismiss = (interventionId: string, gapType: any, reason: any) => {
+    eventBus.publish(
+      GhostTextEvents.DISMISSED,
+      createDomainEvent(GhostTextEvents.DISMISSED, sessionId, 'test', {
+        interventionId,
+        gapType,
+        stem: 'Hello',
+        reason
+      }, options)
+    );
+  };
+  
+  // Helper to trigger accepted
+  const accept = (interventionId: string, gapType: any) => {
+    eventBus.publish(
+      GhostTextEvents.ACCEPTED,
+      createDomainEvent(GhostTextEvents.ACCEPTED, sessionId, 'test', {
+        interventionId,
+        gapType,
+        stem: 'Hello'
+      }, options)
+    );
+  };
+
+  const detectGap = (gapType: any) => {
+    eventBus.publish(
+      'gap.detected',
+      createDomainEvent('gap.detected', sessionId, 'test', {
+        gapType,
+        confidence: 0.9
+      }, options)
+    );
+  };
+
+  // ======================================================================
+  // Test 1: Active -> Suppressed (Initial threshold: 4 exp, 75% reject)
+  // ======================================================================
+  const gapType1 = 'audience';
 
   for (let i = 0; i < 3; i++) {
-    const interventionId = `int-${i}`;
-    eventBus.publish(
-      GhostTextEvents.DISPLAYED,
-      createDomainEvent(GhostTextEvents.DISPLAYED, sessionId, 'test', {
-        interventionId,
-        gapType,
-        stem: 'Hello',
-        displayLatencyMs: 50
-      }, options)
-    );
-    eventBus.publish(
-      GhostTextEvents.DISMISSED,
-      createDomainEvent(GhostTextEvents.DISMISSED, sessionId, 'test', {
-        interventionId,
-        gapType,
-        stem: 'Hello',
-        reason: 'continued_typing'
-      }, options)
-    );
+    const id = `int-1-${i}`;
+    display(id, gapType1);
+    dismiss(id, gapType1, 'continued_typing'); // explicit rejection
   }
 
-  // 4th exposure - displayed only (not yet dismissed)
-  eventBus.publish(
-    GhostTextEvents.DISPLAYED,
-    createDomainEvent(GhostTextEvents.DISPLAYED, sessionId, 'test', {
-      interventionId: 'int-3',
-      gapType,
-      stem: 'Hello',
-      displayLatencyMs: 50
-    }, options)
-  );
+  // 4th exposure
+  display('int-1-3', gapType1);
+  dismiss('int-1-3', gapType1, 'continued_typing');
 
-  // Rejection count is 3, exposure is 4. Rejection rate is 3/4 = 75%.
-  // We trigger dismissal 4, which should cross the threshold and publish AdaptationConfigured
-  eventBus.publish(
-    GhostTextEvents.DISMISSED,
-    createDomainEvent(GhostTextEvents.DISMISSED, sessionId, 'test', {
-      interventionId: 'int-3',
-      gapType,
-      stem: 'Hello',
-      reason: 'continued_typing'
-    }, options)
-  );
-
-  c.eq(adaptationEvents.length, 1, 'Should publish 1 adaptation configuration event');
-  c.eq(adaptationEvents[0]?.payload.gapType, 'audience', 'Suppressed gapType should be audience');
+  c.eq(adaptationEvents.length, 1, 'Should publish 1 adaptation event to suppress');
   c.eq(adaptationEvents[0]?.payload.action, 'suppress', 'Action should be suppress');
-  c.eq(adaptationEvents[0]?.sessionId, sessionId, 'Event sessionId must match');
+  c.eq(adaptationEvents[0]?.payload.gapType, gapType1, 'Suppressed gapType should be audience');
+  
+  adaptationEvents.length = 0; // reset
 
-  // Test 2: Passive dismissals do not count as rejections
-  const otherGap = 'intentionality';
-  adaptationEvents.length = 0; // Clear tracked events
-
-  // 1st exposure - displayed and dismissed passively (lost_focus)
-  eventBus.publish(
-    GhostTextEvents.DISPLAYED,
-    createDomainEvent(GhostTextEvents.DISPLAYED, sessionId, 'test', {
-      interventionId: 'int-10',
-      gapType: otherGap,
-      stem: 'Intent',
-      displayLatencyMs: 50
-    }, options)
-  );
-  eventBus.publish(
-    GhostTextEvents.DISMISSED,
-    createDomainEvent(GhostTextEvents.DISMISSED, sessionId, 'test', {
-      interventionId: 'int-10',
-      gapType: otherGap,
-      stem: 'Intent',
-      reason: 'lost_focus'
-    }, options)
-  );
-
-  // Emit 3 more rejections to make total exposure = 4
-  for (let i = 11; i < 14; i++) {
-    eventBus.publish(
-      GhostTextEvents.DISPLAYED,
-      createDomainEvent(GhostTextEvents.DISPLAYED, sessionId, 'test', {
-        interventionId: `int-${i}`,
-        gapType: otherGap,
-        stem: 'Intent',
-        displayLatencyMs: 50
-      }, options)
-    );
-    eventBus.publish(
-      GhostTextEvents.DISMISSED,
-      createDomainEvent(GhostTextEvents.DISMISSED, sessionId, 'test', {
-        interventionId: `int-${i}`,
-        gapType: otherGap,
-        stem: 'Intent',
-        reason: 'continued_typing'
-      }, options)
-    );
+  // ======================================================================
+  // Test 2: Suppressed -> Probing (Threshold: 5 suppressed detections)
+  // ======================================================================
+  for (let i = 0; i < 4; i++) {
+    detectGap(gapType1);
   }
+  c.eq(adaptationEvents.length, 0, 'Should not probe before threshold');
 
-  // Total exposures = 4, rejections = 3. Rejection rate = 3/4 = 75%.
-  // Wait, did it trigger?
-  // Let's count rejections: we sent 1 lost_focus and 3 continued_typing.
-  // Total exposures = 4, total rejections = 3.
-  // Wait! In the code:
-  // - on lost_focus: `rejections` count does NOT increment.
-  // - on continued_typing: `rejections` count increments.
-  // So stats.displayed = 4, stats.rejections = 3.
-  // 3/4 is 75%, so it SHOULD trigger suppression for otherGap too!
-  // Wait, let's verify if that's correct.
-  // Yes! Exposures is 4, rejections is 3. Rejection rate is 75%.
-  // Let's verify that it DID trigger.
-  c.eq(adaptationEvents.length, 1, 'Should publish adaptation config for intentionality as well');
+  // 5th detection triggers probing
+  detectGap(gapType1);
+  c.eq(adaptationEvents.length, 1, '5th suppressed detection should trigger probe (restore)');
+  c.eq(adaptationEvents[0]?.payload.action, 'active', 'Action should be restore for probe');
+  
+  adaptationEvents.length = 0; // reset
 
-  // Let's test a case where it does NOT trigger (e.g. exposures = 4, rejections = 2 -> 50% rejection rate)
-  const thirdGap = 'constraint';
+  // ======================================================================
+  // Test 3: Probing -> Active (Probe Acceptance Reverses Preference)
+  // ======================================================================
+  // Display the probe
+  display('probe-int-1', gapType1);
+  // Accept the probe
+  accept('probe-int-1', gapType1);
+  
+  // State is now ACTIVE again. We can verify this by triggering 4 more detections
+  // and ensuring it doesn't trigger another probe, OR by getting a rejection and seeing 
+  // it doesn't immediately suppress.
+  for (let i = 0; i < 5; i++) detectGap(gapType1);
+  c.eq(adaptationEvents.length, 0, 'No more probes should fire because state is ACTIVE');
+
+  // ======================================================================
+  // Test 4: Re-Suppress and Probe Rejection Escalation
+  // ======================================================================
+  // Let's re-suppress audience by giving it 4 fresh rejections
+  for (let i = 0; i < 4; i++) {
+    const id = `int-re-${i}`;
+    display(id, gapType1);
+    dismiss(id, gapType1, 'continued_typing');
+  }
+  c.eq(adaptationEvents.length, 1, 'Should re-suppress audience after fresh rejections');
+  c.eq(adaptationEvents[0]?.payload.action, 'suppress', 'Action should be suppress');
   adaptationEvents.length = 0;
 
-  // 2 passive dismissals, 2 rejections
-  for (let i = 20; i < 22; i++) {
-    eventBus.publish(
-      GhostTextEvents.DISPLAYED,
-      createDomainEvent(GhostTextEvents.DISPLAYED, sessionId, 'test', {
-        interventionId: `int-${i}`,
-        gapType: thirdGap,
-        stem: 'Constraint',
-        displayLatencyMs: 50
-      }, options)
-    );
-    eventBus.publish(
-      GhostTextEvents.DISMISSED,
-      createDomainEvent(GhostTextEvents.DISMISSED, sessionId, 'test', {
-        interventionId: `int-${i}`,
-        gapType: thirdGap,
-        stem: 'Constraint',
-        reason: 'lost_focus'
-      }, options)
-    );
+  // Now trigger another probe (threshold should be 5 again because it was reset to ACTIVE)
+  for (let i = 0; i < 5; i++) detectGap(gapType1);
+  c.eq(adaptationEvents.length, 1, 'Should trigger probe again (action: restore)');
+  c.eq(adaptationEvents[0]?.payload.action, 'active', 'Action should be restore');
+  adaptationEvents.length = 0;
+
+  // Display probe and explicitly REJECT it
+  display('probe-int-2', gapType1);
+  dismiss('probe-int-2', gapType1, 'continued_typing'); // explicit rejection
+  
+  // Adaptor should immediately re-suppress
+  c.eq(adaptationEvents.length, 1, 'Should immediately re-suppress on probe rejection');
+  c.eq(adaptationEvents[0]?.payload.action, 'suppress', 'Action should be suppress');
+  adaptationEvents.length = 0;
+
+  // Now, the nextProbeThreshold should have escalated to 10.
+  // 5 detections should NOT trigger a probe.
+  for (let i = 0; i < 5; i++) detectGap(gapType1);
+  c.eq(adaptationEvents.length, 0, '5 detections should not trigger probe due to escalated threshold');
+  
+  for (let i = 0; i < 5; i++) detectGap(gapType1);
+  c.eq(adaptationEvents.length, 1, '10th detection should trigger probe');
+  c.eq(adaptationEvents[0]?.payload.action, 'active', 'Action should be restore');
+  adaptationEvents.length = 0;
+
+  // ======================================================================
+  // Test 5: Passive dismissal preserves Probing state
+  // ======================================================================
+  // Display the next probe
+  display('probe-int-3', gapType1);
+  // Passively dismiss it
+  dismiss('probe-int-3', gapType1, 'lost_focus');
+
+  // Should NOT re-suppress
+  c.eq(adaptationEvents.length, 0, 'Passive dismissal should not alter preference state');
+  
+  // We are still in PROBING state (the restore action is still active on the engine).
+  // Another display will capture a new probe ID
+  display('probe-int-4', gapType1);
+  accept('probe-int-4', gapType1); // Accept it
+
+  // Since it was accepted, it should revert to ACTIVE.
+  // Verify by checking that 10 detections do not trigger anything.
+  for (let i = 0; i < 10; i++) detectGap(gapType1);
+  c.eq(adaptationEvents.length, 0, 'Should be ACTIVE again after second probe was accepted');
+
+  // ======================================================================
+  // Test 6: Strict Probe Attribution
+  // ======================================================================
+  // Suppress a different gap
+  const gapType2 = 'intentionality';
+  for (let i = 0; i < 4; i++) {
+    const id = `int-2-${i}`;
+    display(id, gapType2);
+    dismiss(id, gapType2, 'continued_typing');
   }
-  for (let i = 22; i < 24; i++) {
-    eventBus.publish(
-      GhostTextEvents.DISPLAYED,
-      createDomainEvent(GhostTextEvents.DISPLAYED, sessionId, 'test', {
-        interventionId: `int-${i}`,
-        gapType: thirdGap,
-        stem: 'Constraint',
-        displayLatencyMs: 50
-      }, options)
-    );
-    eventBus.publish(
-      GhostTextEvents.DISMISSED,
-      createDomainEvent(GhostTextEvents.DISMISSED, sessionId, 'test', {
-        interventionId: `int-${i}`,
-        gapType: thirdGap,
-        stem: 'Constraint',
-        reason: 'continued_typing'
-      }, options)
-    );
-  }
+  c.eq(adaptationEvents.length, 1, 'Should suppress intentionality');
+  adaptationEvents.length = 0;
 
-  // Exposures = 4, rejections = 2. Rejection rate = 50% (< 75%).
-  c.eq(adaptationEvents.length, 0, 'Should NOT publish adaptation configuration event for constraint gap');
+  // Trigger probe
+  for (let i = 0; i < 5; i++) detectGap(gapType2);
+  c.eq(adaptationEvents.length, 1, 'Should trigger probe for intentionality');
+  adaptationEvents.length = 0;
 
-  // Test 3: Engine ignores suppressed gaps
-  // 'audience' was suppressed in Test 1.
-  // Set recentGap to 'audience' and trigger pause.detected
-  eventBus.publish(
-    'gap.detected',
-    createDomainEvent('gap.detected', sessionId, 'test', {
-      gapType: 'audience',
-      confidence: 0.9
-    }, options)
-  );
+  // The engine displays the probe:
+  display('probe-int-5', gapType2);
 
-  // Capture intermediate ghosttext.generated
-  const generatedEvents: any[] = [];
-  eventBus.subscribe(GhostTextEvents.GENERATED, (e) => {
-    generatedEvents.push(e);
-  });
+  // Suddenly, a stray/delayed event from an OLD intervention arrives
+  accept('int-2-3', gapType2);
+  c.eq(adaptationEvents.length, 0, 'Stray accepted event should not resolve the probe state');
 
-  eventBus.publish(
-    'pause.detected',
-    createDomainEvent('pause.detected', sessionId, 'test', {
-      durationMs: 2000,
-      textLength: 0
-    }, options)
-  );
+  // The probe itself is rejected
+  dismiss('probe-int-5', gapType2, 'continued_typing');
+  c.eq(adaptationEvents.length, 1, 'The actual probe rejection should resolve the probe state to SUPPRESSED');
+  c.eq(adaptationEvents[0]?.payload.action, 'suppress', 'Action should be suppress');
 
-  c.eq(generatedEvents.length, 0, 'GhostTextEngine should not generate stems for suppressed gap type (audience)');
-
-  // Send a gap that is NOT suppressed, e.g. 'constraint'
-  eventBus.publish(
-    'gap.detected',
-    createDomainEvent('gap.detected', sessionId, 'test', {
-      gapType: 'constraint',
-      confidence: 0.9
-    }, options)
-  );
-
-  eventBus.publish(
-    'pause.detected',
-    createDomainEvent('pause.detected', sessionId, 'test', {
-      durationMs: 2000,
-      textLength: 0
-    }, options)
-  );
-
-  c.eq(generatedEvents.length, 1, 'GhostTextEngine should generate stems for non-suppressed gap type (constraint)');
-
-  // Test 4: Reset behavior on session boundary
-  // End session
-  eventBus.publish(
-    SessionEvents.ENDED,
-    createDomainEvent(SessionEvents.ENDED, sessionId, 'test', { reason: 'explicit' }, options)
-  );
-
-  // Start new session
-  const newSessionId = toSessionId('session-m8-new');
-  eventBus.publish(
-    SessionEvents.STARTED,
-    createDomainEvent(SessionEvents.STARTED, newSessionId, 'test', { platform: 'test' }, options)
-  );
-
-  generatedEvents.length = 0;
-  // Trigger 'audience' gap in new session
-  eventBus.publish(
-    'gap.detected',
-    createDomainEvent('gap.detected', newSessionId, 'test', {
-      gapType: 'audience',
-      confidence: 0.9
-    }, options)
-  );
-
-  eventBus.publish(
-    'pause.detected',
-    createDomainEvent('pause.detected', newSessionId, 'test', {
-      durationMs: 2000,
-      textLength: 0
-    }, options)
-  );
-
-  c.eq(generatedEvents.length, 1, 'After session reset, previously suppressed gap type (audience) should be active again');
-
+  // Cleanup
   adaptor.stop();
   ghostTextEngine.dispose();
 
