@@ -96,6 +96,14 @@ export const AdaptationEvents = Object.freeze({
 } as const);
 
 // ---------------------------------------------------------------------------
+// Identity Events
+// ---------------------------------------------------------------------------
+
+export const IdentityEvents = Object.freeze({
+  ONBOARDING_COMPLETED: 'identity.onboarding.completed',
+} as const);
+
+// ---------------------------------------------------------------------------
 // Derived EventType union
 // ---------------------------------------------------------------------------
 
@@ -111,5 +119,5 @@ export type EventType =
   | typeof ResponseEvents[keyof typeof ResponseEvents]
   | typeof InsightEvents[keyof typeof InsightEvents]
   | typeof HardwareEvents[keyof typeof HardwareEvents]
-  | typeof AdaptationEvents[keyof typeof AdaptationEvents];
-
+  | typeof AdaptationEvents[keyof typeof AdaptationEvents]
+  | typeof IdentityEvents[keyof typeof IdentityEvents];

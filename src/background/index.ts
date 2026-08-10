@@ -8,6 +8,7 @@ import { migrations } from '../storage/migrations';
 import { ReadModelRepository } from '../storage/repositories/ReadModelRepository';
 import { ProjectionManager } from '../storage/projections/ProjectionManager';
 import { SessionProjectionBuilder } from '../storage/projections/builders/SessionProjectionBuilder';
+import { ProfileRepository } from '../storage/repositories/ProfileRepository';
 import { GapProfileProjectionBuilder } from '../storage/projections/builders/GapProfileProjectionBuilder';
 import { IdentityProjectionBuilder } from '../storage/projections/builders/IdentityProjectionBuilder';
 import { AutomaticityProjectionBuilder } from '../storage/projections/builders/AutomaticityProjectionBuilder';
@@ -23,6 +24,7 @@ import {
   InsightEvents,
   HardwareEvents,
   AdaptationEvents,
+  IdentityEvents,
   EventType
 } from '../core/event-bus/registry';
 
@@ -35,6 +37,7 @@ const allEvents: EventType[] = [
   ...Object.values(InsightEvents),
   ...Object.values(HardwareEvents),
   ...Object.values(AdaptationEvents),
+  ...Object.values(IdentityEvents),
 ];
 
 import { InsightEngine } from '../engines/insights/InsightEngine';
@@ -42,6 +45,7 @@ import { ResponseIntelligenceEngine } from '../engines/response/ResponseIntellig
 import { SessionQueryHandler } from './handlers/SessionQueryHandler';
 import { InsightQueryHandler } from './handlers/InsightQueryHandler';
 import { GhostTextAdaptor } from './adaptation/GhostTextAdaptor';
+import { IdentityProfileWriter } from '../engines/identity/IdentityProfileWriter';
 
 /**
  * Background Service Worker Composition Root
@@ -62,8 +66,9 @@ async function bootstrapBackground(): Promise<void> {
     const db = new CognisDatabase(migrations);
     await db.open();
 
-    // 2. Initialize Repository
+    // 2. Initialize Repositories
     const eventRepo = new EventRepository(db);
+    const profileRepo = new ProfileRepository(db);
 
     // 3. Start Subscriber
     const subscriber = new EventStoreSubscriber(eventBus, eventRepo, errorReporter);
@@ -100,6 +105,9 @@ async function bootstrapBackground(): Promise<void> {
     // 7. Start Adaptation loop
     const ghostTextAdaptor = new GhostTextAdaptor(eventBus);
     ghostTextAdaptor.start();
+
+    const identityProfileWriter = new IdentityProfileWriter(profileRepo);
+    identityProfileWriter.start(eventBus);
 
     console.log('[Background] Bootstrap complete. Cognis is active.');
   } catch (error) {

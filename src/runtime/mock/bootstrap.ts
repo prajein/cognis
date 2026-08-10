@@ -16,10 +16,11 @@ import { InsightEngine } from '../../engines/insights/InsightEngine';
 import { ResponseIntelligenceEngine } from '../../engines/response/ResponseIntelligenceEngine';
 import { LocalSessionGateway, LocalInsightGateway } from './gateways';
 import { SessionManager } from '../../sidepanel/features/session/manager/SessionManager';
-import { SessionService, SidepanelContainer, ConnectionStatus } from '../../sidepanel/runtime/container';
+import { SessionService, IdentityService, SidepanelContainer, ConnectionStatus } from '../../sidepanel/runtime/container';
 import { MockHarness } from '../../mock/harness/MockHarness';
 import { ScenarioPlayer } from './ScenarioPlayer';
 import { GhostTextAdaptor } from '../../background/adaptation/GhostTextAdaptor';
+import { OnboardingCompletedPayload } from '../../core/event-bus/contracts';
 
 /**
  * Bootstraps the Mock Runtime.
@@ -88,6 +89,13 @@ export async function bootstrapMockRuntime(): Promise<{
     resumeSession: () => sessionManager.resumeSession(),
   };
 
+  const identityService: IdentityService = {
+    completeOnboarding: (payload: OnboardingCompletedPayload) => {
+      // Mock implementation can just log or publish directly
+      console.log('[MockRuntime] completeOnboarding called', payload);
+    }
+  };
+
   // 7. Hydrate initial state
   let activeSession = null;
   let connectionStatus: ConnectionStatus = 'connected';
@@ -121,6 +129,7 @@ export async function bootstrapMockRuntime(): Promise<{
 
   const container: SidepanelContainer = Object.freeze({
     sessionService,
+    identityService,
     eventBus,
     insightGateway,
     runtimeState: Object.freeze({
