@@ -19,6 +19,7 @@ import { SessionManager } from '../../sidepanel/features/session/manager/Session
 import { SessionService, SidepanelContainer, ConnectionStatus } from '../../sidepanel/runtime/container';
 import { MockHarness } from '../../mock/harness/MockHarness';
 import { ScenarioPlayer } from './ScenarioPlayer';
+import { GhostTextAdaptor } from '../../background/adaptation/GhostTextAdaptor';
 
 /**
  * Bootstraps the Mock Runtime.
@@ -66,6 +67,10 @@ export async function bootstrapMockRuntime(): Promise<{
 
   const insightEngine = new InsightEngine();
   insightEngine.start(eventBus, readModelRepo);
+
+  // 4b. Start Adaptation loop
+  const ghostTextAdaptor = new GhostTextAdaptor(eventBus);
+  ghostTextAdaptor.start();
 
   // 5. Initialize Gateways (Local implementation for mock)
   const sessionGateway = new LocalSessionGateway(eventBus, readModelRepo);

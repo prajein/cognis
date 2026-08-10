@@ -274,6 +274,9 @@ export interface GapDetectedPayload {
  * Consumer: Perception Layer (for display), Storage Layer
  */
 export interface GhostTextGeneratedPayload {
+  /** Unique ID identifying this intervention suggestion. */
+  readonly interventionId: string;
+
   /** The type of gap this ghost text addresses. */
   readonly gapType: GapType;
 
@@ -289,6 +292,12 @@ export interface GhostTextGeneratedPayload {
  * Consumer: Storage Layer, Insight Engine
  */
 export interface GhostTextDisplayedPayload {
+  /** Unique ID identifying this intervention suggestion. */
+  readonly interventionId: string;
+
+  /** The type of gap this ghost text addresses. */
+  readonly gapType: GapType;
+
   /** The ghost text stem that was displayed. */
   readonly stem: string;
 
@@ -304,6 +313,9 @@ export interface GhostTextDisplayedPayload {
  * Consumer: Storage Layer, Insight Engine
  */
 export interface GhostTextAcceptedPayload {
+  /** Unique ID identifying this intervention suggestion. */
+  readonly interventionId: string;
+
   /** The ghost text stem that was accepted. */
   readonly stem: string;
 
@@ -319,6 +331,9 @@ export interface GhostTextAcceptedPayload {
  * Consumer: Storage Layer, Insight Engine
  */
 export interface GhostTextDismissedPayload {
+  /** Unique ID identifying this intervention suggestion. */
+  readonly interventionId: string;
+
   /** The ghost text stem that was dismissed. */
   readonly stem: string;
 
@@ -330,7 +345,7 @@ export interface GhostTextDismissedPayload {
   readonly gapType?: GapType;
 
   /** How the ghost text was dismissed. */
-  readonly reason: 'explicit' | 'timeout' | 'continued_typing' | 'caret_moved' | 'node_removed' | 'lost_focus';
+  readonly reason: 'explicit' | 'timeout' | 'continued_typing' | 'caret_moved' | 'node_removed' | 'lost_focus' | 'replaced';
 }
 
 // ---------------------------------------------------------------------------
@@ -588,6 +603,31 @@ export interface HardwareSignalReceivedPayload {
 }
 
 // ---------------------------------------------------------------------------
+// Adaptation Event Payloads
+// ---------------------------------------------------------------------------
+
+/**
+ * Payload for adaptation.configured
+ *
+ * Purpose: Records an adaptation policy decision that updates co-pilot engine behavior.
+ * Producer: Adaptation Coordinator (background script)
+ * Consumer: Domain Engines (e.g. Ghost Text Engine in content script)
+ */
+export interface AdaptationConfiguredPayload {
+  /** The target engine module to adapt. */
+  readonly targetModule: 'ghosttext';
+
+  /** The gap type that is subject to adaptation. */
+  readonly gapType: GapType;
+
+  /** The action to perform (e.g. suppress stems, restore active behavior). */
+  readonly action: 'suppress' | 'active';
+
+  /** Human-readable explanation of why this decision was made. */
+  readonly reasoning: string;
+}
+
+// ---------------------------------------------------------------------------
 // Cognis Event Map
 // ---------------------------------------------------------------------------
 
@@ -643,4 +683,8 @@ export interface CognisEventMap {
   'hardware.connected': HardwareConnectedPayload;
   'hardware.disconnected': HardwareDisconnectedPayload;
   'hardware.signal.received': HardwareSignalReceivedPayload;
+
+  // Adaptation
+  'adaptation.configured': AdaptationConfiguredPayload;
 }
+

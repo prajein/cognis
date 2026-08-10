@@ -65,6 +65,9 @@ export class GhostTextEngine {
   /** Per-gap rotation cursor so repeated stems vary deterministically. */
   private readonly rotation = new Map<GapType, number>();
 
+  private readonly suppressedGaps = new Set<GapType>();
+  private currentSessionId: SessionId | null = null;
+
   private readonly unsubscribes: Array<() => void> = [];
   private started = false;
 
@@ -86,6 +89,21 @@ export class GhostTextEngine {
     this.started = true;
 
     this.unsubscribes.push(
+      this.eventBus.subscribe("session.started", (event) => {
+        this.currentSessionId = event.sessionId;
+        this.suppressedGaps.clear();
+      }),
+      this.eventBus.subscribe("session.ended", () => {
+        this.currentSessionId = null;
+        this.suppressedGaps.clear();
+      }),
+      this.eventBus.subscribe("adaptation.configured", (event) => {
+        if (this.currentSessionId && event.sessionId === this.currentSessionId) {
+          if (event.payload.targetModule === "ghosttext" && event.payload.action === "suppress") {
+            this.suppressedGaps.add(event.payload.gapType);
+          }
+        }
+      }),
       this.eventBus.subscribe("gap.detected", (event) => {
         const incoming: RecentGap = {
           gapType: event.payload.gapType,
@@ -105,9 +123,6 @@ export class GhostTextEngine {
           this.recentGap = incoming;
         }
       }),
-    );
-
-    this.unsubscribes.push(
       this.eventBus.subscribe("pause.detected", (event) => {
         this.onPause(event.payload.durationMs, event.timestamp, event.sessionId);
       }),
@@ -133,6 +148,9 @@ export class GhostTextEngine {
     if (gap === null || gap.sessionId !== sessionId) {
       return;
     }
+    if (this.suppressedGaps.has(gap.gapType)) {
+      return;
+    }
     if (pauseAt - gap.atTimestamp > settings.gapRecencyMs) {
       return;
     }
@@ -142,11 +160,13 @@ export class GhostTextEngine {
       return;
     }
 
+    const interventionId = this.idFactory ? this.idFactory() : crypto.randomUUID();
+
     const event = createDomainEvent(
       "ghosttext.generated",
       sessionId,
       this.source,
-      { gapType: gap.gapType, stem },
+      { interventionId, gapType: gap.gapType, stem },
       { clock: this.clock, idFactory: this.idFactory },
     );
     this.eventBus.publish("ghosttext.generated", event);

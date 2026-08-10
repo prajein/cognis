@@ -114,8 +114,8 @@ function emitPause(bus: EventBus, durationMs: number, at: number, session: Sessi
   });
 }
 
-function capture(bus: EventBus): DomainEvent<{ gapType: string; stem: string }>[] {
-  const out: DomainEvent<{ gapType: string; stem: string }>[] = [];
+function capture(bus: EventBus): DomainEvent<{ gapType: string; stem: string; interventionId?: string }>[] {
+  const out: DomainEvent<{ gapType: string; stem: string; interventionId?: string }>[] = [];
   bus.subscribe("ghosttext.generated", (e) => out.push(e));
   return out;
 }
@@ -221,6 +221,22 @@ export function runGhostTextSelfTest(): SelfTestReport {
     emitPause(bus, 1500, 1100);
     c.eq(got.length, 1, "strongest-gap: exactly one stem");
     c.eq(got[0]?.payload.gapType, "intentionality", "strongest-gap: stem addresses the strongest gap");
+  }
+
+  // 9. Intervention ID is deterministic if idFactory is provided.
+  {
+    const bus = new EventBus(silentReporter);
+    const got = capture(bus);
+    const engine = new GhostTextEngine(bus, {
+      config: FIXTURE,
+      idFactory: () => toEventId("injected-id"),
+      clock: () => toTimestamp(999),
+    });
+    engine.start();
+    emitGap(bus, "intentionality", 1000);
+    emitPause(bus, 1500, 1200);
+    c.eq(got.length, 1, "deterministic id: stem is emitted");
+    c.eq(got[0]?.payload.interventionId, "injected-id", "deterministic id: uses injected factory");
   }
 
   return { passed: c.passed, failed: c.failed, failures: c.failures };
