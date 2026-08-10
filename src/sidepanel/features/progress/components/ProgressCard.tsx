@@ -1,4 +1,4 @@
-import type { ProgressCardProps } from "./types";
+import type { ProgressCardProps } from "../types";
 
 export function ProgressCard({
     title,

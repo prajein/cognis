@@ -1,3 +1,3 @@
 export * from "./ProgressPanel";
-export * from "./ProgressCard";
+export * from "./components/ProgressCard";
 export * from "./types";

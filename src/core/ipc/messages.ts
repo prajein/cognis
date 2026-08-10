@@ -13,8 +13,8 @@
  *   callers can distinguish success from error without relying on exceptions.
  */
 
-import { SessionReadModel } from '../../storage/projections/builders/SessionProjectionBuilder';
-import { InsightReadModel } from '../../storage/projections/builders/InsightProjectionBuilder';
+import type { SessionReadModel } from '../../storage/projections/builders/SessionProjectionBuilder';
+import type { InsightReadModel } from '../../storage/projections/builders/InsightProjectionBuilder';
 
 // ---------------------------------------------------------------------------
 // Query — QUERY_ACTIVE_SESSION
@@ -25,20 +25,79 @@ import { InsightReadModel } from '../../storage/projections/builders/InsightProj
  * The background responds synchronously within the onMessage handler (return true).
  */
 export interface QueryActiveSessionRequest {
-  readonly type: 'QUERY_ACTIVE_SESSION';
+    readonly type: 'QUERY_ACTIVE_SESSION';
 }
 
 /**
  * Response: returned by the background SessionQueryHandler.
  *
  * - `session`: The currently active SessionReadModel, or null if no session
- *   is active. A session is considered active when its status is 'active' or 'paused'.
+ *   is active. A session is considered active when its status is 'active' or
+ *   'paused'.
+ *
  * - `error`: Present only when the handler encountered an unexpected failure.
  *   The sidepanel should treat this as a disconnect and render a safe fallback.
  */
 export interface QueryActiveSessionResponse {
-  readonly session: SessionReadModel | null;
-  readonly error?: string;
+    readonly session: SessionReadModel | null;
+    readonly error?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Progress Query
+// ---------------------------------------------------------------------------
+
+/**
+ * Response metrics exposed to the progress feature.
+ *
+ * The underlying ResponseMetricsProjectionBuilder stores absolute sums.
+ * The query layer converts those sums into session-level averages so that
+ * consumers do not need to know about the projection implementation.
+ */
+export interface ProgressSessionResponseMetrics {
+    readonly totalResponses: number;
+    readonly averageQuality: number | null;
+    readonly averageReasoning: number | null;
+    readonly averageStructure: number | null;
+}
+
+/**
+ * Historical session data required by the progress feature.
+ *
+ * `sessionNumber` is assigned by the query layer after chronological
+ * ordering. It is intentionally not taken from SessionRecord, because
+ * the persistent session projections are the authoritative historical source.
+ */
+export interface ProgressSession {
+    readonly sessionNumber: number;
+    readonly sessionId: string;
+    readonly taskId: string | null;
+    readonly platform: string;
+
+    readonly startTime: number;
+    readonly endTime?: number;
+    readonly durationMs?: number;
+
+    readonly responseMetrics: ProgressSessionResponseMetrics;
+}
+
+/**
+ * Request: retrieves completed sessions for a specific task.
+ *
+ * The background resolves this from the persistent session and response
+ * metrics read models.
+ */
+export interface QueryProgressRequest {
+    readonly type: 'QUERY_PROGRESS';
+    readonly taskId: string;
+}
+
+/**
+ * Response returned by the background progress query handler.
+ */
+export interface QueryProgressResponse {
+    readonly sessions: readonly ProgressSession[];
+    readonly error?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -46,18 +105,23 @@ export interface QueryActiveSessionResponse {
 // ---------------------------------------------------------------------------
 
 export interface QuerySessionInsightsRequest {
-  readonly type: 'QUERY_SESSION_INSIGHTS';
-  readonly sessionId: string;
+    readonly type: 'QUERY_SESSION_INSIGHTS';
+    readonly sessionId: string;
 }
 
 export interface QuerySessionInsightsResponse {
-  readonly insights: InsightReadModel | null;
-  readonly error?: string;
+    readonly insights: InsightReadModel | null;
+    readonly error?: string;
 }
 
 // ---------------------------------------------------------------------------
 // Discriminated union for future extensibility
 // ---------------------------------------------------------------------------
 
-/** All query request types that the background message router recognises. */
-export type BackgroundQueryRequest = QueryActiveSessionRequest | QuerySessionInsightsRequest;
+/**
+ * All query request types that the background message router recognises.
+ */
+export type BackgroundQueryRequest =
+    | QueryActiveSessionRequest
+    | QueryProgressRequest
+    | QuerySessionInsightsRequest;
