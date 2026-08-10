@@ -53,6 +53,7 @@ export const GhostTextEvents = Object.freeze({
   DISPLAYED: 'ghosttext.displayed',
   ACCEPTED: 'ghosttext.accepted',
   DISMISSED: 'ghosttext.dismissed',
+  MEASUREMENT_COMPUTED: 'ghosttext.measurement.computed',
 } as const);
 
 // ---------------------------------------------------------------------------
