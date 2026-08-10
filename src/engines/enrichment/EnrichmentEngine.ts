@@ -1,7 +1,22 @@
 import { EventBusContract } from '../../core/event-bus/types';
-import { PromptEvents } from '../../core/event-bus/registry';
-import { DomainEvent } from '../../core/event-bus/contracts';
-import config from '../../core/config/enrichment_layers.json';
+import { PromptEvents, CognitiveEvents, SessionEvents } from '../../core/event-bus/registry';
+import { DomainEvent, GapDetectedPayload } from '../../core/event-bus/contracts';
+import { GapType } from '../../core/types/gap.types';
+import rawConfig from '../../core/config/enrichment_layers.json';
+
+interface EnrichmentConfig {
+  settings: {
+    latencyTimeoutMs: number;
+    enableCaching: boolean;
+  };
+  layers: Record<string, {
+    defaultPriority: number;
+    template: string;
+    targetGaps?: GapType[];
+  }>;
+}
+
+const config = rawConfig as EnrichmentConfig;
 
 export interface EnrichmentEngineOptions {
   readonly latencyTimeoutMs?: number;
@@ -11,6 +26,7 @@ interface Layer {
   name: string;
   priority: number;
   template: string;
+  targetGaps?: GapType[];
 }
 
 export class EnrichmentEngine {
@@ -18,7 +34,8 @@ export class EnrichmentEngine {
   private readonly layers: Layer[] = [];
   
   // In-memory state collected from EventBus
-  private currentStateLabel: 'focused' | 'fatigued' | 'distracted' | 'idle' = 'focused';
+  private currentStateLabel: 'focused' | 'fatigued' | 'distracted' | 'idle' | 'unknown' = 'unknown';
+  private readonly activeGaps = new Set<GapType>();
   
   constructor(
     private readonly eventBus: EventBusContract,
@@ -34,7 +51,17 @@ export class EnrichmentEngine {
       this.currentStateLabel = event.payload.currentState as any;
     });
 
-    // We could listen to gap.detected or ghosttext.accepted here to build in-memory heuristics
+    this.eventBus.subscribe(PromptEvents.TYPED, () => {
+      this.activeGaps.clear();
+    });
+
+    this.eventBus.subscribe(CognitiveEvents.GAP_DETECTED, (event: DomainEvent<GapDetectedPayload>) => {
+      this.activeGaps.add(event.payload.gapType);
+    });
+
+    this.eventBus.subscribe(SessionEvents.ENDED, () => {
+      this.activeGaps.clear();
+    });
     console.log('[EnrichmentEngine] Started.');
   }
 
@@ -62,8 +89,13 @@ export class EnrichmentEngine {
 
       try {
         // 2. Compile Templates
-        // Sort layers by priority descending (highest first)
-        const sortedLayers = [...this.layers].sort((a, b) => b.priority - a.priority);
+        // Filter layers based on activeGaps, then sort by priority descending
+        const relevantLayers = this.layers.filter(layer => 
+          !layer.targetGaps || 
+          layer.targetGaps.some(gap => this.activeGaps.has(gap))
+        );
+
+        const sortedLayers = relevantLayers.sort((a, b) => b.priority - a.priority);
         
         let wrapperContext = '';
         for (const layer of sortedLayers) {
@@ -98,7 +130,8 @@ export class EnrichmentEngine {
       this.layers.push({
         name,
         priority: layerConfig.defaultPriority,
-        template: layerConfig.template
+        template: layerConfig.template,
+        targetGaps: layerConfig.targetGaps
       });
     }
   }
