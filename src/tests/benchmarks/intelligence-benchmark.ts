@@ -77,29 +77,40 @@ interface AnalyzerUnderTest {
   name: string;
   analyze: (responseText: string, promptHash: string) => AnalysisResultShape;
   labelKey: keyof Labels;
-  // Prefix used to scope observedIssues to this analyzer's domain, e.g. "structure:".
-  // QualityAnalyzer is a composite and is scored against the FULL issue list (no filtering),
-  // since its own flags can legitimately come from any sub-domain.
-  issueDomainPrefix?: string;
+  // Which domain this analyzer's flags belong to. QualityAnalyzer (composite)
+  // leaves this undefined and is scored against the full unfiltered issue list.
+  issueDomain?: "structure" | "reasoning" | "completeness";
 }
 
-const KNOWN_ISSUE_DOMAIN_PREFIXES = ["structure:", "reasoning:", "completeness:"];
+// Ground-truth flag -> domain mapping, confirmed directly from the real analyzer
+// source via flag-vocabulary-diff.ts. This REPLACES the earlier text-prefix
+// convention ("structure:prose_heavy") -- that approach broke twice: once when
+// QualityAnalyzer's raw predicted flags didn't carry the prefix, and again when
+// relabeled entries were entered as bare flag names with no prefix at all.
+// Determining domain by flag IDENTITY (this lookup) rather than by trusting
+// whatever prefix text happens to be in the dataset is far more robust.
+const REAL_FLAG_DOMAIN: Record<string, "structure" | "reasoning" | "completeness"> = {
+  no_code: "structure",
+  prose_heavy: "structure",
+  highly_structured: "structure",
+  shallow_directive: "reasoning",
+  step_by_step: "reasoning",
+  unclosed_markdown: "completeness",
+  has_conclusion: "completeness",
+};
 
-// observedIssues tags should be namespaced, e.g. "structure:prose_heavy",
-// "reasoning:marker_stuffing", "completeness:unclosed_markdown".
-// - If `prefix` is given: keep only issues in that domain, and strip the prefix.
-// - If `prefix` is omitted (composite analyzers like QualityAnalyzer, whose real
-//   predicted flags are raw/unprefixed): strip WHATEVER known prefix is present
-//   on every issue, so the full unfiltered list is compared using the same raw
-//   flag vocabulary the analyzer actually emits.
-function filterIssuesByDomain(issues: string[], prefix?: string): string[] {
-  if (prefix) {
-    return issues.filter((issue) => issue.startsWith(prefix)).map((issue) => issue.slice(prefix.length));
-  }
-  return issues.map((issue) => {
-    const matchedPrefix = KNOWN_ISSUE_DOMAIN_PREFIXES.find((p) => issue.startsWith(p));
-    return matchedPrefix ? issue.slice(matchedPrefix.length) : issue;
-  });
+// Strips any legacy "domain:" prefix if present, for backward compatibility
+// with any entries labeled before this fix (harmless no-op on bare flag names).
+function stripLegacyPrefix(issue: string): string {
+  const knownPrefixes = ["structure:", "reasoning:", "completeness:", "quality:"];
+  const matched = knownPrefixes.find((p) => issue.startsWith(p));
+  return matched ? issue.slice(matched.length) : issue;
+}
+
+function filterIssuesByDomain(issues: string[], domain?: "structure" | "reasoning" | "completeness"): string[] {
+  const normalized = issues.map(stripLegacyPrefix);
+  if (!domain) return normalized; // composite analyzer -- full list, no filtering
+  return normalized.filter((issue) => REAL_FLAG_DOMAIN[issue] === domain);
 }
 
 // ---- Core metric math (unchanged logic, still analyzer-agnostic) ----
@@ -218,7 +229,7 @@ function runAnalyzerAgainstEntries(
     predictedScores.push(result.score);
     expectedScores.push(entry.labels[analyzer.labelKey]);
     predictedFlagSets.push([...result.flags]); // copy out of readonly array
-    expectedIssueSets.push(filterIssuesByDomain(entry.observedIssues, analyzer.issueDomainPrefix));
+    expectedIssueSets.push(filterIssuesByDomain(entry.observedIssues, analyzer.issueDomain));
   }
 
   return {
@@ -358,19 +369,19 @@ function main(): void {
       name: "StructureAnalyzer",
       analyze: (t, h) => new StructureAnalyzer().analyze(t, h),
       labelKey: "structure",
-      issueDomainPrefix: "structure:",
+      issueDomain: "structure",
     },
     {
       name: "ReasoningAnalyzer",
       analyze: (t, h) => new ReasoningAnalyzer().analyze(t, h),
       labelKey: "reasoning",
-      issueDomainPrefix: "reasoning:",
+      issueDomain: "reasoning",
     },
     {
       name: "CompletenessAnalyzer",
       analyze: (t, h) => new CompletenessAnalyzer().analyze(t, h),
       labelKey: "completeness",
-      issueDomainPrefix: "completeness:",
+      issueDomain: "completeness",
     },
     {
       name: "QualityAnalyzer",
@@ -384,7 +395,7 @@ function main(): void {
           new CompletenessAnalyzer()
         ).analyze(t, h),
       labelKey: "quality",
-      // no issueDomainPrefix -- composite is scored against the full unfiltered issue list
+      // no issueDomain -- composite is scored against the full unfiltered issue list
     },
   ];
 
