@@ -26,18 +26,34 @@ export class SubmitInterceptor {
     const options = { capture: true, signal: this.abortController.signal };
     
     document.addEventListener('keydown', (e) => {
-      const target = e.target as HTMLElement;
-      if (target && target.closest(this.config.selectors.promptInput)) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          console.log('[SubmitInterceptor] Intercepted Enter keydown');
-          this.onSubmitTriggered(e);
-        }
+      let target = e.target as Element;
+      if (target && target.nodeType === Node.TEXT_NODE) {
+          target = target.parentElement as Element;
+      }
+
+      if (target && target.closest) {
+          const matchedInput = target.closest(this.config.selectors.promptInput);
+          if (matchedInput) {
+            // [M11 Diagnostic] Monitor Claude prose-mirror keyboard submission anomalies
+            if (e.key === 'Enter') {
+                console.debug(`[M11 Diagnostic] Enter pressed on prompt target. shiftKey=${e.shiftKey}, isComposing=${e.isComposing}`);
+            }
+
+            if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+              console.log('[SubmitInterceptor] Intercepted Enter keydown');
+              this.onSubmitTriggered(e);
+            }
+          }
       }
     }, options);
 
     document.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      if (this.config.selectors.submitButton && target && target.closest(this.config.selectors.submitButton)) {
+      let target = e.target as Element;
+      if (target && target.nodeType === Node.TEXT_NODE) {
+          target = target.parentElement as Element;
+      }
+
+      if (this.config.selectors.submitButton && target && target.closest && target.closest(this.config.selectors.submitButton)) {
         console.log('[SubmitInterceptor] Intercepted submit button click');
         this.onSubmitTriggered(e);
       }

@@ -16,6 +16,8 @@ import { CognitiveTopology } from "./components/CognitiveTopology";
 import { ObservationsTimeline } from "./components/ObservationsTimeline";
 import { SessionMetrics } from "./components/SessionMetrics";
 import { SessionReview } from "./components/SessionReview";
+import { ResponseMetricsHUD } from "../surface-a/components/ResponseMetricsHUD";
+import { useResponseMetrics } from "../surface-a/hooks/useResponseMetrics";
 
 export function SurfaceB() {
   const {
@@ -52,6 +54,7 @@ export function SurfaceB() {
 
     const { runtimeState } = useSidepanelRuntime();
     const { insights } = useInsights(currentSession?.id !== 'pending' ? currentSession?.id : undefined);
+    const { state: responseState, metrics: responseMetrics } = useResponseMetrics();
 
     const isStreaming = runtimeState.isStreaming;
 
@@ -82,6 +85,7 @@ export function SurfaceB() {
         view = (
             <>
                 <CurrentState sessionState={currentState} isStreaming={isStreaming} />
+                <ResponseMetricsHUD state={responseState} metrics={responseMetrics} />
                 <CognitiveTopology isStreaming={isStreaming} isActive={currentState === SessionState.SESSION_ACTIVE} />
                 <ObservationsTimeline insightsModel={insights} />
                 <SessionMetrics session={currentSession} />

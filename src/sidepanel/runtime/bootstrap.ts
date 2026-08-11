@@ -68,6 +68,28 @@ export async function bootstrapSidepanelRuntime(): Promise<SidepanelContainer> {
   const errorReporter = new ConsoleErrorReporter();
   const eventBus = new EventBus(errorReporter);
 
+  // [M11 Diagnostic] E2E Lifecycle Logger
+  // Intentionally retained for M11 development to monitor prompt-response correlation integrity.
+  // Note: Payload logging explicitly isolates correlation metadata to ensure raw text/prompts are never logged.
+  const debugEvents = [
+    PromptEvents.SENT,
+    ResponseEvents.STARTED,
+    ResponseEvents.COMPLETED,
+    ResponseEvents.ANALYSIS_COMPLETED
+  ];
+  debugEvents.forEach(eventType => {
+    eventBus.subscribe(eventType, (event) => {
+      const payload = event.payload as any;
+      const safePayload = payload ? { 
+          promptEventId: payload.promptEventId, 
+          isCompleted: payload.isCompleted, 
+          isStarting: payload.isStarting,
+          wasEnriched: payload.wasEnriched
+      } : {};
+      console.debug(`[M11 Diagnostic] ${eventType} -> session: ${event.sessionId}`, safePayload);
+    });
+  });
+
   // 2. Instantiate and initialize the Transport (ExtensionEventBridge in 'side-panel' mode).
   //    This opens a persistent chrome.runtime.connect port to the background host,
   //    subscriptions and bridging begin immediately after initialize().

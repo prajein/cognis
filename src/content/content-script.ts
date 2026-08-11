@@ -28,8 +28,9 @@ const eventsToBridge: EventType[] = [
 ];
 
 function bootstrapContentScript(): void {
-  if (!window.location.hostname.includes('chatgpt.com')) {
-    console.warn('[Cognis] Content script loaded on unsupported domain:', window.location.hostname);
+  const hostname = window.location.hostname;
+  if (!hostname.includes('chatgpt.com') && !hostname.includes('claude.ai')) {
+    console.warn('[Cognis] Content script loaded on unsupported domain:', hostname);
     return;
   }
 

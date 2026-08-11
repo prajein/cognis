@@ -25,5 +25,11 @@
       "defaultPriority": 90,
       "template": "### Core Constraints\n- DO NOT output code blocks unless explicitly requested.\n- Focus purely on architectural principles."
     }
+  },
+  "stateSuffixes": {
+    "stretch": "[PRODUCT DECISION PENDING: stretch suffix]",
+    "coasting": "[PRODUCT DECISION PENDING: coasting suffix]",
+    "overload": "[PRODUCT DECISION PENDING: overload suffix]",
+    "unknown": ""
   }
 }

@@ -17,6 +17,7 @@ interface EnrichmentConfig {
     template: string;
     targetGaps?: GapType[];
   }>;
+  stateSuffixes?: Partial<Record<StateLabel, string>>;
 }
 
 const config = rawConfig as EnrichmentConfig;
@@ -103,6 +104,11 @@ export class EnrichmentEngine {
         let wrapperContext = '';
         for (const layer of sortedLayers) {
           wrapperContext += `\n${layer.template}\n`;
+        }
+
+        const stateSuffix = config.stateSuffixes?.[this.currentStateLabel];
+        if (stateSuffix) {
+          wrapperContext += `\n${stateSuffix}\n`;
         }
 
         // 3. Compose Final Enriched Prompt

@@ -46,15 +46,21 @@ export async function runEnrichmentEngineTests(): Promise<{ passed: number; fail
     lastEnrichedPayload = evt.payload;
   });
 
-  const triggerEnrichment = async () => {
+  const triggerEnrichment = async (text: string = "test prompt") => {
     lastEnrichedPayload = null;
-    await engine.enrich("test prompt", sessionId);
-    return lastEnrichedPayload?.appliedLayers ?? [];
+    const finalEnriched = await engine.enrich(text, sessionId);
+    return { appliedLayers: lastEnrichedPayload?.appliedLayers ?? [], finalEnriched };
   };
 
   const publishGap = (gapType: string) => {
     eventBus.publish(CognitiveEvents.GAP_DETECTED, createDomainEvent(
       CognitiveEvents.GAP_DETECTED, sessionId, 'test', { gapType: gapType as GapType, confidence: 0.8 }, { clock, idFactory }
+    ));
+  };
+
+  const publishState = (stateLabel: string) => {
+    eventBus.publish('state.changed', createDomainEvent(
+      'state.changed', sessionId, 'test', { currentState: stateLabel as any, previousState: 'unknown', confidence: 1 }, { clock, idFactory }
     ));
   };
 
@@ -69,37 +75,44 @@ export async function runEnrichmentEngineTests(): Promise<{ passed: number; fail
 
   // Test 1: No gap detected -> Only universal layers
   publishTyped(); // ensure clean state
-  let applied = await triggerEnrichment();
+  publishState('unknown');
+  let result = await triggerEnrichment();
+  let applied = result.appliedLayers;
   c.eq(applied, universalLayers, 'No gap detected -> Only universal layers');
 
   // Test 2: mechanism gap -> Universal + gapResolution
   publishTyped();
   publishGap('mechanism');
-  applied = await triggerEnrichment();
+  result = await triggerEnrichment();
+  applied = result.appliedLayers;
   c.eq(applied, [...universalLayers, 'gapResolution'], 'mechanism gap -> Universal + gapResolution');
 
   // Test 3: second_order gap -> Universal + gapResolution
   publishTyped();
   publishGap('second_order');
-  applied = await triggerEnrichment();
+  result = await triggerEnrichment();
+  applied = result.appliedLayers;
   c.eq(applied, [...universalLayers, 'gapResolution'], 'second_order gap -> Universal + gapResolution');
 
   // Test 4: constraint gap -> Universal layers (constraints is now universal)
   publishTyped();
   publishGap('constraint');
-  applied = await triggerEnrichment();
+  result = await triggerEnrichment();
+  applied = result.appliedLayers;
   c.eq(applied, universalLayers, 'constraint gap -> Universal layers only');
 
   // Test 5: Multiple gaps -> Union of matching targeted layers, no duplicates
   publishTyped();
   publishGap('mechanism');
   publishGap('second_order');
-  applied = await triggerEnrichment();
+  result = await triggerEnrichment();
+  applied = result.appliedLayers;
   c.eq(applied, [...universalLayers, 'gapResolution'], 'Multiple gaps -> Union without duplicates');
 
   // Test 6: New prompt.typed -> Clears previous gaps
   publishTyped(); // clears the gaps from Test 5
-  applied = await triggerEnrichment();
+  result = await triggerEnrichment();
+  applied = result.appliedLayers;
   c.eq(applied, universalLayers, 'New prompt.typed -> Clears previous gaps');
 
   // Test 7: session.ended -> Clears previous gaps
@@ -108,14 +121,40 @@ export async function runEnrichmentEngineTests(): Promise<{ passed: number; fail
   eventBus.publish(SessionEvents.ENDED, createDomainEvent(
     SessionEvents.ENDED, sessionId, 'test', { reason: 'timeout' }, { clock, idFactory }
   ));
-  applied = await triggerEnrichment();
+  result = await triggerEnrichment();
+  applied = result.appliedLayers;
   c.eq(applied, universalLayers, 'session.ended -> Clears previous gaps');
 
   // Test 8: Invalid/unknown gap -> No accidental layer match
   publishTyped();
   publishGap('made_up_gap');
-  applied = await triggerEnrichment();
+  result = await triggerEnrichment();
+  applied = result.appliedLayers;
   c.eq(applied, universalLayers, 'Invalid/unknown gap -> No accidental layer match');
+
+  // Test 9: state.changed (stretch) -> Appends stretch suffix
+  publishTyped();
+  publishState('stretch');
+  result = await triggerEnrichment();
+  c.ok(result.finalEnriched.includes('[PRODUCT DECISION PENDING: stretch suffix]'), 'state.changed (stretch) appends stretch suffix');
+
+  // Test 10: state.changed (unknown) -> No suffix appended
+  publishTyped();
+  publishState('unknown');
+  result = await triggerEnrichment();
+  c.ok(!result.finalEnriched.includes('[PRODUCT DECISION PENDING:'), 'state.changed (unknown) appends no suffix');
+
+  // Test 11: Unconfigured/future state safely falls back to no suffix without throwing
+  publishTyped();
+  publishState('hypothetical_future_state');
+  result = await triggerEnrichment();
+  c.ok(!result.finalEnriched.includes('[PRODUCT DECISION PENDING:'), 'unconfigured state safely falls back to no suffix');
+
+  // Test 12: Exact rawText byte-for-byte check
+  publishTyped();
+  const rawTestString = "This is my precise raw text. \n\n Don't mutate it!";
+  result = await triggerEnrichment(rawTestString);
+  c.ok(result.finalEnriched.endsWith(`\n### User Prompt\n${rawTestString}`), 'Exact rawText is appended byte-for-byte at the end of the enriched output');
 
   engine.stop();
   console.log(`[SelfTest EnrichmentEngine] passed=${c.passed} failed=${c.failed}`);
