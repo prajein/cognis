@@ -69,8 +69,23 @@ export interface QueryIdentityProfileResponse {
 }
 
 // ---------------------------------------------------------------------------
+// Query — QUERY_ADAPTATION_STATE
+// ---------------------------------------------------------------------------
+
+import { GapType } from '../types/gap.types';
+
+export interface QueryAdaptationStateRequest {
+  readonly type: 'QUERY_ADAPTATION_STATE';
+}
+
+export interface QueryAdaptationStateResponse {
+  readonly suppressedGaps: GapType[];
+  readonly error?: string;
+}
+
+// ---------------------------------------------------------------------------
 // Discriminated union for future extensibility
 // ---------------------------------------------------------------------------
 
 /** All query request types that the background message router recognises. */
-export type BackgroundQueryRequest = QueryActiveSessionRequest | QuerySessionInsightsRequest | QueryIdentityProfileRequest;
+export type BackgroundQueryRequest = QueryActiveSessionRequest | QuerySessionInsightsRequest | QueryIdentityProfileRequest | QueryAdaptationStateRequest;

@@ -1,7 +1,8 @@
 import { EventBusContract } from '../../core/event-bus/types';
 import { DomainEvent, OnboardingCompletedPayload } from '../../core/event-bus/contracts';
 import { ProfileRepository } from '../../storage/repositories/ProfileRepository';
-import { UserProfileRecord } from '../../core/types/profile.types';
+import { UserProfileRecord, GapLongitudinalState } from '../../core/types/profile.types';
+import { GapType } from '../../core/types/gap.types';
 
 /**
  * IdentityProfileWriter
@@ -49,6 +50,15 @@ export class IdentityProfileWriter {
             lastModified: event.timestamp,
             lastEventId: event.id,
             onboarding: event.payload,
+            ...(currentModel ? {
+              recentCountedSessions: currentModel.recentCountedSessions,
+              foldedSessions: currentModel.foldedSessions,
+              gapHistory: currentModel.gapHistory
+            } : {
+              recentCountedSessions: [],
+              foldedSessions: [],
+              gapHistory: {} as Record<GapType, GapLongitudinalState>
+            })
           };
         }
       );
