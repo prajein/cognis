@@ -274,3 +274,92 @@
       scroll-behavior: auto !important;
     }
   }
+
+/* Settings / Mode Popover */
+.cognis-header {
+  position: relative;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.settings-trigger {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.settings-trigger:hover {
+  color: var(--text-primary);
+  background-color: var(--border-color);
+}
+
+.settings-popover {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  width: 180px;
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: var(--space-2);
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-popover-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  padding: var(--space-1) var(--space-2);
+  margin-bottom: 4px;
+}
+
+.settings-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px var(--space-2);
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: default;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: normal;
+}
+
+.settings-option.active {
+  background-color: var(--border-color);
+  font-weight: 500;
+}
+
+.settings-option.disabled {
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+.settings-option-badge {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  background-color: var(--border-color);
+  padding: 2px 4px;
+  border-radius: 3px;
+  color: var(--text-secondary);
+}
