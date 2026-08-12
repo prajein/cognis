@@ -29,6 +29,7 @@ export class IdentityQueryHandler {
           console.error('[IdentityQueryHandler] Unexpected error:', error);
           sendResponse({
             hasOnboarded: false,
+            onboarding: null,
             error: error instanceof Error ? error.message : 'Unknown error',
           });
         });
@@ -46,7 +47,7 @@ export class IdentityQueryHandler {
   private async handleQueryIdentityProfile(): Promise<QueryIdentityProfileResponse> {
     const profile = await this.profileRepo.get('default-user');
     const hasOnboarded = !!profile?.onboarding;
-    return { hasOnboarded };
+    return { hasOnboarded, onboarding: profile?.onboarding ?? null };
   }
 
   private isQueryIdentityProfileRequest(

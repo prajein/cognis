@@ -46,6 +46,7 @@ import { ResponseIntelligenceEngine } from '../engines/response/ResponseIntellig
 import { SessionQueryHandler } from './handlers/SessionQueryHandler';
 import { InsightQueryHandler } from './handlers/InsightQueryHandler';
 import { IdentityQueryHandler } from './handlers/IdentityQueryHandler';
+import { GapProfileQueryHandler } from './handlers/GapProfileQueryHandler';
 import { AdaptationQueryHandler } from './handlers/AdaptationQueryHandler';
 import { SessionProfileUpdater } from './adaptation/SessionProfileUpdater';
 import { GhostTextAdaptor } from './adaptation/GhostTextAdaptor';
@@ -101,6 +102,9 @@ async function bootstrapBackground(): Promise<void> {
 
     const identityQueryHandler = new IdentityQueryHandler(profileRepo);
     identityQueryHandler.register();
+
+    const gapProfileQueryHandler = new GapProfileQueryHandler(readModelRepo);
+    gapProfileQueryHandler.register();
 
     const adaptationQueryHandler = new AdaptationQueryHandler(profileRepo);
     adaptationQueryHandler.register();
