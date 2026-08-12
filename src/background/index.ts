@@ -46,6 +46,8 @@ import { ResponseIntelligenceEngine } from '../engines/response/ResponseIntellig
 import { SessionQueryHandler } from './handlers/SessionQueryHandler';
 import { InsightQueryHandler } from './handlers/InsightQueryHandler';
 import { IdentityQueryHandler } from './handlers/IdentityQueryHandler';
+import { AdaptationQueryHandler } from './handlers/AdaptationQueryHandler';
+import { SessionProfileUpdater } from './adaptation/SessionProfileUpdater';
 import { GhostTextAdaptor } from './adaptation/GhostTextAdaptor';
 import { IdentityProfileWriter } from '../engines/identity/IdentityProfileWriter';
 
@@ -100,6 +102,9 @@ async function bootstrapBackground(): Promise<void> {
     const identityQueryHandler = new IdentityQueryHandler(profileRepo);
     identityQueryHandler.register();
 
+    const adaptationQueryHandler = new AdaptationQueryHandler(profileRepo);
+    adaptationQueryHandler.register();
+
     // 6. Start Engines
     const responseIntelligenceEngine = new ResponseIntelligenceEngine();
     responseIntelligenceEngine.start(eventBus);
@@ -111,6 +116,9 @@ async function bootstrapBackground(): Promise<void> {
     const adaptationPrefRepo = new AdaptationPreferenceRepository(db);
     const ghostTextAdaptor = new GhostTextAdaptor(eventBus, adaptationPrefRepo);
     ghostTextAdaptor.start();
+
+    const sessionProfileUpdater = new SessionProfileUpdater(profileRepo, readModelRepo, eventBus, errorReporter);
+    sessionProfileUpdater.start();
 
     const identityProfileWriter = new IdentityProfileWriter(profileRepo);
     identityProfileWriter.start(eventBus);
