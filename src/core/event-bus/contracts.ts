@@ -274,6 +274,9 @@ export interface GapDetectedPayload {
  * Consumer: Perception Layer (for display), Storage Layer
  */
 export interface GhostTextGeneratedPayload {
+  /** Unique ID identifying this intervention suggestion. */
+  readonly interventionId: string;
+
   /** The type of gap this ghost text addresses. */
   readonly gapType: GapType;
 
@@ -289,6 +292,12 @@ export interface GhostTextGeneratedPayload {
  * Consumer: Storage Layer, Insight Engine
  */
 export interface GhostTextDisplayedPayload {
+  /** Unique ID identifying this intervention suggestion. */
+  readonly interventionId: string;
+
+  /** The type of gap this ghost text addresses. */
+  readonly gapType: GapType;
+
   /** The ghost text stem that was displayed. */
   readonly stem: string;
 
@@ -304,6 +313,9 @@ export interface GhostTextDisplayedPayload {
  * Consumer: Storage Layer, Insight Engine
  */
 export interface GhostTextAcceptedPayload {
+  /** Unique ID identifying this intervention suggestion. */
+  readonly interventionId: string;
+
   /** The ghost text stem that was accepted. */
   readonly stem: string;
 
@@ -319,11 +331,52 @@ export interface GhostTextAcceptedPayload {
  * Consumer: Storage Layer, Insight Engine
  */
 export interface GhostTextDismissedPayload {
+  /** Unique ID identifying this intervention suggestion. */
+  readonly interventionId: string;
+
   /** The ghost text stem that was dismissed. */
   readonly stem: string;
 
+  /**
+   * The gap type the dismissed suggestion was addressing.
+   * Optional for defensive replay of legacy events that pre-date this field.
+   * Projection consumers must handle absence gracefully.
+   */
+  readonly gapType?: GapType;
+
   /** How the ghost text was dismissed. */
-  readonly reason: 'explicit' | 'timeout' | 'continued_typing' | 'caret_moved' | 'node_removed' | 'lost_focus';
+  readonly reason: 'explicit' | 'timeout' | 'continued_typing' | 'caret_moved' | 'node_removed' | 'lost_focus' | 'replaced';
+}
+
+/**
+ * Payload for ghosttext.measurement.computed
+ *
+ * Purpose: Records observable behavioral signatures surrounding ghost-text dismissals.
+ * Producer: Perception Layer (GhostTextMeasurementObserver)
+ * Consumer: Telemetry/Analytics
+ */
+export interface GhostTextMeasurementComputedPayload {
+  readonly interventionId: string;
+  readonly gapType: GapType;
+  
+  readonly dismissalReason: 'explicit' | 'timeout' | 'continued_typing' | 'caret_moved' | 'node_removed' | 'lost_focus' | 'replaced';
+  readonly measurementCompletionReason: 'idle_timeout' | 'hard_timeout' | 'prompt_sent' | 'focus_lost' | 'intervention_replaced' | 'node_removed';
+  
+  readonly context: {
+    readonly origin: string;
+    readonly domRole: string;
+  };
+  
+  readonly features: {
+    readonly continuationLatencyMs: number | null;
+    readonly typedTextLength: number | null;
+    readonly stemLength: number;
+    readonly baselineTextLength: number;
+    readonly lexicalOverlap: number | null;
+    readonly editDistance: number | null;
+  };
+  
+  readonly confidence: 'high' | 'medium' | 'low' | 'unknown';
 }
 
 // ---------------------------------------------------------------------------
@@ -340,6 +393,12 @@ export interface GhostTextDismissedPayload {
 export interface ResponseStartedPayload {
   /** Hash of the prompt that triggered this response. */
   readonly promptHash: string;
+
+  /** The unique event ID of the prompt.sent event that triggered this response. */
+  readonly promptEventId?: string;
+
+  /** Whether the triggering prompt was enriched. */
+  readonly wasEnriched?: boolean;
 }
 
 /**
@@ -409,6 +468,12 @@ export interface ResponseAnalysis {
   /** Hash of the prompt that triggered this response. */
   readonly promptHash: string;
   
+  /** Link to the specific prompt.sent event. */
+  readonly promptEventId?: string;
+
+  /** Whether the triggering prompt was enriched. */
+  readonly wasEnriched?: boolean;
+
   /** Evaluated structural completeness (0.0 to 1.0). */
   readonly structuralScore: number;
   
@@ -509,6 +574,33 @@ export interface AutomaticityUpdatedPayload {
 }
 
 // ---------------------------------------------------------------------------
+// Identity Event Payloads
+// ---------------------------------------------------------------------------
+
+/**
+ * Synthetic session identifier used exclusively by the onboarding event.
+ *
+ * Workaround: the DomainEvent envelope structurally requires a SessionId,
+ * although onboarding is not associated with a cognitive session.
+ */
+export const ONBOARDING_SESSION_ID = 'system-onboarding' as SessionId;
+
+/**
+ * Payload for identity.onboarding.completed
+ *
+ * Purpose: Records the user's initial onboarding configuration answers.
+ *          Field names are intentionally generic placeholders (answer1, answer2, answer3)
+ *          until the product team defines the final semantic domains.
+ * Producer: Side Panel (Onboarding Flow)
+ * Consumer: Identity Profile Writer, Storage Layer
+ */
+export interface OnboardingCompletedPayload {
+  readonly answer1: string;
+  readonly answer2: string;
+  readonly answer3: string;
+}
+
+// ---------------------------------------------------------------------------
 // Hardware Event Payloads
 // ---------------------------------------------------------------------------
 
@@ -569,6 +661,31 @@ export interface HardwareSignalReceivedPayload {
 }
 
 // ---------------------------------------------------------------------------
+// Adaptation Event Payloads
+// ---------------------------------------------------------------------------
+
+/**
+ * Payload for adaptation.configured
+ *
+ * Purpose: Records an adaptation policy decision that updates co-pilot engine behavior.
+ * Producer: Adaptation Coordinator (background script)
+ * Consumer: Domain Engines (e.g. Ghost Text Engine in content script)
+ */
+export interface AdaptationConfiguredPayload {
+  /** The target engine module to adapt. */
+  readonly targetModule: 'ghosttext';
+
+  /** The gap type that is subject to adaptation. */
+  readonly gapType: GapType;
+
+  /** The action to perform (e.g. suppress stems, restore active behavior). */
+  readonly action: 'suppress' | 'active';
+
+  /** Human-readable explanation of why this decision was made. */
+  readonly reasoning: string;
+}
+
+// ---------------------------------------------------------------------------
 // Cognis Event Map
 // ---------------------------------------------------------------------------
 
@@ -607,6 +724,7 @@ export interface CognisEventMap {
   'ghosttext.displayed': GhostTextDisplayedPayload;
   'ghosttext.accepted': GhostTextAcceptedPayload;
   'ghosttext.dismissed': GhostTextDismissedPayload;
+  'ghosttext.measurement.computed': GhostTextMeasurementComputedPayload;
 
   // Response
   'response.started': ResponseStartedPayload;
@@ -624,4 +742,11 @@ export interface CognisEventMap {
   'hardware.connected': HardwareConnectedPayload;
   'hardware.disconnected': HardwareDisconnectedPayload;
   'hardware.signal.received': HardwareSignalReceivedPayload;
+
+  // Adaptation
+  'adaptation.configured': AdaptationConfiguredPayload;
+
+  // Identity
+  'identity.onboarding.completed': OnboardingCompletedPayload;
 }
+

@@ -52,7 +52,7 @@ export class ResponseIntelligenceEngine implements IResponseIntelligenceEngine {
 
   private handleStarted(event: DomainEvent<any>): void {
     const { sessionId, payload } = event;
-    const { promptHash } = payload;
+    const { promptHash, promptEventId, wasEnriched } = payload;
     
     if (!this.pipeline) return;
 
@@ -68,7 +68,9 @@ export class ResponseIntelligenceEngine implements IResponseIntelligenceEngine {
       this.pipeline,
       (completedSessionId) => {
         this.activeBuffers.delete(completedSessionId);
-      }
+      },
+      promptEventId,
+      wasEnriched
     );
 
     this.activeBuffers.set(sessionId, buffer);

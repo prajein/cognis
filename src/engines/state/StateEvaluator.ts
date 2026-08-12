@@ -2,10 +2,18 @@ import { StateSnapshot } from './StateSnapshot';
 import { StateLabel } from '../../core/types/state.types';
 import { StateEngineRules } from '../../core/config/state-rules-loader';
 
+export interface StateEvaluation {
+  readonly state: StateLabel;
+  readonly confidence: number;
+}
+
 export class StateEvaluator {
+  private static readonly COLD_START_CONFIDENCE = 0.4;
+  private static readonly RULE_MATCH_CONFIDENCE = 0.7;
+
   constructor(private readonly rules: StateEngineRules) { }
 
-  public evaluate(snapshot: StateSnapshot): StateLabel {
+  public evaluate(snapshot: StateSnapshot): StateEvaluation {
     const minSamples = this.rules.baseline?.minSamplesBeforeBaseline ?? 5;
 
     // Cold-start fallback if baseline is not yet established
@@ -25,7 +33,7 @@ export class StateEvaluator {
       wpm >= coastingWpmThreshold &&
       snapshot.revisionRate < revisionThresholds.coasting
     ) {
-      return 'coasting';
+      return { state: 'coasting', confidence: StateEvaluator.RULE_MATCH_CONFIDENCE };
     }
 
     // 2. Overload Check: ~-30% WPM below baseline AND heavy deletion
@@ -34,7 +42,7 @@ export class StateEvaluator {
       wpm <= overloadWpmThreshold &&
       snapshot.revisionRate >= revisionThresholds.overload
     ) {
-      return 'overload';
+      return { state: 'overload', confidence: StateEvaluator.RULE_MATCH_CONFIDENCE };
     }
 
     // 3. Stretch Check: Productive zone (near baseline, low deletion, cognitive pauses)
@@ -43,29 +51,28 @@ export class StateEvaluator {
     const isLongPause = snapshot.pauseDurationMs >= pauseThresholds.stretch;
 
     if (isNearBaseline && isLowRevision && isLongPause) {
-      return 'stretch';
+      return { state: 'stretch', confidence: StateEvaluator.RULE_MATCH_CONFIDENCE };
     }
 
-    // Default fallback to stretch for steady-state baseline interaction
-    // to maintain state continuity prior to long pause detection.
-    return 'stretch';
+    // Steady-state baseline interaction lacking explicit cognitive markers
+    return { state: 'unknown', confidence: 0.0 };
   }
 
-  private evaluateColdStart(snapshot: StateSnapshot): StateLabel {
+  private evaluateColdStart(snapshot: StateSnapshot): StateEvaluation {
     if (
       snapshot.typingVelocity > this.rules.thresholds.velocity.overload ||
       snapshot.revisionRate > this.rules.thresholds.revisionRate.overload
     ) {
-      return 'overload';
+      return { state: 'overload', confidence: StateEvaluator.COLD_START_CONFIDENCE };
     }
 
     if (
       snapshot.typingVelocity < this.rules.thresholds.velocity.coasting &&
       snapshot.revisionRate < this.rules.thresholds.revisionRate.coasting
     ) {
-      return 'coasting';
+      return { state: 'coasting', confidence: StateEvaluator.COLD_START_CONFIDENCE };
     }
 
-    return 'stretch';
+    return { state: 'unknown', confidence: 0.0 };
   }
 }

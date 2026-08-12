@@ -13,6 +13,7 @@ export interface SessionReadModel {
    * Undefined for sessions started implicitly by the platform adapter.
    */
   taskId?: string;
+  hasTypingActivity?: boolean;
   startTime: number;
   endTime?: number;
   status: 'active' | 'paused' | 'ended';
@@ -26,7 +27,8 @@ export class SessionProjectionBuilder implements ProjectionBuilder {
     SessionEvents.STARTED,
     SessionEvents.ENDED,
     SessionEvents.PAUSED,
-    SessionEvents.RESUMED
+    SessionEvents.RESUMED,
+    PromptEvents.TYPED
   ];
 
   constructor(private readonly repo: ReadModelRepository) {}
@@ -45,6 +47,7 @@ export class SessionProjectionBuilder implements ProjectionBuilder {
           sessionId: event.sessionId,
           platform: payload.platform,
           taskId: payload.taskId,
+          hasTypingActivity: false,
           startTime: event.timestamp,
           status: 'active',
           totalPauseDurationMs: 0,
@@ -75,6 +78,10 @@ export class SessionProjectionBuilder implements ProjectionBuilder {
         const payload = event.payload as SessionResumedPayload;
         model.status = 'active';
         model.totalPauseDurationMs += payload.pauseDurationMs;
+        break;
+      }
+      case PromptEvents.TYPED: {
+        model.hasTypingActivity = true;
         break;
       }
     }

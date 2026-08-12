@@ -59,6 +59,12 @@
         },
         "template": {
           "type": "string"
+        },
+        "targetGaps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [

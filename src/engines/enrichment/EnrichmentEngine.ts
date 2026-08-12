@@ -1,40 +1,79 @@
 import { EventBusContract } from '../../core/event-bus/types';
-import { PromptEvents } from '../../core/event-bus/registry';
-import { DomainEvent } from '../../core/event-bus/contracts';
-import config from '../../core/config/enrichment_layers.json';
+import { PromptEvents, CognitiveEvents, SessionEvents } from '../../core/event-bus/registry';
+import { DomainEvent, GapDetectedPayload, StateChangedPayload } from '../../core/event-bus/contracts';
+import { GapType } from '../../core/types/gap.types';
+import { StateLabel } from '../../core/types/state.types';
+import { createDomainEvent } from '../../core/event-bus/createDomainEvent';
+import { OnboardingCompletedPayload } from '../../core/event-bus/contracts';
+import { toSessionId } from '../../core/types/session.types';
+import rawConfig from '../../core/config/enrichment_layers.json';
+
+interface EnrichmentConfig {
+  settings: {
+    latencyTimeoutMs: number;
+    enableCaching: boolean;
+  };
+  layers: Record<string, {
+    defaultPriority: number;
+    template: string;
+    targetGaps?: GapType[];
+  }>;
+  stateSuffixes?: Partial<Record<StateLabel, string>>;
+}
+
+const config = rawConfig as EnrichmentConfig;
 
 export interface EnrichmentEngineOptions {
   readonly latencyTimeoutMs?: number;
+  readonly identityProfile?: OnboardingCompletedPayload;
+  readonly initialActiveGaps?: GapType[];
 }
 
 interface Layer {
   name: string;
   priority: number;
   template: string;
+  targetGaps?: GapType[];
 }
 
 export class EnrichmentEngine {
   private readonly timeoutMs: number;
   private readonly layers: Layer[] = [];
-  
+
   // In-memory state collected from EventBus
-  private currentStateLabel: 'focused' | 'fatigued' | 'distracted' | 'idle' = 'focused';
-  
+  private currentStateLabel: StateLabel = 'unknown';
+  private readonly activeGaps = new Set<GapType>();
+
   constructor(
     private readonly eventBus: EventBusContract,
     options?: EnrichmentEngineOptions
   ) {
     this.timeoutMs = options?.latencyTimeoutMs ?? config.settings.latencyTimeoutMs;
-    this.loadLayers();
+
+    if (options?.initialActiveGaps) {
+      options.initialActiveGaps.forEach(gap => this.activeGaps.add(gap));
+    }
+
+    this.loadLayers(options?.identityProfile);
   }
 
   public start(): void {
     // Listen to State changes to dynamically adjust layer priorities or templates
-    this.eventBus.subscribe('state.changed', (event) => {
-      this.currentStateLabel = event.payload.currentState as any;
+    this.eventBus.subscribe('state.changed', (event: DomainEvent<StateChangedPayload>) => {
+      this.currentStateLabel = event.payload.currentState;
     });
 
-    // We could listen to gap.detected or ghosttext.accepted here to build in-memory heuristics
+    this.eventBus.subscribe(PromptEvents.TYPED, () => {
+      this.activeGaps.clear();
+    });
+
+    this.eventBus.subscribe(CognitiveEvents.GAP_DETECTED, (event: DomainEvent<GapDetectedPayload>) => {
+      this.activeGaps.add(event.payload.gapType);
+    });
+
+    this.eventBus.subscribe(SessionEvents.ENDED, () => {
+      this.activeGaps.clear();
+    });
     console.log('[EnrichmentEngine] Started.');
   }
 
@@ -62,12 +101,22 @@ export class EnrichmentEngine {
 
       try {
         // 2. Compile Templates
-        // Sort layers by priority descending (highest first)
-        const sortedLayers = [...this.layers].sort((a, b) => b.priority - a.priority);
-        
+        // Filter layers based on activeGaps, then sort by priority descending
+        const relevantLayers = this.layers.filter(layer =>
+          !layer.targetGaps ||
+          layer.targetGaps.some(gap => this.activeGaps.has(gap))
+        );
+
+        const sortedLayers = relevantLayers.sort((a, b) => b.priority - a.priority);
+
         let wrapperContext = '';
         for (const layer of sortedLayers) {
           wrapperContext += `\n${layer.template}\n`;
+        }
+
+        const stateSuffix = config.stateSuffixes?.[this.currentStateLabel];
+        if (stateSuffix) {
+          wrapperContext += `\n${stateSuffix}\n`;
         }
 
         // 3. Compose Final Enriched Prompt
@@ -93,12 +142,21 @@ export class EnrichmentEngine {
     });
   }
 
-  private loadLayers(): void {
+  private loadLayers(identityProfile?: OnboardingCompletedPayload): void {
     for (const [name, layerConfig] of Object.entries(config.layers)) {
+      let template = layerConfig.template;
+
+      if (name === 'identity' && identityProfile) {
+        template += `\n- Answer 1: ${identityProfile.answer1}`;
+        template += `\n- Answer 2: ${identityProfile.answer2}`;
+        template += `\n- Answer 3: ${identityProfile.answer3}`;
+      }
+
       this.layers.push({
         name,
         priority: layerConfig.defaultPriority,
-        template: layerConfig.template
+        template,
+        targetGaps: layerConfig.targetGaps
       });
     }
   }
@@ -111,22 +169,20 @@ export class EnrichmentEngine {
   ): void {
     // Simple hash for simulation (In real implementation, use subtlecrypto or similar)
     const textHash = `hash_${rawText.length}`;
-    
+
     const payload = {
       enrichmentVersion: '1.0.0',
       appliedLayers,
-      stateLabel: this.currentStateLabel as any
+      stateLabel: this.currentStateLabel
     };
 
-    const event: DomainEvent<typeof payload> = {
-      id: crypto.randomUUID() as any,
-      type: PromptEvents.ENRICHED,
-      timestamp: Date.now() as any,
-      sessionId: sessionId as any,
-      source: 'EnrichmentEngine',
+    const event = createDomainEvent(
+      PromptEvents.ENRICHED,
+      toSessionId(sessionId),
+      'EnrichmentEngine',
       payload
-    };
+    );
 
-    this.eventBus.publish(PromptEvents.ENRICHED, event as any);
+    this.eventBus.publish(PromptEvents.ENRICHED, event);
   }
 }

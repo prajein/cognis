@@ -15,6 +15,7 @@
  */
 
 import { EventBusContract } from '../../core/event-bus/types';
+import { OnboardingCompletedPayload } from '../../core/event-bus/contracts';
 import { SessionReadModel } from '../../storage/projections/builders/SessionProjectionBuilder';
 import { InsightGateway } from './InsightGateway';
 
@@ -52,6 +53,20 @@ export interface SessionService {
 }
 
 // ---------------------------------------------------------------------------
+// IdentityService — UI-facing façade for user profile
+// ---------------------------------------------------------------------------
+
+/**
+ * The interface that React hooks call to record identity state.
+ */
+export interface IdentityService {
+  /**
+   * Records the completion of the user onboarding flow.
+   */
+  completeOnboarding(payload: OnboardingCompletedPayload): void;
+}
+
+// ---------------------------------------------------------------------------
 // RuntimeState — point-in-time snapshot at bootstrap
 // ---------------------------------------------------------------------------
 
@@ -77,6 +92,7 @@ export interface RuntimeState {
   readonly isStreaming: boolean;
   readonly platform: string;
   readonly connectionStatus: ConnectionStatus;
+  readonly identityStatus: 'loading' | 'onboarded' | 'not_onboarded' | 'error';
 }
 
 /**
@@ -95,6 +111,11 @@ export interface SidepanelContainer {
    * lifecycle actions (start, end, pause, resume).
    */
   readonly sessionService: SessionService;
+
+  /**
+   * The UI-facing identity service for onboarding and profile updates.
+   */
+  readonly identityService: IdentityService;
 
   /**
    * The local sidepanel EventBus (typed as the contract interface).

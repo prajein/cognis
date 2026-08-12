@@ -16,10 +16,12 @@ import { Migration } from "../indexeddb/CognisDatabase";
 import { v1Migration } from "./v1";
 import { v2Migration } from "./v2";
 import { v3Migration } from "./v3";
+import { v4Migration } from "./v4";
 
 /** All migrations in ascending version order. */
-export const migrations: Migration[] = [v1Migration, v2Migration, v3Migration];
+export const migrations: Migration[] = [v1Migration, v2Migration, v3Migration, v4Migration];
 
 export { v1Migration } from "./v1";
 export { v2Migration } from "./v2";
 export { v3Migration } from "./v3";
+export { v4Migration } from "./v4";

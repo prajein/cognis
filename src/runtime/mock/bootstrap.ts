@@ -16,9 +16,12 @@ import { InsightEngine } from '../../engines/insights/InsightEngine';
 import { ResponseIntelligenceEngine } from '../../engines/response/ResponseIntelligenceEngine';
 import { LocalSessionGateway, LocalInsightGateway } from './gateways';
 import { SessionManager } from '../../sidepanel/features/session/manager/SessionManager';
-import { SessionService, SidepanelContainer, ConnectionStatus } from '../../sidepanel/runtime/container';
+import { SessionService, IdentityService, SidepanelContainer, ConnectionStatus } from '../../sidepanel/runtime/container';
 import { MockHarness } from '../../mock/harness/MockHarness';
 import { ScenarioPlayer } from './ScenarioPlayer';
+import { GhostTextAdaptor } from '../../background/adaptation/GhostTextAdaptor';
+import { createDomainEvent } from '../../core/event-bus/createDomainEvent';
+import { OnboardingCompletedPayload, ONBOARDING_SESSION_ID } from '../../core/event-bus/contracts';
 
 /**
  * Bootstraps the Mock Runtime.
@@ -67,6 +70,10 @@ export async function bootstrapMockRuntime(): Promise<{
   const insightEngine = new InsightEngine();
   insightEngine.start(eventBus, readModelRepo);
 
+  // 4b. Start Adaptation loop
+  const ghostTextAdaptor = new GhostTextAdaptor(eventBus);
+  ghostTextAdaptor.start();
+
   // 5. Initialize Gateways (Local implementation for mock)
   const sessionGateway = new LocalSessionGateway(eventBus, readModelRepo);
   const insightGateway = new LocalInsightGateway(readModelRepo);
@@ -83,11 +90,25 @@ export async function bootstrapMockRuntime(): Promise<{
     resumeSession: () => sessionManager.resumeSession(),
   };
 
+  const identityService: IdentityService = {
+    completeOnboarding: (payload: OnboardingCompletedPayload) => {
+      console.log('[MockRuntime] completeOnboarding called', payload);
+      const event = createDomainEvent(
+        'identity.onboarding.completed',
+        ONBOARDING_SESSION_ID,
+        'mock.onboarding',
+        payload
+      );
+      eventBus.publish('identity.onboarding.completed', event);
+    }
+  };
+
   // 7. Hydrate initial state
   let activeSession = null;
   let connectionStatus: ConnectionStatus = 'connected';
   const platform = 'mock-harness';
   const isStreaming = false;
+  const identityStatus = 'not_onboarded';
 
   try {
     activeSession = await sessionGateway.getActiveSession();
@@ -96,8 +117,7 @@ export async function bootstrapMockRuntime(): Promise<{
       sessionManager.restoreSession(activeSession.taskId ?? 'restored-task');
     }
   } catch (error) {
-    console.warn('[MockRuntime] Hydration failed', error);
-    connectionStatus = 'disconnected';
+    console.warn('[MockRuntime] Session hydrate failed:', error);
   }
 
   // 8. Prepare Mock Harness & Scenario Player
@@ -116,13 +136,15 @@ export async function bootstrapMockRuntime(): Promise<{
 
   const container: SidepanelContainer = Object.freeze({
     sessionService,
+    identityService,
     eventBus,
     insightGateway,
     runtimeState: Object.freeze({
       activeSession,
       connectionStatus,
       platform,
-      isStreaming
+      isStreaming,
+      identityStatus
     }),
   });
 

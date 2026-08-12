@@ -23,10 +23,13 @@
 import { EventBus } from '../../core/event-bus/EventBus';
 import { ExtensionEventBridge } from '../../core/event-bus/ExtensionEventBridge';
 import { ConsoleErrorReporter } from '../../core/error/ConsoleErrorReporter';
+import { createDomainEvent } from '../../core/event-bus/createDomainEvent';
+import { ONBOARDING_SESSION_ID, OnboardingCompletedPayload } from '../../core/event-bus/contracts';
 import { IpcSessionGateway } from './SessionGateway';
 import { IpcInsightGateway, InsightGateway } from './InsightGateway';
+import { IpcIdentityGateway } from './IdentityQueryGateway';
 import { SessionManager } from '../features/session/manager/SessionManager';
-import { SessionService } from './container';
+import { SessionService, IdentityService } from './container';
 import type { SidepanelContainer, ConnectionStatus } from './container';
 import {
   SessionEvents,
@@ -36,6 +39,7 @@ import {
   ResponseEvents,
   InsightEvents,
   HardwareEvents,
+  IdentityEvents,
   EventType,
 } from '../../core/event-bus/registry';
 
@@ -48,6 +52,7 @@ const BRIDGED_EVENTS: EventType[] = [
   ...Object.values(ResponseEvents),
   ...Object.values(InsightEvents),
   ...Object.values(HardwareEvents),
+  ...Object.values(IdentityEvents),
 ];
 
 /**
@@ -62,6 +67,28 @@ export async function bootstrapSidepanelRuntime(): Promise<SidepanelContainer> {
   //    or background — each process has its own bus.
   const errorReporter = new ConsoleErrorReporter();
   const eventBus = new EventBus(errorReporter);
+
+  // [M11 Diagnostic] E2E Lifecycle Logger
+  // Intentionally retained for M11 development to monitor prompt-response correlation integrity.
+  // Note: Payload logging explicitly isolates correlation metadata to ensure raw text/prompts are never logged.
+  const debugEvents = [
+    PromptEvents.SENT,
+    ResponseEvents.STARTED,
+    ResponseEvents.COMPLETED,
+    ResponseEvents.ANALYSIS_COMPLETED
+  ];
+  debugEvents.forEach(eventType => {
+    eventBus.subscribe(eventType, (event) => {
+      const payload = event.payload as any;
+      const safePayload = payload ? { 
+          promptEventId: payload.promptEventId, 
+          isCompleted: payload.isCompleted, 
+          isStarting: payload.isStarting,
+          wasEnriched: payload.wasEnriched
+      } : {};
+      console.debug(`[M11 Diagnostic] ${eventType} -> session: ${event.sessionId}`, safePayload);
+    });
+  });
 
   // 2. Instantiate and initialize the Transport (ExtensionEventBridge in 'side-panel' mode).
   //    This opens a persistent chrome.runtime.connect port to the background host,
@@ -89,6 +116,18 @@ export async function bootstrapSidepanelRuntime(): Promise<SidepanelContainer> {
     resumeSession: () => sessionManager.resumeSession(),
   };
 
+  const identityService: IdentityService = {
+    completeOnboarding: (payload: OnboardingCompletedPayload) => {
+      const event = createDomainEvent(
+        'identity.onboarding.completed',
+        ONBOARDING_SESSION_ID,
+        'sidepanel.onboarding',
+        payload
+      );
+      eventBus.publish('identity.onboarding.completed', event);
+    }
+  };
+
   // 5. Hydrate initial state from the background.
   //    Performed before React renders so the first render has real data.
   //    The gateway's getActiveSession() rejects on timeout; we catch here
@@ -97,9 +136,17 @@ export async function bootstrapSidepanelRuntime(): Promise<SidepanelContainer> {
   let connectionStatus: ConnectionStatus = 'connected';
   const platform = 'ChatGPT';
   const isStreaming = false;
+  let identityStatus: 'loading' | 'onboarded' | 'not_onboarded' | 'error' = 'loading';
+
+  const identityGateway = new IpcIdentityGateway();
 
   try {
-    activeSession = await gateway.getActiveSession();
+    const [sessionResult, identityResult] = await Promise.all([
+      gateway.getActiveSession(),
+      identityGateway.getIdentityProfile()
+    ]);
+
+    activeSession = sessionResult;
 
     // If a session was restored, reattach the gateway's internal sessionId
     // and synchronize SessionManager so subsequent lifecycle commands reference
@@ -108,25 +155,34 @@ export async function bootstrapSidepanelRuntime(): Promise<SidepanelContainer> {
       gateway.restoreSession(activeSession.sessionId);
       sessionManager.restoreSession(activeSession.taskId ?? 'restored-task');
     }
+
+    if (identityResult.error) {
+      identityStatus = 'error';
+    } else {
+      identityStatus = identityResult.hasOnboarded ? 'onboarded' : 'not_onboarded';
+    }
   } catch (error) {
     console.warn(
       '[SidepanelRuntime] Background hydration failed — rendering disconnected state.',
       error
     );
     connectionStatus = 'disconnected';
+    identityStatus = 'error';
   }
 
   // 6. Return a frozen container. Object.freeze() prevents consumer code from
   //    accidentally replacing service references after bootstrap.
   const container: SidepanelContainer = Object.freeze({
     sessionService,
+    identityService,
     eventBus,
     insightGateway,
     runtimeState: Object.freeze({
       activeSession,
       connectionStatus,
       platform,
-      isStreaming
+      isStreaming,
+      identityStatus
     }),
   });
 

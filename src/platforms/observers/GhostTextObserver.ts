@@ -4,11 +4,17 @@ import { SessionId } from '../../core/types/session.types';
 import { GhostTextEvents, SessionEvents } from '../../core/event-bus/registry';
 import { GhostTextGeneratedPayload } from '../../core/event-bus/contracts';
 import { createDomainEvent } from '../../core/event-bus/createDomainEvent';
+import { GapType } from '../../core/types/gap.types';
 
 export class GhostTextObserver {
   private overlayNode: HTMLElement | null = null;
-  private currentStem: string | null = null;
-  private currentGapType: string | null = null;
+  /**
+   * The suggestion currently being displayed. Treated as an immutable pair:
+   * both stem and gapType are captured atomically when the overlay appears,
+   * and cleared atomically when it is dismissed or accepted. This guarantees
+   * that every dismissal event carries the exact gapType of the visible suggestion.
+   */
+  private currentSuggestion: { interventionId: string; stem: string; gapType: GapType; generatedAt: number } | null = null;
   private isDestroyed = false;
   private unsubscribeAll: (() => void)[] = [];
   
@@ -34,9 +40,9 @@ export class GhostTextObserver {
 
     // Listen to EventBus for generated stems
     this.unsubscribeAll.push(
-      this.eventBus.subscribe(GhostTextEvents.GENERATED, (e) => this.onGhostTextGenerated(e.payload)),
-      this.eventBus.subscribe(GhostTextEvents.DISMISSED, () => this.clearOverlay()),
-      this.eventBus.subscribe(GhostTextEvents.ACCEPTED, () => this.clearOverlay()),
+      this.eventBus.subscribe(GhostTextEvents.GENERATED, (e) => this.onGhostTextGenerated(e.payload, e.timestamp)),
+      this.eventBus.subscribe(GhostTextEvents.DISMISSED, (e) => this.handleTerminalEvent(e.payload)),
+      this.eventBus.subscribe(GhostTextEvents.ACCEPTED, (e) => this.handleTerminalEvent(e.payload)),
       this.eventBus.subscribe(SessionEvents.ENDED, () => this.destroy())
     );
 
@@ -96,7 +102,7 @@ export class GhostTextObserver {
     document.head.appendChild(style);
   }
 
-  private onGhostTextGenerated(payload: GhostTextGeneratedPayload): void {
+  private onGhostTextGenerated(payload: GhostTextGeneratedPayload, generatedAt: number): void {
     if (this.isDestroyed) return;
 
     const inputNode = document.querySelector(this.config.selectors.promptInput) as HTMLElement;
@@ -108,19 +114,40 @@ export class GhostTextObserver {
       stem = stem.slice(0, 80) + '...';
     }
 
-    this.currentStem = stem;
-    this.currentGapType = payload.gapType as any;
-    
+    const suggestion = {
+      interventionId: payload.interventionId,
+      stem,
+      gapType: payload.gapType,
+      generatedAt
+    };
+
     if (this.state === 'showing') {
-        // If already showing, just update text
+        const oldSuggestion = this.currentSuggestion;
+        this.currentSuggestion = suggestion;
+        
+        if (oldSuggestion) {
+            this.eventBus.publish(
+                GhostTextEvents.DISMISSED,
+                createDomainEvent(GhostTextEvents.DISMISSED, this.sessionId, 'perception.ui', {
+                    interventionId: oldSuggestion.interventionId,
+                    stem: oldSuggestion.stem,
+                    gapType: oldSuggestion.gapType,
+                    reason: 'replaced'
+                })
+            );
+        }
+        
         if (this.overlayNode) {
             this.overlayNode.textContent = stem;
         }
     } else {
         this.state = 'showing';
+        this.currentSuggestion = suggestion;
         this.initialCaretOffset = this.getCaretOffset();
         this.renderOverlay(inputNode, stem);
     }
+
+    this.publishDisplayed(suggestion);
   }
 
   private getCaretOffset(): number | null {
@@ -197,10 +224,15 @@ export class GhostTextObserver {
     }
     
     this.overlayNode = null;
-    this.currentStem = null;
-    this.currentGapType = null;
+    this.currentSuggestion = null;
     this.initialCaretOffset = null;
     this.state = 'idle';
+  }
+
+  private handleTerminalEvent(payload: { interventionId: string }): void {
+    if (this.currentSuggestion && payload.interventionId === this.currentSuggestion.interventionId) {
+      this.clearOverlay();
+    }
   }
 
   private handleSelectionChange = (): void => {
@@ -217,7 +249,7 @@ export class GhostTextObserver {
   };
 
   private handleKeyDown = (e: KeyboardEvent): void => {
-    if (this.state !== 'showing' || !this.currentStem) return;
+    if (this.state !== 'showing' || !this.currentSuggestion) return;
 
     const target = e.target as HTMLElement;
     if (!target.closest(this.config.selectors.promptInput)) return;
@@ -249,14 +281,14 @@ export class GhostTextObserver {
   };
 
   private acceptGhostText(): void {
-    if (!this.currentStem || !this.currentGapType) return;
+    if (!this.currentSuggestion) return;
 
-    const stemToInsert = this.currentStem;
-    const gapType = this.currentGapType;
+    // Snapshot the suggestion before clearOverlay() nullifies it.
+    const { interventionId, stem: stemToInsert, gapType } = this.currentSuggestion;
 
     // Use the verified browser-native insertion method
     const success = document.execCommand('insertText', false, stemToInsert);
-    
+
     if (!success) {
         console.warn('[GhostTextObserver] document.execCommand failed.');
     }
@@ -264,20 +296,39 @@ export class GhostTextObserver {
     this.eventBus.publish(
       GhostTextEvents.ACCEPTED,
       createDomainEvent(GhostTextEvents.ACCEPTED, this.sessionId, 'perception.ui', {
+        interventionId,
         stem: stemToInsert,
-        gapType: gapType as any
+        gapType
       })
     );
   }
 
-  private dismissGhostText(reason: 'explicit' | 'timeout' | 'continued_typing' | 'caret_moved' | 'node_removed' | 'lost_focus'): void {
-    if (!this.currentStem) return;
+  private dismissGhostText(reason: 'explicit' | 'timeout' | 'continued_typing' | 'caret_moved' | 'node_removed' | 'lost_focus' | 'replaced'): void {
+    if (!this.currentSuggestion) return;
+
+    // Snapshot the suggestion before clearOverlay() nullifies it.
+    const { interventionId, stem, gapType } = this.currentSuggestion;
 
     this.eventBus.publish(
       GhostTextEvents.DISMISSED,
       createDomainEvent(GhostTextEvents.DISMISSED, this.sessionId, 'perception.ui', {
-        stem: this.currentStem,
+        interventionId,
+        stem,
+        gapType,
         reason
+      })
+    );
+  }
+
+  private publishDisplayed(suggestion: { interventionId: string; stem: string; gapType: GapType; generatedAt: number }): void {
+    const latency = Date.now() - suggestion.generatedAt;
+    this.eventBus.publish(
+      GhostTextEvents.DISPLAYED,
+      createDomainEvent(GhostTextEvents.DISPLAYED, this.sessionId, 'perception.ui', {
+        interventionId: suggestion.interventionId,
+        gapType: suggestion.gapType,
+        stem: suggestion.stem,
+        displayLatencyMs: latency
       })
     );
   }

@@ -2,12 +2,12 @@ import type { InsightReadModel } from "../../../storage/projections/builders/Ins
 import type { SessionRecord } from "../session/types";
 import type { ProgressSession } from "../../../core/ipc/messages";
 
-export interface ProgressHistory{
+export interface ProgressHistory {
     readonly sessions: readonly ProgressSession[];
-    readonly sessionCount : number;
+    readonly sessionCount: number;
 }
 
-export interface ProgressSummary{
+export interface ProgressSummary {
     readonly sessionCount: number;
     readonly averageQuality: number | null;
     readonly averageReasoning: number | null;
@@ -15,7 +15,7 @@ export interface ProgressSummary{
     readonly totalDurationMs: number;
 }
 
-export interface ProgressState{
+export interface ProgressState {
     readonly history: ProgressHistory;
     readonly summary: ProgressSummary;
 }

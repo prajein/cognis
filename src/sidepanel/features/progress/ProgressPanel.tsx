@@ -35,7 +35,9 @@ export function ProgressPanel({
 
             <ProgressCard
                 title="Insights Generated"
-                value={String(insights?.insights.length ?? 0)}
+                value={String(
+                    insights?.insights.length ?? 0
+                )}
             />
 
             {/* ------------------------------------------------------------- */}
@@ -125,7 +127,9 @@ export function ProgressPanel({
 
                         <MotorProgressChart
                             data={motorProgress.points}
-                            transition={motorProgress.transition}
+                            transition={
+                                motorProgress.transition
+                            }
                         />
 
                         {motorProgress.transition && (

@@ -14,7 +14,9 @@ export class ReconstructorBuffer {
     public readonly sessionId: string,
     public readonly promptHash: string,
     private readonly pipeline: AnalysisPipeline,
-    private readonly onComplete: (sessionId: string) => void
+    private readonly onComplete: (sessionId: string) => void,
+    public readonly promptEventId?: string,
+    public readonly wasEnriched?: boolean
   ) {
     this.resetWatchdog();
   }
@@ -42,7 +44,13 @@ export class ReconstructorBuffer {
     try {
       // Execute the analysis pipeline with the fully reconstructed text.
       // destroy() is guaranteed to run even if the pipeline throws.
-      this.pipeline.execute(this.sessionId, this.promptHash, this.buffer);
+      this.pipeline.execute(
+        this.sessionId,
+        this.promptHash,
+        this.buffer,
+        this.promptEventId,
+        this.wasEnriched
+      );
     } finally {
       this.destroy(); // Explicit garbage collection, always runs
       this.onComplete(this.sessionId);

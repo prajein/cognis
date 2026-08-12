@@ -52,7 +52,8 @@
       "properties": {
         "stretch": { "$ref": "#/definitions/modifier" },
         "coasting": { "$ref": "#/definitions/modifier" },
-        "overload": { "$ref": "#/definitions/modifier" }
+        "overload": { "$ref": "#/definitions/modifier" },
+        "unknown": { "$ref": "#/definitions/modifier" }
       }
     },
     "revisionModifier": {

@@ -77,7 +77,7 @@ export class GapDetectionEngine {
     this.source = options.source ?? DEFAULT_SOURCE;
     this.clock = options.clock;
     this.idFactory = options.idFactory;
-    this.currentState = options.initialState ?? "stretch";
+    this.currentState = options.initialState ?? "unknown";
   }
 
   /**

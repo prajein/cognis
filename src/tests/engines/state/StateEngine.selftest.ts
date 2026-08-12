@@ -107,7 +107,7 @@ export async function runStateEngineTests(): Promise<{ passed: number; failed: n
   const coastingEvent = capturedStateChanges[capturedStateChanges.length - 1];
   if (coastingEvent) {
     c.eq(coastingEvent.payload.currentState, 'coasting', 'Current state is coasting');
-    c.eq(coastingEvent.payload.previousState, 'stretch', 'Previous state was stretch');
+    c.eq(coastingEvent.payload.previousState, 'unknown', 'Previous state was unknown');
   }
 
   // 4. Trigger Overload: Slow typing (1 word over 12 seconds = 5 WPM) with heavy deletion

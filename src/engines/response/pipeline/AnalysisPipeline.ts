@@ -31,7 +31,13 @@ export class AnalysisPipeline {
     this.analyzers = [this.qualityAnalyzer];
   }
 
-  public execute(sessionId: string, promptHash: string, fullText: string): void {
+  public execute(
+    sessionId: string,
+    promptHash: string,
+    fullText: string,
+    promptEventId?: string,
+    wasEnriched?: boolean
+  ): void {
     // The pipeline executes synchronously to ensure it stays within the lifecycle bounds.
     // In a real system, we'd ensure `fullText` never leaves this scope.
     
@@ -41,6 +47,8 @@ export class AnalysisPipeline {
     // Emit the resulting metrics to the EventBus
     const payload: ResponseAnalysisCompletedPayload = {
       promptHash,
+      promptEventId,
+      wasEnriched,
       structuralScore: Number(result.metadata.structureScore) || 0,
       reasoningScore: Number(result.metadata.reasoningScore) || 0,
       completenessScore: Number(result.metadata.completenessScore) || 0, 

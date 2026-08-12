@@ -14,6 +14,7 @@
     },
     "gapResolution": {
       "defaultPriority": 60,
+      "targetGaps": ["mechanism", "second_order"],
       "template": "### Cognitive Guidance\n- The user paused frequently while constructing the logic. Please ensure you clarify edge cases and complex boolean evaluations."
     },
     "outputStructure": {
@@ -24,5 +25,11 @@
       "defaultPriority": 90,
       "template": "### Core Constraints\n- DO NOT output code blocks unless explicitly requested.\n- Focus purely on architectural principles."
     }
+  },
+  "stateSuffixes": {
+    "stretch": "[PRODUCT DECISION PENDING: stretch suffix]",
+    "coasting": "[PRODUCT DECISION PENDING: coasting suffix]",
+    "overload": "[PRODUCT DECISION PENDING: overload suffix]",
+    "unknown": ""
   }
 }

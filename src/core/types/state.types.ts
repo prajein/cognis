@@ -22,4 +22,4 @@
  * - overload: User is operating beyond current capacity.
  *             High cognitive load; risk of abandonment.
  */
-export type StateLabel = 'stretch' | 'coasting' | 'overload';
+export type StateLabel = 'stretch' | 'coasting' | 'overload' | 'unknown';

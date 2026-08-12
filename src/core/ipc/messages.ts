@@ -8,13 +8,18 @@
  * processes can import them without creating cross-context dependencies.
  *
  * Design:
+ *
  * - Every query request carries a discriminated `type` field.
+ *
  * - Every query response wraps its data in a typed `Result` shape so
- *   callers can distinguish success from error without relying on exceptions.
+ * callers can distinguish success from error without relying on exceptions.
  */
 
-import type { SessionReadModel } from '../../storage/projections/builders/SessionProjectionBuilder';
-import type { InsightReadModel } from '../../storage/projections/builders/InsightProjectionBuilder';
+import { SessionReadModel } from '../../storage/projections/builders/SessionProjectionBuilder';
+import { InsightReadModel } from '../../storage/projections/builders/InsightProjectionBuilder';
+import { GapProfileReadModel } from '../../storage/projections/builders/GapProfileProjectionBuilder';
+import { OnboardingCompletedPayload } from '../event-bus/contracts';
+import { GapType } from '../types/gap.types';
 
 // ---------------------------------------------------------------------------
 // Query — QUERY_ACTIVE_SESSION
@@ -32,11 +37,11 @@ export interface QueryActiveSessionRequest {
  * Response: returned by the background SessionQueryHandler.
  *
  * - `session`: The currently active SessionReadModel, or null if no session
- *   is active. A session is considered active when its status is 'active' or
- *   'paused'.
+ * is active. A session is considered active when its status is 'active' or
+ * 'paused'.
  *
  * - `error`: Present only when the handler encountered an unexpected failure.
- *   The sidepanel should treat this as a disconnect and render a safe fallback.
+ * The sidepanel should treat this as a disconnect and render a safe fallback.
  */
 export interface QueryActiveSessionResponse {
     readonly session: SessionReadModel | null;
@@ -115,6 +120,47 @@ export interface QuerySessionInsightsResponse {
 }
 
 // ---------------------------------------------------------------------------
+// Query — QUERY_IDENTITY_PROFILE
+// ---------------------------------------------------------------------------
+
+export interface QueryIdentityProfileRequest {
+    readonly type: 'QUERY_IDENTITY_PROFILE';
+}
+
+export interface QueryIdentityProfileResponse {
+    readonly hasOnboarded: boolean;
+    readonly onboarding: OnboardingCompletedPayload | null;
+    readonly error?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Query — QUERY_SESSION_GAPS
+// ---------------------------------------------------------------------------
+
+export interface QuerySessionGapsRequest {
+    readonly type: 'QUERY_SESSION_GAPS';
+    readonly sessionId: string;
+}
+
+export interface QuerySessionGapsResponse {
+    readonly gapProfile: GapProfileReadModel | null;
+    readonly error?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Query — QUERY_ADAPTATION_STATE
+// ---------------------------------------------------------------------------
+
+export interface QueryAdaptationStateRequest {
+    readonly type: 'QUERY_ADAPTATION_STATE';
+}
+
+export interface QueryAdaptationStateResponse {
+    readonly suppressedGaps: GapType[];
+    readonly error?: string;
+}
+
+// ---------------------------------------------------------------------------
 // Discriminated union for future extensibility
 // ---------------------------------------------------------------------------
 
@@ -124,4 +170,7 @@ export interface QuerySessionInsightsResponse {
 export type BackgroundQueryRequest =
     | QueryActiveSessionRequest
     | QueryProgressRequest
-    | QuerySessionInsightsRequest;
+    | QuerySessionInsightsRequest
+    | QueryIdentityProfileRequest
+    | QueryAdaptationStateRequest
+    | QuerySessionGapsRequest;

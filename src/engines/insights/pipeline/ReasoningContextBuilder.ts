@@ -62,7 +62,14 @@ export class ReasoningContextBuilder {
   }
 
   private createDefaultGapReadModel(sessionId: string, now: number): GapProfileReadModel {
-    const emptyGapState = { detectedCount: 0, acceptedCount: 0, dismissedCount: 0, lastDetectedAt: 0 };
+    const emptyGapState = {
+      detectedCount: 0,
+      displayedCount: 0,
+      acceptedCount: 0,
+      dismissedCount: 0,
+      rejectionCount: 0,
+      lastDetectedAt: 0
+    };
     return {
       projectionId: `gap-profile-v1_${sessionId}`,
       sessionId,

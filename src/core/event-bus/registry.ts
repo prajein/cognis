@@ -53,6 +53,7 @@ export const GhostTextEvents = Object.freeze({
   DISPLAYED: 'ghosttext.displayed',
   ACCEPTED: 'ghosttext.accepted',
   DISMISSED: 'ghosttext.dismissed',
+  MEASUREMENT_COMPUTED: 'ghosttext.measurement.computed',
 } as const);
 
 // ---------------------------------------------------------------------------
@@ -88,6 +89,22 @@ export const HardwareEvents = Object.freeze({
 } as const);
 
 // ---------------------------------------------------------------------------
+// Adaptation Events
+// ---------------------------------------------------------------------------
+
+export const AdaptationEvents = Object.freeze({
+  CONFIGURED: 'adaptation.configured',
+} as const);
+
+// ---------------------------------------------------------------------------
+// Identity Events
+// ---------------------------------------------------------------------------
+
+export const IdentityEvents = Object.freeze({
+  ONBOARDING_COMPLETED: 'identity.onboarding.completed',
+} as const);
+
+// ---------------------------------------------------------------------------
 // Derived EventType union
 // ---------------------------------------------------------------------------
 
@@ -102,4 +119,6 @@ export type EventType =
   | typeof GhostTextEvents[keyof typeof GhostTextEvents]
   | typeof ResponseEvents[keyof typeof ResponseEvents]
   | typeof InsightEvents[keyof typeof InsightEvents]
-  | typeof HardwareEvents[keyof typeof HardwareEvents];
+  | typeof HardwareEvents[keyof typeof HardwareEvents]
+  | typeof AdaptationEvents[keyof typeof AdaptationEvents]
+  | typeof IdentityEvents[keyof typeof IdentityEvents];
