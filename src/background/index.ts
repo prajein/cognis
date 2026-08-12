@@ -45,6 +45,7 @@ import { InsightEngine } from '../engines/insights/InsightEngine';
 import { ResponseIntelligenceEngine } from '../engines/response/ResponseIntelligenceEngine';
 import { SessionQueryHandler } from './handlers/SessionQueryHandler';
 import { InsightQueryHandler } from './handlers/InsightQueryHandler';
+import { ProgressQueryHandler } from './handlers/ProgressQueryHandler';
 import { IdentityQueryHandler } from './handlers/IdentityQueryHandler';
 import { GapProfileQueryHandler } from './handlers/GapProfileQueryHandler';
 import { AdaptationQueryHandler } from './handlers/AdaptationQueryHandler';
@@ -63,7 +64,12 @@ async function bootstrapBackground(): Promise<void> {
   const eventBus = new EventBus(errorReporter);
 
   // Initialize EventBridge in host mode (background script)
-  const eventBridge = new ExtensionEventBridge('background', eventBus, allEvents);
+  const eventBridge = new ExtensionEventBridge(
+    'background',
+    eventBus,
+    allEvents
+  );
+
   eventBridge.initialize();
 
   try {
@@ -76,11 +82,17 @@ async function bootstrapBackground(): Promise<void> {
     const profileRepo = new ProfileRepository(db);
 
     // 3. Start Subscriber
-    const subscriber = new EventStoreSubscriber(eventBus, eventRepo, errorReporter);
+    const subscriber = new EventStoreSubscriber(
+      eventBus,
+      eventRepo,
+      errorReporter
+    );
+
     subscriber.subscribeToAll();
 
     // 4. Initialize Projections
     const readModelRepo = new ReadModelRepository(db);
+
     const builders = [
       new SessionProjectionBuilder(readModelRepo),
       new GapProfileProjectionBuilder(readModelRepo),
@@ -89,45 +101,98 @@ async function bootstrapBackground(): Promise<void> {
       new ResponseMetricsProjectionBuilder(readModelRepo),
       new InsightProjectionBuilder(readModelRepo)
     ];
-    const projectionManager = new ProjectionManager(builders, eventBus, eventRepo, errorReporter);
+
+    const projectionManager = new ProjectionManager(
+      builders,
+      eventBus,
+      eventRepo,
+      errorReporter
+    );
+
     projectionManager.startLiveSubscriptions();
 
     // 5. Register background query handlers
     //    Each handler is a dedicated class; no query logic is inlined here.
-    const sessionQueryHandler = new SessionQueryHandler(readModelRepo);
+
+    const sessionQueryHandler =
+      new SessionQueryHandler(readModelRepo);
+
     sessionQueryHandler.register();
 
-    const insightQueryHandler = new InsightQueryHandler(readModelRepo);
+    const insightQueryHandler =
+      new InsightQueryHandler(readModelRepo);
+
     insightQueryHandler.register();
 
-    const identityQueryHandler = new IdentityQueryHandler(profileRepo);
+    // Week 7 — Progress query handler
+    const progressQueryHandler =
+      new ProgressQueryHandler(readModelRepo);
+
+    progressQueryHandler.register();
+
+    // Identity/profile query handler
+    const identityQueryHandler =
+      new IdentityQueryHandler(profileRepo);
+
     identityQueryHandler.register();
 
-    const gapProfileQueryHandler = new GapProfileQueryHandler(readModelRepo);
+    // Gap profile query handler
+    const gapProfileQueryHandler =
+      new GapProfileQueryHandler(readModelRepo);
+
     gapProfileQueryHandler.register();
 
-    const adaptationQueryHandler = new AdaptationQueryHandler(profileRepo);
+    // Adaptation state query handler
+    const adaptationQueryHandler =
+      new AdaptationQueryHandler(profileRepo);
+
     adaptationQueryHandler.register();
 
     // 6. Start Engines
-    const responseIntelligenceEngine = new ResponseIntelligenceEngine();
+    const responseIntelligenceEngine =
+      new ResponseIntelligenceEngine();
+
     responseIntelligenceEngine.start(eventBus);
 
-    const insightEngine = new InsightEngine();
-    insightEngine.start(eventBus, readModelRepo);
+    // 7. Start Insight Engine (Apex Reasoning Layer)
+    const insightEngine =
+      new InsightEngine();
 
-    // 7. Start Adaptation loop
-    const adaptationPrefRepo = new AdaptationPreferenceRepository(db);
-    const ghostTextAdaptor = new GhostTextAdaptor(eventBus, adaptationPrefRepo);
+    insightEngine.start(
+      eventBus,
+      readModelRepo
+    );
+
+    // 8. Start Adaptation loop
+    const adaptationPrefRepo =
+      new AdaptationPreferenceRepository(db);
+
+    const ghostTextAdaptor =
+      new GhostTextAdaptor(
+        eventBus,
+        adaptationPrefRepo
+      );
+
     ghostTextAdaptor.start();
 
-    const sessionProfileUpdater = new SessionProfileUpdater(profileRepo, readModelRepo, eventBus, errorReporter);
+    const sessionProfileUpdater =
+      new SessionProfileUpdater(
+        profileRepo,
+        readModelRepo,
+        eventBus,
+        errorReporter
+      );
+
     sessionProfileUpdater.start();
 
-    const identityProfileWriter = new IdentityProfileWriter(profileRepo);
+    const identityProfileWriter =
+      new IdentityProfileWriter(profileRepo);
+
     identityProfileWriter.start(eventBus);
 
-    console.log('[Background] Bootstrap complete. Cognis is active.');
+    console.log(
+      '[Background] Bootstrap complete. Cognis is active.'
+    );
   } catch (error) {
     errorReporter.report(error, {
       eventType: 'system.bootstrap.failed',
