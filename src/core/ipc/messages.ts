@@ -15,6 +15,8 @@
 
 import { SessionReadModel } from '../../storage/projections/builders/SessionProjectionBuilder';
 import { InsightReadModel } from '../../storage/projections/builders/InsightProjectionBuilder';
+import { GapProfileReadModel } from '../../storage/projections/builders/GapProfileProjectionBuilder';
+import { OnboardingCompletedPayload } from '../event-bus/contracts';
 
 // ---------------------------------------------------------------------------
 // Query — QUERY_ACTIVE_SESSION
@@ -65,6 +67,21 @@ export interface QueryIdentityProfileRequest {
 
 export interface QueryIdentityProfileResponse {
   readonly hasOnboarded: boolean;
+  readonly onboarding: OnboardingCompletedPayload | null;
+  readonly error?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Query — QUERY_SESSION_GAPS
+// ---------------------------------------------------------------------------
+
+export interface QuerySessionGapsRequest {
+  readonly type: 'QUERY_SESSION_GAPS';
+  readonly sessionId: string;
+}
+
+export interface QuerySessionGapsResponse {
+  readonly gapProfile: GapProfileReadModel | null;
   readonly error?: string;
 }
 
@@ -88,4 +105,9 @@ export interface QueryAdaptationStateResponse {
 // ---------------------------------------------------------------------------
 
 /** All query request types that the background message router recognises. */
-export type BackgroundQueryRequest = QueryActiveSessionRequest | QuerySessionInsightsRequest | QueryIdentityProfileRequest | QueryAdaptationStateRequest;
+export type BackgroundQueryRequest =
+  | QueryActiveSessionRequest
+  | QuerySessionInsightsRequest
+  | QueryIdentityProfileRequest
+  | QueryAdaptationStateRequest
+  | QuerySessionGapsRequest;

@@ -16,6 +16,7 @@ import {
   AdaptationEvents,
   EventType
 } from '../core/event-bus/registry';
+import { toSessionId } from '../core/types/session.types';
 
 const eventsToBridge: EventType[] = [
   ...Object.values(PromptEvents),
@@ -27,7 +28,16 @@ const eventsToBridge: EventType[] = [
   SessionEvents.RESUMED
 ];
 
-function bootstrapContentScript(): void {
+import {
+  QueryActiveSessionRequest,
+  QueryActiveSessionResponse,
+  QueryIdentityProfileRequest,
+  QueryIdentityProfileResponse,
+  QuerySessionGapsRequest,
+  QuerySessionGapsResponse
+} from '../core/ipc/messages';
+
+async function bootstrapContentScript(): Promise<void> {
   const hostname = window.location.hostname;
   if (!hostname.includes('chatgpt.com') && !hostname.includes('claude.ai')) {
     console.warn('[Cognis] Content script loaded on unsupported domain:', hostname);
@@ -49,11 +59,49 @@ function bootstrapContentScript(): void {
   const stateEngine = new StateEngine(eventBus);
   stateEngine.start();
 
-  const enrichmentEngine = new EnrichmentEngine(eventBus);
+  // Deterministic Asynchronous Bootstrap Sequence
+  const activeSessionReq: QueryActiveSessionRequest = { type: 'QUERY_ACTIVE_SESSION' };
+  const sessionRes = await new Promise<QueryActiveSessionResponse>((resolve) =>
+    chrome.runtime.sendMessage(activeSessionReq, resolve)
+  );
+
+  let identityProfile = undefined;
+  let initialActiveGaps = undefined;
+  const activeSessionId = sessionRes?.session?.sessionId;
+
+  if (activeSessionId) {
+    const identityReq: QueryIdentityProfileRequest = { type: 'QUERY_IDENTITY_PROFILE' };
+    const gapsReq: QuerySessionGapsRequest = { type: 'QUERY_SESSION_GAPS', sessionId: activeSessionId };
+
+    const [identityRes, gapsRes] = await Promise.all([
+      new Promise<QueryIdentityProfileResponse>((resolve) => chrome.runtime.sendMessage(identityReq, resolve)),
+      new Promise<QuerySessionGapsResponse>((resolve) => chrome.runtime.sendMessage(gapsReq, resolve))
+    ]);
+
+    if (!chrome.runtime.lastError) {
+      if (identityRes?.onboarding) {
+        identityProfile = identityRes.onboarding;
+      }
+      if (gapsRes?.gapProfile?.gaps) {
+        initialActiveGaps = Object.keys(gapsRes.gapProfile.gaps) as any[];
+      }
+    }
+  }
+
+  const enrichmentEngine = new EnrichmentEngine(eventBus, {
+    identityProfile,
+    initialActiveGaps
+  });
   enrichmentEngine.start();
 
   const platformManager = new PlatformManager(eventBus, gapEngine, enrichmentEngine);
   platformManager.prepareAdapter(window.location.href);
+
+  // If a session was already active (e.g. from a page reload), begin observation immediately
+  if (activeSessionId) {
+    console.log('[Cognis] Recovered active session:', activeSessionId);
+    platformManager.beginObservation(toSessionId(activeSessionId));
+  }
 
   eventBus.subscribe(SessionEvents.STARTED, (event: DomainEvent<any>) => {
     console.log('[Cognis] Authoritative session started received in content script:', event.payload);
@@ -68,4 +116,4 @@ function bootstrapContentScript(): void {
   console.log('[Cognis] Content script initialized. Platform Ready.');
 }
 
-bootstrapContentScript();
+bootstrapContentScript().catch(err => console.error('[Cognis] Bootstrap failed', err));

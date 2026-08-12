@@ -4,6 +4,7 @@ import { DomainEvent, GapDetectedPayload, StateChangedPayload } from '../../core
 import { GapType } from '../../core/types/gap.types';
 import { StateLabel } from '../../core/types/state.types';
 import { createDomainEvent } from '../../core/event-bus/createDomainEvent';
+import { OnboardingCompletedPayload } from '../../core/event-bus/contracts';
 import { toSessionId } from '../../core/types/session.types';
 import rawConfig from '../../core/config/enrichment_layers.json';
 
@@ -24,6 +25,8 @@ const config = rawConfig as EnrichmentConfig;
 
 export interface EnrichmentEngineOptions {
   readonly latencyTimeoutMs?: number;
+  readonly identityProfile?: OnboardingCompletedPayload;
+  readonly initialActiveGaps?: GapType[];
 }
 
 interface Layer {
@@ -36,17 +39,22 @@ interface Layer {
 export class EnrichmentEngine {
   private readonly timeoutMs: number;
   private readonly layers: Layer[] = [];
-  
+
   // In-memory state collected from EventBus
   private currentStateLabel: StateLabel = 'unknown';
   private readonly activeGaps = new Set<GapType>();
-  
+
   constructor(
     private readonly eventBus: EventBusContract,
     options?: EnrichmentEngineOptions
   ) {
     this.timeoutMs = options?.latencyTimeoutMs ?? config.settings.latencyTimeoutMs;
-    this.loadLayers();
+
+    if (options?.initialActiveGaps) {
+      options.initialActiveGaps.forEach(gap => this.activeGaps.add(gap));
+    }
+
+    this.loadLayers(options?.identityProfile);
   }
 
   public start(): void {
@@ -94,13 +102,13 @@ export class EnrichmentEngine {
       try {
         // 2. Compile Templates
         // Filter layers based on activeGaps, then sort by priority descending
-        const relevantLayers = this.layers.filter(layer => 
-          !layer.targetGaps || 
+        const relevantLayers = this.layers.filter(layer =>
+          !layer.targetGaps ||
           layer.targetGaps.some(gap => this.activeGaps.has(gap))
         );
 
         const sortedLayers = relevantLayers.sort((a, b) => b.priority - a.priority);
-        
+
         let wrapperContext = '';
         for (const layer of sortedLayers) {
           wrapperContext += `\n${layer.template}\n`;
@@ -134,12 +142,20 @@ export class EnrichmentEngine {
     });
   }
 
-  private loadLayers(): void {
+  private loadLayers(identityProfile?: OnboardingCompletedPayload): void {
     for (const [name, layerConfig] of Object.entries(config.layers)) {
+      let template = layerConfig.template;
+
+      if (name === 'identity' && identityProfile) {
+        template += `\n- Answer 1: ${identityProfile.answer1}`;
+        template += `\n- Answer 2: ${identityProfile.answer2}`;
+        template += `\n- Answer 3: ${identityProfile.answer3}`;
+      }
+
       this.layers.push({
         name,
         priority: layerConfig.defaultPriority,
-        template: layerConfig.template,
+        template,
         targetGaps: layerConfig.targetGaps
       });
     }
@@ -153,7 +169,7 @@ export class EnrichmentEngine {
   ): void {
     // Simple hash for simulation (In real implementation, use subtlecrypto or similar)
     const textHash = `hash_${rawText.length}`;
-    
+
     const payload = {
       enrichmentVersion: '1.0.0',
       appliedLayers,

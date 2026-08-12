@@ -29,7 +29,7 @@ class Checker {
 
 export async function runEnrichmentEngineTests(): Promise<{ passed: number; failed: number; failures: string[] }> {
   const c = new Checker();
-  
+
   let virtualTime = 10000;
   const clock = () => toTimestamp(virtualTime);
   let idCount = 0;
@@ -157,6 +157,59 @@ export async function runEnrichmentEngineTests(): Promise<{ passed: number; fail
   c.ok(result.finalEnriched.endsWith(`\n### User Prompt\n${rawTestString}`), 'Exact rawText is appended byte-for-byte at the end of the enriched output');
 
   engine.stop();
+
+  // --- Week 5 Causal Consumption Tests ---
+
+  // Test 13: Identity Causal Consumption
+  const eventBusA = new EventBus(new ConsoleErrorReporter());
+  const engineA = new EnrichmentEngine(eventBusA, {
+    latencyTimeoutMs: 1000,
+    identityProfile: { answer1: 'X', answer2: 'Y', answer3: 'Z' }
+  });
+  engineA.start();
+
+  const eventBusB = new EventBus(new ConsoleErrorReporter());
+  const engineB = new EnrichmentEngine(eventBusB, {
+    latencyTimeoutMs: 1000,
+    identityProfile: { answer1: 'A', answer2: 'B', answer3: 'C' }
+  });
+  engineB.start();
+
+  const outA = await engineA.enrich('test', sessionId);
+  const outB = await engineB.enrich('test', sessionId);
+  c.ok(outA !== outB, 'Identity Causal Consumption: outputA !== outputB');
+  c.ok(outA.includes('- Answer 1: X'), 'Profile A values are present in output A');
+  c.ok(outB.includes('- Answer 1: A'), 'Profile B values are present in output B');
+
+  engineA.stop();
+  engineB.stop();
+
+  // Test 14: Persisted Gap Causal Consumption
+  const eventBusGap = new EventBus(new ConsoleErrorReporter());
+  const engineGap = new EnrichmentEngine(eventBusGap, {
+    latencyTimeoutMs: 1000,
+    initialActiveGaps: ['mechanism']
+  });
+  engineGap.start();
+
+  let gapAppliedLayers: string[] = [];
+  eventBusGap.subscribe(PromptEvents.ENRICHED, (evt: any) => {
+    gapAppliedLayers = evt.payload.appliedLayers;
+  });
+
+  await engineGap.enrich('test', sessionId);
+  c.ok(gapAppliedLayers.includes('gapResolution'), 'Persisted mechanism gap adds gapResolution layer without live event');
+  engineGap.stop();
+
+  // Test 15: Session Isolation & Failure Isolation
+  // Covered inherently by constructing new engines per context, but let's test isolation between two engines:
+  const eventBusIso = new EventBus(new ConsoleErrorReporter());
+  const engineSessA = new EnrichmentEngine(eventBusIso, { initialActiveGaps: ['mechanism'] });
+  const engineSessB = new EnrichmentEngine(eventBusIso, { initialActiveGaps: [] }); // Simulating a different session context
+
+  const isoOutA = await engineSessA.enrich('test', sessionId);
+  const isoOutB = await engineSessB.enrich('test', sessionId);
+  c.ok(isoOutA !== isoOutB, 'Session A gap state does not leak into Session B (different engine instance)');
   console.log(`[SelfTest EnrichmentEngine] passed=${c.passed} failed=${c.failed}`);
   if (c.failed > 0) {
     console.error('Failures:\n - ' + c.failures.join('\n - '));
