@@ -14,6 +14,7 @@ export const claudeV1: PlatformConfig = {
     responseBlock: '.font-claude-response',
     streamingIndicator: '[data-is-streaming]',
     promptInput: '[contenteditable="true"].ProseMirror',
-    submitButton: 'button[aria-label="Send Message"], button[aria-label="Send message"]'
+    submitButton: 'button[aria-label="Send Message"], button[aria-label="Send message"]',
+    scrollContainer: 'div.flex-1.overflow-y-auto'
   }
 };

@@ -42,6 +42,7 @@ export const CognitiveEvents = Object.freeze({
   PAUSE_DETECTED: 'pause.detected',
   STATE_CHANGED: 'state.changed',
   GAP_DETECTED: 'gap.detected',
+  READING_ENGAGEMENT_MEASURED: 'reading.engagement.measured',
 } as const);
 
 // ---------------------------------------------------------------------------

@@ -262,6 +262,33 @@ export interface GapDetectedPayload {
   readonly confidence: number;
 }
 
+/**
+ * Payload for reading.engagement.measured
+ *
+ * Purpose: Records observable reading engagement metrics for a generated answer.
+ * Producer: Perception Layer (ReadingObserver)
+ * Consumer: Storage Layer, Insight Engine
+ */
+export interface ReadingEngagementMeasuredPayload {
+  /** The unique event ID of the prompt.sent event that triggered the response being read. */
+  readonly promptEventId: string;
+
+  /** Hash of the prompt that triggered the response being read. */
+  readonly promptHash: string;
+
+  /** Time from response start to first user action in milliseconds. */
+  readonly readingDurationMs: number;
+
+  /** Calculated scroll velocity in pixels per second. */
+  readonly scrollVelocityPxPerSec: number;
+
+  /** Count of scroll direction reversals exceeding the jitter threshold. */
+  readonly scrollReversals: number;
+
+  /** The action that terminated the reading phase. */
+  readonly actionType: 'typed' | 'sent' | 'session_ended' | 'interrupted';
+}
+
 // ---------------------------------------------------------------------------
 // Ghost Text Event Payloads
 // ---------------------------------------------------------------------------
@@ -718,6 +745,7 @@ export interface CognisEventMap {
   'pause.detected': PauseDetectedPayload;
   'state.changed': StateChangedPayload;
   'gap.detected': GapDetectedPayload;
+  'reading.engagement.measured': ReadingEngagementMeasuredPayload;
 
   // Ghost Text
   'ghosttext.generated': GhostTextGeneratedPayload;

@@ -1,5 +1,5 @@
-import { DomainEvent, SessionStartedPayload, SessionEndedPayload, SessionPausedPayload, SessionResumedPayload } from '../../../core/event-bus/contracts';
-import { PromptEvents, SessionEvents, EventType } from '../../../core/event-bus/registry';
+import { DomainEvent, SessionStartedPayload, SessionEndedPayload, SessionPausedPayload, SessionResumedPayload, ReadingEngagementMeasuredPayload } from '../../../core/event-bus/contracts';
+import { PromptEvents, SessionEvents, CognitiveEvents, EventType } from '../../../core/event-bus/registry';
 import { ProjectionBuilder } from '../interfaces';
 import { ReadModelRepository } from '../../repositories/ReadModelRepository';
 
@@ -19,6 +19,12 @@ export interface SessionReadModel {
   status: 'active' | 'paused' | 'ended';
   totalPauseDurationMs: number;
   lastUpdated: number;
+
+  totalScrollReversals?: number;
+  averageScrollVelocityPxPerSec?: number;
+  averageReadingDurationMs?: number;
+  totalReadingPhases?: number;
+  processedReadingPrompts?: string[];
 }
 
 export class SessionProjectionBuilder implements ProjectionBuilder {
@@ -28,14 +34,15 @@ export class SessionProjectionBuilder implements ProjectionBuilder {
     SessionEvents.ENDED,
     SessionEvents.PAUSED,
     SessionEvents.RESUMED,
-    PromptEvents.TYPED
+    PromptEvents.TYPED,
+    CognitiveEvents.READING_ENGAGEMENT_MEASURED
   ];
 
   constructor(private readonly repo: ReadModelRepository) {}
 
   public async handleEvent(event: DomainEvent<any>): Promise<void> {
     const id = `${this.projectionId}_${event.sessionId}`;
-    
+
     // Retrieve existing state or initialize
     let model = await this.repo.get<SessionReadModel>(id);
 
@@ -54,7 +61,7 @@ export class SessionProjectionBuilder implements ProjectionBuilder {
           lastUpdated: event.timestamp
         };
       } else {
-        // We received a lifecycle event before STARTED. 
+        // We received a lifecycle event before STARTED.
         // In a strictly ordered event sourced system, this is rare but possible during replays if partial.
         console.warn(`[SessionProjectionBuilder] Received ${event.type} before session.started for ${event.sessionId}`);
         return;
@@ -82,6 +89,43 @@ export class SessionProjectionBuilder implements ProjectionBuilder {
       }
       case PromptEvents.TYPED: {
         model.hasTypingActivity = true;
+        break;
+      }
+      case CognitiveEvents.READING_ENGAGEMENT_MEASURED: {
+        const payload = event.payload as ReadingEngagementMeasuredPayload;
+
+        // Idempotency Check
+        if (!model.processedReadingPrompts) {
+          model.processedReadingPrompts = [];
+        }
+
+        if (model.processedReadingPrompts.includes(payload.promptEventId)) {
+          // Already aggregated this reading phase
+          break;
+        }
+
+        model.processedReadingPrompts.push(payload.promptEventId);
+
+        // Safe Initialization
+        const oldTotalPhases = model.totalReadingPhases || 0;
+        const oldAvgVelocity = model.averageScrollVelocityPxPerSec || 0;
+        const oldAvgTime = model.averageReadingDurationMs || 0;
+
+        // Additive
+        model.totalScrollReversals = (model.totalScrollReversals || 0) + payload.scrollReversals;
+
+        // Rolling Averages
+        const newTotalPhases = oldTotalPhases + 1;
+        model.totalReadingPhases = newTotalPhases;
+
+        model.averageScrollVelocityPxPerSec = Math.round(
+          ((oldAvgVelocity * oldTotalPhases) + payload.scrollVelocityPxPerSec) / newTotalPhases
+        );
+
+        model.averageReadingDurationMs = Math.round(
+          ((oldAvgTime * oldTotalPhases) + payload.readingDurationMs) / newTotalPhases
+        );
+
         break;
       }
     }

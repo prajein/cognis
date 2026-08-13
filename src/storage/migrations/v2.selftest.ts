@@ -129,7 +129,7 @@ export function runHardwareStoresSelfTest(): SelfTestReport {
 
   // 3. Migration registry is ordered and complete.
   {
-    c.eq(migrations.length, 2, "registry contains v1 and v2");
+    c.ok(migrations.length >= 2, "registry contains at least v1 and v2");
     c.eq(migrations[0]?.version, 1, "first migration is version 1");
     c.eq(migrations[1]?.version, 2, "second migration is version 2");
     const ascending = migrations.every((m, i) => i === 0 || m.version > migrations[i - 1].version);

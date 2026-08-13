@@ -9,6 +9,8 @@ export interface PlatformSelectors {
   promptInput: string;
   /** The submit button for the prompt */
   submitButton: string;
+  /** The scroll target container for reading engagement observation */
+  scrollContainer?: string | 'window';
 }
 
 export interface PlatformConfig {
