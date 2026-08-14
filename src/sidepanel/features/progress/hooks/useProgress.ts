@@ -39,9 +39,12 @@ import type {
 } from "../models/skillTransfer";
 
 const gateway = new ProgressQueryGateway();
+
 const progressService = new ProgressService();
 
-const skillBalanceModel = new SkillBalanceModel();
+const skillBalanceModel =
+    new SkillBalanceModel();
+
 const skillBalanceAggregation =
     new SkillBalanceAggregation();
 
@@ -76,7 +79,7 @@ interface UseProgressResult {
 
 export function useProgress(
     taskId: string | null,
-     profile: ActivationProfile | null
+    profile: ActivationProfile | null
 ): UseProgressResult {
     const [progress, setProgress] =
         useState<ProgressResult | null>(null);
@@ -144,16 +147,17 @@ export function useProgress(
              * Step 4:
              * Generate the motor curve only for motor tasks.
              *
-             * Preserve the existing behavior here.
+             * The actual activation profile taxonomy uses
+             * "Sport and Movement".
              * ---------------------------------------------------------
              */
             const motorProgress =
                 profile.category === "Sport and Movement"
-                ? progressService.buildMotorProgress(
-                    sessions,
-                    profile
-                )
-                : null;
+                    ? progressService.buildMotorProgress(
+                          sessions,
+                          profile
+                      )
+                    : null;
 
             /*
              * ---------------------------------------------------------
