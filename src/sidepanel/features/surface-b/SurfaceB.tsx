@@ -387,21 +387,35 @@ export function SurfaceB() {
             <ProgressPanel
                 session={currentSession}
                 insights={insights}
+
                 cognitiveProgress={
                     progress?.cognitiveProgress ??
                     null
                 }
+
                 motorProgress={
                     progress?.motorProgress ??
                     null
                 }
+
+                skillBalance={
+                    progress?.skillBalance ??
+                    null
+                }
+
+                skillTransfer={
+                    progress?.skillTransfer ??
+                    null
+                }
+
                 progressLoading={
                     progressLoading
                 }
+
                 progressError={
                     progressError
                 }
-            />
+                />
 
         </div>
     );

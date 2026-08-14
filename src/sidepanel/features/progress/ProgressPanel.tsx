@@ -9,6 +9,8 @@ export function ProgressPanel({
     insights,
     cognitiveProgress,
     motorProgress,
+    skillBalance,
+    skillTransfer,
     progressLoading,
     progressError,
 }: ProgressPanelProps) {
@@ -70,11 +72,64 @@ export function ProgressPanel({
             {!progressLoading &&
                 !progressError &&
                 !cognitiveProgress &&
-                !motorProgress && (
+                !motorProgress &&
+                !skillBalance && (
                     <ProgressCard
                         title="Progress Analytics"
                         value="No completed sessions yet"
                     />
+                )}
+
+            {/* ------------------------------------------------------------- */}
+            {/* Skill balance                                                  */}
+            {/* ------------------------------------------------------------- */}
+
+            {!progressLoading &&
+                !progressError &&
+                skillBalance && (
+                    <section>
+                        <h4>
+                            Skill Balance
+                        </h4>
+
+                        <ProgressCard
+                            title="Coefficient of Variation"
+                            value={skillBalance.coefficientOfVariation.toFixed(
+                                2
+                            )}
+                        />
+
+                        <ProgressCard
+                            title="Practice Distribution"
+                            value={
+                                skillBalance.classification ===
+                                "balanced"
+                                    ? "Balanced"
+                                    : "Concentrated"
+                            }
+                        />
+                    </section>
+                )}
+
+            {/* ------------------------------------------------------------- */}
+            {/* Cross-subclass transfer                                        */}
+            {/* ------------------------------------------------------------- */}
+
+            {!progressLoading &&
+                !progressError &&
+                skillTransfer && (
+                    <section>
+                        <h4>
+                            Cross-Subclass Transfer
+                        </h4>
+
+                        <ProgressCard
+                            title="Prediction"
+                            value={
+                                skillTransfer.description
+                            }
+                        />
+                    </section>
                 )}
 
             {/* ------------------------------------------------------------- */}
