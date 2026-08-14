@@ -4,6 +4,7 @@ import { SessionId } from '../../core/types/session.types';
 import { ClaudeResponseObserver } from './ClaudeResponseObserver';
 import { TypingObserver } from '../observers/TypingObserver';
 import { GhostTextObserver } from '../observers/GhostTextObserver';
+import { ReadingObserver } from '../observers/ReadingObserver';
 import { SelectorRegistry } from '../selectors/registry';
 import { GapDetectionEngine } from '../../engines/gap/GapDetectionEngine';
 import { PromptEnricher } from '../interfaces/PromptEnricher';
@@ -22,6 +23,7 @@ export class ClaudeAdapter implements PlatformAdapter {
   private typingObserver: TypingObserver | null = null;
   private ghostTextObserver: GhostTextObserver | null = null;
   private ghostTextMeasurementObserver: GhostTextMeasurementObserver | null = null;
+  private readingObserver: ReadingObserver | null = null;
   private submitInterceptor: SubmitInterceptor | null = null;
 
   constructor(
@@ -41,12 +43,14 @@ export class ClaudeAdapter implements PlatformAdapter {
     this.typingObserver = new TypingObserver(this.eventBus, config, sessionId, this.gapEngine);
     this.ghostTextObserver = new GhostTextObserver(this.eventBus, config, sessionId);
     this.ghostTextMeasurementObserver = new GhostTextMeasurementObserver(this.eventBus, config, sessionId);
+    this.readingObserver = new ReadingObserver(this.eventBus, config, sessionId);
     this.submitInterceptor = new SubmitInterceptor(this.eventBus, config, sessionId, this.promptEnricher);
 
     this.responseObserver.connect();
     this.typingObserver.connect();
     this.ghostTextObserver.connect();
     this.ghostTextMeasurementObserver.connect();
+    this.readingObserver.connect();
     this.submitInterceptor.connect();
     
     console.log('[ClaudeAdapter] Started observing Claude via Composition Root.');
@@ -68,6 +72,10 @@ export class ClaudeAdapter implements PlatformAdapter {
     if (this.ghostTextMeasurementObserver) {
       this.ghostTextMeasurementObserver.destroy();
       this.ghostTextMeasurementObserver = null;
+    }
+    if (this.readingObserver) {
+      this.readingObserver.destroy();
+      this.readingObserver = null;
     }
     if (this.submitInterceptor) {
       this.submitInterceptor.destroy();
