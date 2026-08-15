@@ -1,6 +1,8 @@
 import type { InsightReadModel } from "../../../storage/projections/builders/InsightProjectionBuilder";
 import type { SessionRecord } from "../session/types";
 import type { ProgressSession } from "../../../core/ipc/messages";
+import type { SkillBalanceResult } from "./models/skillBalance";
+import type { SkillTransferNote } from "./models/skillTransfer";
 
 export interface ProgressHistory {
     readonly sessions: readonly ProgressSession[];
@@ -26,6 +28,9 @@ export interface ProgressPanelProps {
 
     cognitiveProgress: CognitiveProgress | null;
     motorProgress: MotorProgress | null;
+
+    skillBalance?: SkillBalanceResult | null;
+    skillTransfer?: SkillTransferNote | null;
 
     progressLoading: boolean;
     progressError: string | null;
