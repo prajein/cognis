@@ -3,10 +3,11 @@ import { DomainEvent } from '../../core/event-bus/contracts';
 import { EventRepository } from '../repositories/EventRepository';
 import { ProjectionBuilder } from './interfaces';
 import { SessionId } from '../../core/types/session.types';
+import { SessionEvents } from '../../core/event-bus/registry';
 
 /**
  * ProjectionManager
- * 
+ *
  * Orchestrator for all Projection Builders.
  * Wires builders to the EventBus for live updates, and manages
  * the rebuild/replay pipeline from the EventRepository.
@@ -48,8 +49,22 @@ export class ProjectionManager {
    */
   public async rebuildForSession(sessionId: SessionId): Promise<void> {
     console.log(`[ProjectionManager] Starting rebuild for session ${sessionId}...`);
-    
-    // 1. Clear state
+
+    // 1. Fetch strictly ordered events first
+    const events = await this.eventRepo.getBySessionOrdered(sessionId);
+
+    // 2. Safely guard against destructive rebuilds of compacted history
+    if (events.length === 0) {
+      console.warn(`[ProjectionManager] Refusing to rebuild: No events found for session ${sessionId}. If this session was compacted by retention, the existing projection is intentionally preserved.`);
+      return;
+    }
+
+    if (events[0].type !== SessionEvents.STARTED) {
+      console.warn(`[ProjectionManager] Refusing to rebuild: Session ${sessionId} history is partially compacted (missing STARTED event). Rebuilding now would corrupt the projection.`);
+      return;
+    }
+
+    // 3. Clear state (safe to proceed)
     for (const builder of this.builders) {
       try {
         await builder.clear();
@@ -61,10 +76,7 @@ export class ProjectionManager {
       }
     }
 
-    // 2. Fetch strictly ordered events
-    const events = await this.eventRepo.getBySessionOrdered(sessionId);
-    
-    // 3. Sequentially process events (batch optimizations deferred per architectural plan)
+    // 4. Sequentially process events (batch optimizations deferred per architectural plan)
     for (const event of events) {
       for (const builder of this.builders) {
         if (builder.consumedEvents.includes(event.type)) {
