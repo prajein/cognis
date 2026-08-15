@@ -776,5 +776,34 @@ export interface CognisEventMap {
 
   // Identity
   'identity.onboarding.completed': OnboardingCompletedPayload;
+
+  // Storage
+  'storage.retention.completed': StorageRetentionCompletedPayload;
 }
 
+
+// ---------------------------------------------------------------------------
+// Storage Event Payloads
+// ---------------------------------------------------------------------------
+
+/**
+ * Payload for storage.retention.completed
+ *
+ * Purpose: Records the completion of a storage retention batch.
+ *          Contains metadata only, strictly avoiding raw payload details.
+ * Producer: RetentionPolicy
+ * Consumer: Telemetry/Analytics
+ */
+export interface StorageRetentionCompletedPayload {
+  /** Timestamp that was used as the cutoff for deletion. */
+  readonly cutoffTimestamp: number;
+
+  /** Total number of records deleted across all stores. */
+  readonly totalDeleted: number;
+
+  /** Breakdown of records deleted per store. */
+  readonly storeCounts: Record<string, number>;
+
+  /** Duration of the retention operation in milliseconds. */
+  readonly durationMs: number;
+}

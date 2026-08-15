@@ -106,6 +106,14 @@ export const IdentityEvents = Object.freeze({
 } as const);
 
 // ---------------------------------------------------------------------------
+// Storage Events
+// ---------------------------------------------------------------------------
+
+export const StorageEvents = Object.freeze({
+  RETENTION_COMPLETED: 'storage.retention.completed',
+} as const);
+
+// ---------------------------------------------------------------------------
 // Derived EventType union
 // ---------------------------------------------------------------------------
 
@@ -122,4 +130,5 @@ export type EventType =
   | typeof InsightEvents[keyof typeof InsightEvents]
   | typeof HardwareEvents[keyof typeof HardwareEvents]
   | typeof AdaptationEvents[keyof typeof AdaptationEvents]
-  | typeof IdentityEvents[keyof typeof IdentityEvents];
+  | typeof IdentityEvents[keyof typeof IdentityEvents]
+  | typeof StorageEvents[keyof typeof StorageEvents];

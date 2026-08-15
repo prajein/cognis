@@ -15,6 +15,9 @@ import { AutomaticityProjectionBuilder } from '../storage/projections/builders/A
 import { ResponseMetricsProjectionBuilder } from '../storage/projections/builders/ResponseMetricsProjectionBuilder';
 import { InsightProjectionBuilder } from '../storage/projections/builders/InsightProjectionBuilder';
 import { AdaptationPreferenceRepository } from '../storage/repositories/AdaptationPreferenceRepository';
+import { RetentionRepository } from '../storage/repositories/RetentionRepository';
+import { RetentionPolicy } from '../storage/retention/RetentionPolicy';
+import { initializeRetentionScheduler } from './retention-scheduler';
 
 import {
   SessionEvents,
@@ -189,6 +192,11 @@ async function bootstrapBackground(): Promise<void> {
       new IdentityProfileWriter(profileRepo);
 
     identityProfileWriter.start(eventBus);
+
+    // 9. Start Retention Scheduler
+    const retentionRepo = new RetentionRepository(db);
+    const retentionPolicy = new RetentionPolicy(retentionRepo, eventBus, errorReporter);
+    initializeRetentionScheduler(db, retentionPolicy);
 
     console.log(
       '[Background] Bootstrap complete. Cognis is active.'
