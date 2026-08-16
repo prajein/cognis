@@ -38,16 +38,16 @@ export class PlatformManager {
     }
 
     this.activeAdapter = this.createAdapterForUrl(currentUrl);
-    
+
     if (!this.activeAdapter) {
       console.warn('[PlatformManager] No supported platform detected for URL:', currentUrl);
     }
   }
 
   /**
-   * Phase 2: Begins observation when a session is explicitly started by the user.
+   * Phase 2: Begins observation for an explicit or implicitly created session.
    */
-  public beginObservation(sessionId: SessionId): void {
+  public beginObservation(sessionId?: SessionId): void {
     if (!this.activeAdapter) {
       console.warn('[PlatformManager] Cannot begin observation: no active adapter prepared.');
       return;
@@ -58,11 +58,31 @@ export class PlatformManager {
       return;
     }
 
-    this.currentSessionId = sessionId;
-    
+    let actualSessionId = sessionId;
+    let generatedEvent = null;
+
+    if (!actualSessionId) {
+      actualSessionId = toSessionId(crypto.randomUUID());
+      const platform = this.getPlatformName(window.location.href);
+
+      generatedEvent = createDomainEvent(
+        SessionEvents.STARTED,
+        actualSessionId,
+        'platform-adapter',
+        { platform }
+      );
+    }
+
+    // Set state before publishing to prevent reentrancy loops from synchronous listeners
+    this.currentSessionId = actualSessionId;
+
+    if (generatedEvent) {
+      this.eventBus.publish(SessionEvents.STARTED, generatedEvent);
+    }
+
     // Start the platform adapter
     this.activeAdapter.start(this.currentSessionId);
-    
+
     // Bind lifecycle listeners for session pause/end logic
     document.addEventListener('visibilitychange', this.boundOnVisibilityChange);
     window.addEventListener('beforeunload', this.boundOnBeforeUnload);
@@ -75,7 +95,7 @@ export class PlatformManager {
     if (this.activeAdapter) {
       this.activeAdapter.stop();
     }
-    
+
     document.removeEventListener('visibilitychange', this.boundOnVisibilityChange);
     window.removeEventListener('beforeunload', this.boundOnBeforeUnload);
 
