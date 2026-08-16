@@ -25,7 +25,9 @@ const eventsToBridge: EventType[] = [
   ...Object.values(GhostTextEvents),
   ...Object.values(AdaptationEvents),
   SessionEvents.PAUSED,
-  SessionEvents.RESUMED
+  SessionEvents.RESUMED,
+  SessionEvents.STARTED,
+  SessionEvents.ENDED
 ];
 
 import {
@@ -97,10 +99,11 @@ async function bootstrapContentScript(): Promise<void> {
   const platformManager = new PlatformManager(eventBus, gapEngine, enrichmentEngine);
   platformManager.prepareAdapter(window.location.href);
 
-  // If a session was already active (e.g. from a page reload), begin observation immediately
   if (activeSessionId) {
     console.log('[Cognis] Recovered active session:', activeSessionId);
     platformManager.beginObservation(toSessionId(activeSessionId));
+  } else {
+    platformManager.beginObservation();
   }
 
   eventBus.subscribe(SessionEvents.STARTED, (event: DomainEvent<any>) => {
