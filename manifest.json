@@ -22,7 +22,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://chatgpt.com/*", "*://claude.ai/*"],
+      "matches": ["*://chatgpt.com/*", "*://claude.ai/*", "*://gemini.google.com/*"],
       "js": ["src/content/content-script.ts"]
     }
   ],

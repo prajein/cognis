@@ -1,0 +1,14 @@
+{
+  "version": "0.1.0",
+  "note": "Static question templates for the highest-leverage-gap signal (EnrichmentEngine). This is a LOCAL heuristic substitute for the Build Brief §5.5 'silent meta-call' LLM pass — no on-device LLM is available, so instead of asking a model 'what 3 context items would most change your response', the engine ranks its own already-detected gap.detected signals and surfaces one static question per gap type. No raw prompt text is ever involved; the id/question pair is public, non-sensitive copy.",
+  "questions": {
+    "intentionality": { "id": "intentionality-v1", "question": "What are you ultimately trying to achieve here?" },
+    "audience": { "id": "audience-v1", "question": "Who is this actually for?" },
+    "constraint": { "id": "constraint-v1", "question": "Any hard limits or boundaries this needs to respect?" },
+    "stakes": { "id": "stakes-v1", "question": "How much does getting this right matter, and why?" },
+    "assumption": { "id": "assumption-v1", "question": "What are you assuming that the AI might not know?" },
+    "mechanism": { "id": "mechanism-v1", "question": "Do you care how this gets done, or just the result?" },
+    "temporal": { "id": "temporal-v1", "question": "Is there a timeline or sequence this needs to follow?" },
+    "second_order": { "id": "second_order-v1", "question": "What could this affect downstream?" }
+  }
+}

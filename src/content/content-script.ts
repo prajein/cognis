@@ -41,7 +41,11 @@ import {
 
 async function bootstrapContentScript(): Promise<void> {
   const hostname = window.location.hostname;
-  if (!hostname.includes('chatgpt.com') && !hostname.includes('claude.ai')) {
+  const isSupportedPlatform =
+    hostname.includes('chatgpt.com') ||
+    hostname.includes('claude.ai') ||
+    hostname.includes('gemini.google.com');
+  if (!isSupportedPlatform) {
     console.warn('[Cognis] Content script loaded on unsupported domain:', hostname);
     return;
   }

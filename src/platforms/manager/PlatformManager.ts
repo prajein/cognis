@@ -1,6 +1,7 @@
 import { PlatformAdapter } from '../interfaces/PlatformAdapter';
 import { ChatGPTAdapter } from '../chatgpt/ChatGPTAdapter';
 import { ClaudeAdapter } from '../claude/ClaudeAdapter';
+import { GeminiAdapter } from '../gemini/GeminiAdapter';
 import { EventBus } from '../../core/event-bus/EventBus';
 import { SessionId, toSessionId } from '../../core/types/session.types';
 import { createDomainEvent } from '../../core/event-bus/createDomainEvent';
@@ -143,12 +144,16 @@ export class PlatformManager {
     if (url.includes('claude.ai')) {
       return new ClaudeAdapter(this.eventBus, this.gapEngine, this.promptEnricher);
     }
+    if (url.includes('gemini.google.com')) {
+      return new GeminiAdapter(this.eventBus, this.gapEngine, this.promptEnricher);
+    }
     return null;
   }
 
   private getPlatformName(url: string): string {
     if (url.includes('chatgpt.com')) return 'chatgpt';
     if (url.includes('claude.ai')) return 'claude';
+    if (url.includes('gemini.google.com')) return 'gemini';
     return 'unknown';
   }
 }

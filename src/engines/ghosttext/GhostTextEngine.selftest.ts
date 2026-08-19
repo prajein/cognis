@@ -239,6 +239,26 @@ export function runGhostTextSelfTest(): SelfTestReport {
     c.eq(got[0]?.payload.interventionId, "injected-id", "deterministic id: uses injected factory");
   }
 
+  // 10. v0.2 rotation with more than two variants: a third cycle continues
+  //     rotating (not just toggling between two), and never repeats the
+  //     immediately-prior stem.
+  {
+    const wideConfig: GhostTextStemsConfig = {
+      ...FIXTURE,
+      stems: { ...FIXTURE.stems, intentionality: ["Stem A ", "Stem B ", "Stem C "] },
+    };
+    const bus = new EventBus(silentReporter);
+    const got = capture(bus);
+    const engine = newEngine(bus, wideConfig);
+    engine.start();
+    for (let i = 0; i < 3; i++) {
+      emitGap(bus, "intentionality", 1000 + i * 1000);
+      emitPause(bus, 1500, 1100 + i * 1000);
+    }
+    c.eq(got.length, 3, "wide rotation: three cycles emit three stems");
+    c.eq(got.map((e) => e.payload.stem).join(","), "Stem A ,Stem B ,Stem C ", "wide rotation: cycles through all variants in order");
+  }
+
   return { passed: c.passed, failed: c.failed, failures: c.failures };
 }
 

@@ -1,11 +1,12 @@
 {
-  "version": "0.1.0",
-  "note": "Cognis v0.1 gap-detection rules. Rule-based, on-device heuristics only (no network, no model weights) per the Week-1 'draft the gap-detection rules and pick the on-device approach' deliverable. Every threshold, marker list and weight lives here — never hardcoded in engine code (Engineering Constitution: 'never hardcode numbers or text'). Confidences are model estimates, not measurements (Disclosure Rule).",
+  "version": "0.2.0",
+  "note": "Cognis v0.2 gap-detection rules. Rule-based, on-device heuristics only (no network, no model weights) per the Week-1 'draft the gap-detection rules and pick the on-device approach' deliverable, upgraded from v0.1's binary any-marker-present check to a weighted-evidence matcher (see GapHeuristics.matchScore). Every threshold, marker list and weight lives here — never hardcoded in engine code (Engineering Constitution: 'never hardcode numbers or text'). Confidences are model estimates, not measurements (Disclosure Rule). This is still a heuristic classifier, not real NLU — markers can carry an optional {marker, weight} form to down-weight generic/ambiguous evidence; see 'mechanism' and 'temporal' below for examples.",
   "settings": {
     "minTextLength": 12,
     "emitThreshold": 0.5,
     "maxSignals": 3,
-    "cognitivePauseMs": 1200
+    "cognitivePauseMs": 1200,
+    "addressedThreshold": 0.5
   },
   "stateModifiers": {
     "stretch": 0.0,
@@ -70,7 +71,13 @@
       "gapType": "mechanism",
       "baseConfidence": 0.5,
       "satisfiedWhenAnyPresent": [
-        "how ", "using", "via", "with the", "approach", "method", "steps",
+        { "marker": "how ", "weight": 0.5 },
+        { "marker": "using", "weight": 0.6 },
+        { "marker": "via", "weight": 0.6 },
+        "with the",
+        { "marker": "approach", "weight": 0.7 },
+        { "marker": "method", "weight": 0.7 },
+        { "marker": "steps", "weight": 0.8 },
         "step by step", "algorithm", "implement", "technique", "strategy",
         "by means of", "the way to", "process"
       ]
@@ -79,8 +86,13 @@
       "gapType": "temporal",
       "baseConfidence": 0.35,
       "satisfiedWhenAnyPresent": [
-        "first", "then", "next", "before", "after", "by tomorrow", "by today",
-        "by friday", "deadline", "timeline", "when ", "sequence", "in order",
+        { "marker": "first", "weight": 0.5 },
+        { "marker": "then", "weight": 0.5 },
+        { "marker": "next", "weight": 0.5 },
+        "before", "after", "by tomorrow", "by today",
+        "by friday", "deadline", "timeline",
+        { "marker": "when ", "weight": 0.5 },
+        "sequence", "in order",
         "step 1", "phase", "schedule", "eventually", "finally"
       ]
     },

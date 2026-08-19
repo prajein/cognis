@@ -3,6 +3,8 @@ import { IInsightEngine } from './interfaces';
 import { ReasoningPipeline } from './pipeline/ReasoningPipeline';
 import { InsightScheduler } from './InsightScheduler';
 import { V1AutomaticityEvaluator } from './strategies/V1AutomaticityEvaluator';
+import { FormulationGapTrendStrategy } from './strategies/FormulationGapTrendStrategy';
+import { CognitiveStateProxyStrategy } from './strategies/CognitiveStateProxyStrategy';
 
 import { ReadModelRepository } from '../../storage/repositories/ReadModelRepository';
 import { ReasoningContextBuilder } from './pipeline/ReasoningContextBuilder';
@@ -18,7 +20,9 @@ export class InsightEngine implements IInsightEngine {
 
     // Initialize Strategies
     const strategies = [
-      new V1AutomaticityEvaluator()
+      new V1AutomaticityEvaluator(),
+      new FormulationGapTrendStrategy(),
+      new CognitiveStateProxyStrategy()
     ];
 
     // Initialize Context Builder

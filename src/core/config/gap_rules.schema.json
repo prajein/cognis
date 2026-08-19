@@ -41,6 +41,12 @@
           "type": "integer",
           "description": "Pause duration (ms) that marks a cognitive (thinking) pause — the ghost-text trigger window. Shared with the Ghost Text engine.",
           "minimum": 0
+        },
+        "addressedThreshold": {
+          "type": "number",
+          "description": "v0.2: weighted-evidence score at or above which a gap is considered addressed. Optional; GapHeuristics defaults to 0.5 when omitted (backward compatible with v0.1 configs).",
+          "minimum": 0,
+          "maximum": 1
         }
       }
     },
@@ -107,10 +113,24 @@
         },
         "satisfiedWhenAnyPresent": {
           "type": "array",
-          "description": "Lexical markers; if ANY appears in the prompt (case-insensitive), the gap is considered addressed and is NOT emitted.",
+          "description": "Evidence markers; presence accumulates weighted evidence (v0.2) that the gap is addressed. A plain string is a full-weight (1.0) marker; the object form lets tuning down-weight generic/ambiguous markers.",
           "minItems": 1,
-          "items": { "type": "string", "minLength": 1 }
+          "items": {
+            "oneOf": [
+              { "type": "string", "minLength": 1 },
+              { "$ref": "#/definitions/weightedMarker" }
+            ]
+          }
         }
+      }
+    },
+    "weightedMarker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["marker"],
+      "properties": {
+        "marker": { "type": "string", "minLength": 1 },
+        "weight": { "type": "number", "minimum": 0, "maximum": 1 }
       }
     }
   }

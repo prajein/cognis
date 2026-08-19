@@ -35,6 +35,19 @@ export const PromptEvents = Object.freeze({
 } as const);
 
 // ---------------------------------------------------------------------------
+// Enrichment Events
+// ---------------------------------------------------------------------------
+
+export const EnrichmentEvents = Object.freeze({
+  /**
+   * The single highest-confidence unaddressed gap, identified for a pre-send
+   * nudge. Local heuristic substitute for the "silent meta-call" LLM pass —
+   * see EnrichmentLeverageGapIdentifiedPayload for why.
+   */
+  LEVERAGE_GAP_IDENTIFIED: 'enrichment.leverageGap',
+} as const);
+
+// ---------------------------------------------------------------------------
 // Cognitive Events
 // ---------------------------------------------------------------------------
 
@@ -124,6 +137,7 @@ export const StorageEvents = Object.freeze({
 export type EventType =
   | typeof SessionEvents[keyof typeof SessionEvents]
   | typeof PromptEvents[keyof typeof PromptEvents]
+  | typeof EnrichmentEvents[keyof typeof EnrichmentEvents]
   | typeof CognitiveEvents[keyof typeof CognitiveEvents]
   | typeof GhostTextEvents[keyof typeof GhostTextEvents]
   | typeof ResponseEvents[keyof typeof ResponseEvents]

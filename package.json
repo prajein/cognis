@@ -7,7 +7,9 @@
     "verify:brain-maps": "npx tsx src/sidepanel/features/brain-map/utils/verify-assets.ts",
     "build:brain-maps": "npm run generate:brain-maps && npm run verify:brain-maps",
     "build": "vite build",
-    "test": "npm run validate:schemas && npm run build:brain-maps"
+    "test": "npm run validate:schemas && npm run build:brain-maps",
+    "selftest": "npx tsx scripts/run-selftests.ts",
+    "eval:analyzers": "npx tsx docs/benchmarks/run-analyzer-eval.ts"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0-beta.33",

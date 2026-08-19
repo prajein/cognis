@@ -1,12 +1,13 @@
 import { EventBusContract } from '../../core/event-bus/types';
-import { PromptEvents, CognitiveEvents, SessionEvents } from '../../core/event-bus/registry';
+import { PromptEvents, EnrichmentEvents, CognitiveEvents, SessionEvents } from '../../core/event-bus/registry';
 import { DomainEvent, GapDetectedPayload, StateChangedPayload } from '../../core/event-bus/contracts';
 import { GapType } from '../../core/types/gap.types';
 import { StateLabel } from '../../core/types/state.types';
 import { createDomainEvent } from '../../core/event-bus/createDomainEvent';
 import { OnboardingCompletedPayload } from '../../core/event-bus/contracts';
-import { toSessionId } from '../../core/types/session.types';
+import { SessionId, toSessionId } from '../../core/types/session.types';
 import rawConfig from '../../core/config/enrichment_layers.json';
+import rawLeverageGapConfig from '../../core/config/leverage_gap_questions.json';
 
 interface EnrichmentConfig {
   settings: {
@@ -22,6 +23,21 @@ interface EnrichmentConfig {
 }
 
 const config = rawConfig as EnrichmentConfig;
+
+interface LeverageGapQuestion {
+  readonly id: string;
+  readonly question: string;
+}
+interface LeverageGapQuestionsConfig {
+  readonly questions: Partial<Record<GapType, LeverageGapQuestion>>;
+}
+const leverageGapConfig = rawLeverageGapConfig as LeverageGapQuestionsConfig;
+
+/** A tracked gap signal: confidence plus recency, for leverage-gap ranking. */
+interface TrackedGap {
+  readonly confidence: number;
+  readonly atMs: number;
+}
 
 export interface EnrichmentEngineOptions {
   readonly latencyTimeoutMs?: number;
@@ -42,7 +58,7 @@ export class EnrichmentEngine {
 
   // In-memory state collected from EventBus
   private currentStateLabel: StateLabel = 'unknown';
-  private readonly activeGaps = new Set<GapType>();
+  private readonly activeGaps = new Map<GapType, TrackedGap>();
 
   constructor(
     private readonly eventBus: EventBusContract,
@@ -51,7 +67,10 @@ export class EnrichmentEngine {
     this.timeoutMs = options?.latencyTimeoutMs ?? config.settings.latencyTimeoutMs;
 
     if (options?.initialActiveGaps) {
-      options.initialActiveGaps.forEach(gap => this.activeGaps.add(gap));
+      const hydratedAt = Date.now();
+      options.initialActiveGaps.forEach(gap =>
+        this.activeGaps.set(gap, { confidence: 0, atMs: hydratedAt })
+      );
     }
 
     this.loadLayers(options?.identityProfile);
@@ -68,7 +87,11 @@ export class EnrichmentEngine {
     });
 
     this.eventBus.subscribe(CognitiveEvents.GAP_DETECTED, (event: DomainEvent<GapDetectedPayload>) => {
-      this.activeGaps.add(event.payload.gapType);
+      this.activeGaps.set(event.payload.gapType, {
+        confidence: event.payload.confidence,
+        atMs: Date.now(),
+      });
+      this.publishLeverageGap(event.sessionId);
     });
 
     this.eventBus.subscribe(SessionEvents.ENDED, () => {
@@ -140,6 +163,49 @@ export class EnrichmentEngine {
         }
       }
     });
+  }
+
+  /**
+   * Ranks currently-active gaps by confidence and publishes
+   * `enrichment.leverageGap` for the single strongest one, as a pre-send
+   * nudge signal. Local heuristic substitute for the deferred "silent
+   * meta-call" LLM pass (Build Brief §5.5) — see
+   * `EnrichmentLeverageGapIdentifiedPayload`. Carries only a gap type,
+   * confidence, and static question-template id — never prompt text
+   * (ADR-019). No-op if no gap has a matching question template or none are
+   * currently active.
+   */
+  private publishLeverageGap(sessionId: SessionId): void {
+    let strongestType: GapType | null = null;
+    let strongest: TrackedGap | null = null;
+
+    for (const [gapType, tracked] of this.activeGaps) {
+      if (strongest === null || tracked.confidence > strongest.confidence) {
+        strongestType = gapType;
+        strongest = tracked;
+      }
+    }
+
+    if (strongestType === null || strongest === null) {
+      return;
+    }
+
+    const template = leverageGapConfig.questions[strongestType];
+    if (!template) {
+      return;
+    }
+
+    const event = createDomainEvent(
+      EnrichmentEvents.LEVERAGE_GAP_IDENTIFIED,
+      sessionId,
+      'EnrichmentEngine',
+      {
+        gapType: strongestType,
+        confidence: strongest.confidence,
+        questionTemplateId: template.id,
+      },
+    );
+    this.eventBus.publish(EnrichmentEvents.LEVERAGE_GAP_IDENTIFIED, event);
   }
 
   private loadLayers(identityProfile?: OnboardingCompletedPayload): void {

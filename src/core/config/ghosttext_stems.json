@@ -1,6 +1,6 @@
 {
-  "version": "0.1.0",
-  "note": "Cognis v0.1 ghost-text stems. On-device template stems (no model, no network) offered during a cognitive pause to help the user address a detected gap. v0.1 is a fixed template set; a small pretrained stem model is post-August and will slot in behind the same engine surface. Stems are gentle openers the user continues — never full sentences put in their mouth.",
+  "version": "0.2.0",
+  "note": "Cognis v0.2 ghost-text stems. Still on-device templates (no model, no network) offered during a cognitive pause to help the user address a detected gap — a small pretrained stem model is a future upgrade behind the same engine surface. v0.2 widens each gap type from 2 to several rotating variants (no-immediate-repeat) — always a short static opener the user continues, never text derived from what the user typed: a stem is published on ghosttext.generated, so anything folded into it would travel over the EventBus, which ADR-019 reserves for hashes/derived signals only, never raw prompt text.",
   "settings": {
     "pauseThresholdMs": 1200,
     "gapRecencyMs": 8000,
@@ -9,35 +9,50 @@
   "stems": {
     "intentionality": [
       "My goal here is to ",
-      "What I'm ultimately trying to do is "
+      "What I'm ultimately trying to do is ",
+      "Really, I'm trying to accomplish ",
+      "The main thing I want is "
     ],
     "audience": [
       "This is for ",
-      "The audience is "
+      "The audience is ",
+      "I'm writing this for ",
+      "The people reading this will be "
     ],
     "constraint": [
       "It needs to ",
-      "A key constraint is "
+      "A key constraint is ",
+      "This has to stay within ",
+      "One limit I have is "
     ],
     "stakes": [
       "This matters because ",
-      "What's at stake is "
+      "What's at stake is ",
+      "This is important since ",
+      "The reason this matters is "
     ],
     "assumption": [
       "For context, ",
-      "I'm assuming that "
+      "I'm assuming that ",
+      "Worth noting: ",
+      "One thing to know here is "
     ],
     "mechanism": [
       "The approach should be ",
-      "Specifically, it should work by "
+      "Specifically, it should work by ",
+      "The way I want this to work is "
     ],
     "temporal": [
       "The timeline is ",
-      "First, "
+      "First, ",
+      "This needs to happen by ",
+      "In terms of sequence, "
     ],
     "second_order": [
       "One downstream effect to consider is ",
-      "A knock-on effect could be "
+      "A knock-on effect could be ",
+      "Something this might affect later is ",
+      "A trade-off worth naming is "
     ]
   }
 }
