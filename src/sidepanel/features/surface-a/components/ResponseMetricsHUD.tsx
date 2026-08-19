@@ -27,31 +27,20 @@ export function ResponseMetricsHUD({ state, metrics }: ResponseMetricsHUDProps) 
     };
 
     return (
-        <section 
-            className={`session-metrics ${isStale ? 'metrics-stale' : ''}`} 
-            style={{ 
-                marginTop: '16px', 
-                borderTop: '1px solid var(--border-color)', 
-                paddingTop: '16px',
-            }}
+        <section
+            className={`session-metrics ${isStale ? 'metrics-stale' : ''}`}
+            style={{ paddingTop: 'var(--gap-md)', borderTop: '1px solid var(--border)' }}
         >
-            <h2 className="section-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <span>Response Analysis</span>
+            <div className="task-picker-header">
+                <h2 className="section-heading" style={{ marginBottom: 0 }}>Response analysis</h2>
                 {isStale && (
-                    <span style={{ 
-                        fontSize: '10px', 
-                        color: 'var(--bg-panel)',
-                        backgroundColor: 'var(--text-primary)',
-                        padding: '2px 6px',
-                        borderRadius: '4px',
-                        fontWeight: 600
-                    }}>
-                        Analyzing new response...
+                    <span className="micro-label" style={{ color: 'var(--pulse)' }}>
+                        Analyzing new response…
                     </span>
                 )}
-            </h2>
-            
-            <div style={{ opacity: isStale ? 0.6 : 1, transition: 'opacity 0.2s ease-in-out' }}>
+            </div>
+
+            <div style={{ opacity: isStale ? 0.6 : 1, transition: 'opacity 0.2s ease-in-out', display: 'flex', flexDirection: 'column', gap: 'var(--gap-sm)' }}>
                 <div className="metric-row">
                     <span>Quality Score</span>
                     <div className="metric-bar-container">
@@ -94,8 +83,8 @@ export function ResponseMetricsHUD({ state, metrics }: ResponseMetricsHUDProps) 
                 </div>
             </div>
 
-            <div className="metric-row" style={{ marginTop: '8px' }}>
-                <span style={{ color: 'var(--text-secondary)' }}>Flags: <span style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: '10px' }}>{formatFlags(metrics.flags)}</span></span>
+            <div className="metric-row">
+                <span>Flags: <span className="mono" style={{ color: 'var(--fg)', fontSize: '11px' }}>{formatFlags(metrics.flags)}</span></span>
             </div>
             </div>
         </section>

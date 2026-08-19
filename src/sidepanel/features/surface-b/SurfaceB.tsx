@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { TaskPicker } from "./components/TaskPicker";
 import { BrainMap } from "./components/BrainMap";
 import { DisclosureLabel } from "./components/DisclosureLabel";
+import { TabNav, type SurfaceBTab } from "./components/TabNav";
 
 import { Header } from "./components/Header";
 import { EmptyState } from "./components/EmptyState";
@@ -48,6 +49,9 @@ export function SurfaceB() {
 
     const [selectedTaskId, setSelectedTaskId] =
         useState<string | null>(null);
+
+    const [activeTab, setActiveTab] =
+        useState<SurfaceBTab>("task");
 
     const taskOptions: TaskOption[] = useMemo(
         () =>
@@ -212,30 +216,12 @@ export function SurfaceB() {
                     isStreaming={isStreaming}
                 />
 
-                <div
-                    style={{
-                        marginTop: "64px",
-                    }}
-                >
-                    <p
-                        className="state-desc"
-                        style={{
-                            color:
-                                "var(--text-primary)",
-                        }}
-                    >
-                        Cognis is temporarily
-                        disconnected.
+                <div className="hero-state" style={{ marginTop: "1rem" }}>
+                    <p className="state-desc">
+                        Cognis is temporarily disconnected.
                     </p>
-
-                    <p
-                        className="state-desc"
-                        style={{
-                            marginTop: "8px",
-                        }}
-                    >
-                        Your ChatGPT session is not
-                        affected.
+                    <p className="state-desc">
+                        Your ChatGPT session is not affected.
                     </p>
                 </div>
             </div>
@@ -244,16 +230,13 @@ export function SurfaceB() {
 
 
     // -----------------------------------------------------------------------
-    // Determine primary session view
+    // Session tab content
     // -----------------------------------------------------------------------
 
-    let view;
+    let sessionView;
 
-    if (
-        currentState ===
-        SessionState.SESSION_ENDED
-    ) {
-        view = (
+    if (currentState === SessionState.SESSION_ENDED) {
+        sessionView = (
             <SessionReview
                 session={currentSession}
                 insightsModel={insights}
@@ -263,16 +246,11 @@ export function SurfaceB() {
         currentState === SessionState.IDLE ||
         currentState === SessionState.TASK_SELECTED
     ) {
-        // TASK_SELECTED means a task has been selected
-        // but the session has not started yet.
-        view = (
-            <EmptyState
-                startSession={startSession}
-            />
+        sessionView = (
+            <EmptyState startSession={startSession} />
         );
     } else {
-        // OBSERVING / LIVE STATE
-        view = (
+        sessionView = (
             <>
                 <CurrentState
                     sessionState={currentState}
@@ -304,9 +282,7 @@ export function SurfaceB() {
                 <div
                     style={{
                         display: "flex",
-                        gap: "8px",
-                        alignSelf: "center",
-                        marginTop: "16px",
+                        gap: "0.6rem",
                     }}
                 >
                     <button
@@ -315,7 +291,7 @@ export function SurfaceB() {
                             handleExportM11Telemetry
                         }
                     >
-                        Export M11 Telemetry
+                        Export Telemetry
                     </button>
 
                     <button
@@ -343,79 +319,71 @@ export function SurfaceB() {
                 isStreaming={isStreaming}
             />
 
-            {/* ------------------------------------------------------------- */}
-            {/* Task selection                                                 */}
-            {/* ------------------------------------------------------------- */}
+            <TabNav active={activeTab} onChange={setActiveTab} />
 
-            <TaskPicker
-                tasks={taskOptions}
-                selectedTaskId={selectedTaskId}
-                onTaskSelect={(id) => {
-                    setSelectedTaskId(id);
-                    selectTask(id);
-                }}
-            />
+            {activeTab === "task" && (
+                <div className="tab-panel">
+                    <TaskPicker
+                        tasks={taskOptions}
+                        selectedTaskId={selectedTaskId}
+                        onTaskSelect={(id) => {
+                            setSelectedTaskId(id);
+                            selectTask(id);
+                            setActiveTab("session");
+                        }}
+                    />
 
+                    <BrainMap
+                        profile={selectedProfile}
+                        isStreaming={isStreaming}
+                    />
 
-            {/* ------------------------------------------------------------- */}
-            {/* Brain visualization                                            */}
-            {/* ------------------------------------------------------------- */}
+                    <DisclosureLabel />
+                </div>
+            )}
 
-            <BrainMap
-                profile={selectedProfile}
-            />
+            {activeTab === "session" && (
+                <div className="tab-panel">
+                    {sessionView}
+                </div>
+            )}
 
+            {activeTab === "progress" && (
+                <div className="tab-panel">
+                    <ProgressPanel
+                        session={currentSession}
+                        insights={insights}
 
-            {/* ------------------------------------------------------------- */}
-            {/* Disclosure / activation information                           */}
-            {/* ------------------------------------------------------------- */}
+                        cognitiveProgress={
+                            progress?.cognitiveProgress ??
+                            null
+                        }
 
-            <DisclosureLabel />
+                        motorProgress={
+                            progress?.motorProgress ??
+                            null
+                        }
 
+                        skillBalance={
+                            progress?.skillBalance ??
+                            null
+                        }
 
-            {/* ------------------------------------------------------------- */}
-            {/* Current session state                                          */}
-            {/* ------------------------------------------------------------- */}
+                        skillTransfer={
+                            progress?.skillTransfer ??
+                            null
+                        }
 
-            {view}
+                        progressLoading={
+                            progressLoading
+                        }
 
-
-            {/* ------------------------------------------------------------- */}
-            {/* Week 8 — Progress                                              */}
-            {/* ------------------------------------------------------------- */}
-
-            <ProgressPanel
-                session={currentSession}
-                insights={insights}
-
-                cognitiveProgress={
-                    progress?.cognitiveProgress ??
-                    null
-                }
-
-                motorProgress={
-                    progress?.motorProgress ??
-                    null
-                }
-
-                skillBalance={
-                    progress?.skillBalance ??
-                    null
-                }
-
-                skillTransfer={
-                    progress?.skillTransfer ??
-                    null
-                }
-
-                progressLoading={
-                    progressLoading
-                }
-
-                progressError={
-                    progressError
-                }
-            />
+                        progressError={
+                            progressError
+                        }
+                    />
+                </div>
+            )}
 
         </div>
     );

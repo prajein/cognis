@@ -67,110 +67,107 @@ export const OnboardingFlow: React.FC = () => {
         </p>
       </div>
 
-      <div className="onboarding-card">
-        <form onSubmit={handleSubmit} className="onboarding-form">
-          {/* Step 1: Role & Domain */}
-          <div className="onboarding-group">
-            <div className="onboarding-label-row">
-              <label htmlFor="role-input" className="onboarding-label">
-                <span className="onboarding-step-num">1</span> Primary Role & Domain
-              </label>
-              <span className="onboarding-hint">Select or type</span>
-            </div>
-            <div className="onboarding-chips">
-              {ROLE_PRESETS.map((preset) => (
-                <button
-                  key={preset}
-                  type="button"
-                  className={`onboarding-chip ${role === preset ? 'selected' : ''}`}
-                  onClick={() => setRole(preset)}
-                >
-                  {preset}
-                </button>
-              ))}
-            </div>
-            <input
-              id="role-input"
-              type="text"
-              className="onboarding-input"
-              placeholder="e.g. Senior Full-Stack Architect"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              required
-              disabled={isSubmitting}
-            />
+      <form onSubmit={handleSubmit} className="onboarding-form">
+        {/* Step 1: Role & Domain */}
+        <div className="onboarding-group">
+          <div className="onboarding-label-row">
+            <label htmlFor="role-input" className="onboarding-label">
+              <span className="onboarding-step-num">01</span> Primary role & domain
+            </label>
+            <span className="onboarding-hint">Select or type</span>
           </div>
-
-          {/* Step 2: Code & Response Preferences */}
-          <div className="onboarding-group">
-            <div className="onboarding-label-row">
-              <label htmlFor="style-input" className="onboarding-label">
-                <span className="onboarding-step-num">2</span> AI Response & Code Style
-              </label>
-              <span className="onboarding-hint">Select or type</span>
-            </div>
-            <div className="onboarding-chips">
-              {STYLE_PRESETS.map((preset) => (
-                <button
-                  key={preset}
-                  type="button"
-                  className={`onboarding-chip ${style === preset ? 'selected' : ''}`}
-                  onClick={() => setStyle(preset)}
-                >
-                  {preset}
-                </button>
-              ))}
-            </div>
-            <input
-              id="style-input"
-              type="text"
-              className="onboarding-input"
-              placeholder="e.g. Strict TypeScript, React 19, modular architecture"
-              value={style}
-              onChange={(e) => setStyle(e.target.value)}
-              required
-              disabled={isSubmitting}
-            />
+          <div className="onboarding-chips">
+            {ROLE_PRESETS.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                className={`onboarding-chip ${role === preset ? 'selected' : ''}`}
+                onClick={() => setRole(preset)}
+              >
+                {preset}
+              </button>
+            ))}
           </div>
+          <input
+            id="role-input"
+            type="text"
+            className="onboarding-input"
+            placeholder="e.g. Senior Full-Stack Architect"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            required
+            disabled={isSubmitting}
+          />
+        </div>
 
-          {/* Step 3: Interaction Priority */}
-          <div className="onboarding-group">
-            <div className="onboarding-label-row">
-              <label htmlFor="goal-input" className="onboarding-label">
-                <span className="onboarding-step-num">3</span> Primary Interaction Priority
-              </label>
-              <span className="onboarding-hint">Select or type</span>
-            </div>
-            <div className="onboarding-chips">
-              {GOAL_PRESETS.map((preset) => (
-                <button
-                  key={preset}
-                  type="button"
-                  className={`onboarding-chip ${goal === preset ? 'selected' : ''}`}
-                  onClick={() => setGoal(preset)}
-                >
-                  {preset}
-                </button>
-              ))}
-            </div>
-            <input
-              id="goal-input"
-              type="text"
-              className="onboarding-input"
-              placeholder="e.g. Catch prompt gaps & maintain deep focus"
-              value={goal}
-              onChange={(e) => setGoal(e.target.value)}
-              required
-              disabled={isSubmitting}
-            />
+        {/* Step 2: Code & Response Preferences */}
+        <div className="onboarding-group">
+          <div className="onboarding-label-row">
+            <label htmlFor="style-input" className="onboarding-label">
+              <span className="onboarding-step-num">02</span> AI response & code style
+            </label>
+            <span className="onboarding-hint">Select or type</span>
           </div>
+          <div className="onboarding-chips">
+            {STYLE_PRESETS.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                className={`onboarding-chip ${style === preset ? 'selected' : ''}`}
+                onClick={() => setStyle(preset)}
+              >
+                {preset}
+              </button>
+            ))}
+          </div>
+          <input
+            id="style-input"
+            type="text"
+            className="onboarding-input"
+            placeholder="e.g. Strict TypeScript, React 19, modular architecture"
+            value={style}
+            onChange={(e) => setStyle(e.target.value)}
+            required
+            disabled={isSubmitting}
+          />
+        </div>
 
-          <button type="submit" className="onboarding-submit-btn" disabled={isSubmitting}>
-            {isSubmitting ? 'Initializing Cognis...' : 'Complete Onboarding & Start'} →
-          </button>
-        </form>
-      </div>
+        {/* Step 3: Interaction Priority */}
+        <div className="onboarding-group" style={{ border: 'none', paddingBottom: 0 }}>
+          <div className="onboarding-label-row">
+            <label htmlFor="goal-input" className="onboarding-label">
+              <span className="onboarding-step-num">03</span> Primary interaction priority
+            </label>
+            <span className="onboarding-hint">Select or type</span>
+          </div>
+          <div className="onboarding-chips">
+            {GOAL_PRESETS.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                className={`onboarding-chip ${goal === preset ? 'selected' : ''}`}
+                onClick={() => setGoal(preset)}
+              >
+                {preset}
+              </button>
+            ))}
+          </div>
+          <input
+            id="goal-input"
+            type="text"
+            className="onboarding-input"
+            placeholder="e.g. Catch prompt gaps & maintain deep focus"
+            value={goal}
+            onChange={(e) => setGoal(e.target.value)}
+            required
+            disabled={isSubmitting}
+          />
+        </div>
+
+        <button type="submit" className="onboarding-submit-btn" disabled={isSubmitting}>
+          {isSubmitting ? 'Initializing…' : 'Begin observation'} →
+        </button>
+      </form>
     </div>
   );
 };
-

@@ -12,25 +12,23 @@ export function SessionReview({ session, insightsModel }: SessionReviewProps) {
     const insights = insightsModel?.insights || [];
     
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--gap-lg)' }}>
             <div className="hero-state">
-                <h1 className="section-label">Session Review</h1>
-                <p className="state-desc" style={{ fontSize: '16px', color: 'var(--text-primary)' }}>Your thinking trajectory</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '14px', marginTop: '8px' }}>
+                <span className="micro-label">Session Review</span>
+                <div className="state-name" style={{ fontSize: '2rem', marginTop: '0.4rem' }}>Your thinking trajectory</div>
+                <div className="mono" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--dim)', fontSize: '12px', marginTop: '0.6rem' }}>
                     <span>Explore</span>
                     <span>→</span>
                     <span>Stretch</span>
                     <span>→</span>
                     <span>Revise</span>
                     <span>→</span>
-                    <span style={{ color: 'var(--text-primary)' }}>Resolve</span>
+                    <span style={{ color: 'var(--fg)' }}>Resolve</span>
                 </div>
             </div>
-            
-            <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)' }} />
-            
+
             <section>
-                <h2 className="section-label">Moments Worth Noticing</h2>
+                <h2 className="section-heading">Moments worth noticing</h2>
                 <div className="timeline-list">
                     {insights.map((insight: any, idx: number) => (
                         <div key={insight.id} className="timeline-item">
@@ -40,12 +38,10 @@ export function SessionReview({ session, insightsModel }: SessionReviewProps) {
                     ))}
                 </div>
             </section>
-            
-            <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)' }} />
-            
-            <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                <div>{insights.length} observations</div>
-                <div>1 intervention</div>
+
+            <div className="micro-label" style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                <span>{insights.length} observations</span>
+                <span>1 intervention</span>
             </div>
         </div>
     );

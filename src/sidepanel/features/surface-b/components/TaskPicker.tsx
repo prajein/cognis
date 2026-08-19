@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { TaskOption } from "../types";
 
 interface TaskPickerProps {
@@ -8,7 +8,7 @@ interface TaskPickerProps {
 }
 
 const CATEGORIES = [
-    { id: "all", label: "All Tasks" },
+    { id: "all", label: "All" },
     { id: "ai", label: "AI Co-pilot" },
     { id: "coding", label: "Coding & Tech" },
     { id: "writing", label: "Writing" },
@@ -47,7 +47,9 @@ export function TaskPicker({
     return (
         <div className="task-picker-container">
             <div className="task-picker-header">
-                <span className="task-picker-label">Target Practice Task</span>
+                <h2 className="section-heading" style={{ marginBottom: 0 }}>
+                    What are you practicing?
+                </h2>
                 {selectedTask && (
                     <span className="task-picker-active-badge">
                         ● {selectedTask.label}
@@ -55,7 +57,6 @@ export function TaskPicker({
                 )}
             </div>
 
-            {/* Category Filter Pills */}
             <div className="task-category-pills">
                 {CATEGORIES.map((cat) => (
                     <button
@@ -69,32 +70,8 @@ export function TaskPicker({
                 ))}
             </div>
 
-            {/* Styled Dropdown Selector */}
-            <div className="task-select-wrapper">
-                <select
-                    className="task-select-input"
-                    value={selectedTaskId ?? ""}
-                    onChange={(e) => {
-                        if (e.target.value) {
-                            onTaskSelect(e.target.value);
-                        }
-                    }}
-                >
-                    <option value="" disabled>
-                        Choose a task profile to observe... ({filteredTasks.length} available)
-                    </option>
-                    {filteredTasks.map((task) => (
-                        <option key={task.id} value={task.id}>
-                            {task.label}
-                        </option>
-                    ))}
-                </select>
-                <div className="task-select-arrow">▼</div>
-            </div>
-
-            {/* Quick Choice Chips for Filtered Tasks (showing max 8) */}
             <div className="task-quick-chips">
-                {filteredTasks.slice(0, 8).map((task) => {
+                {filteredTasks.map((task) => {
                     const isSelected = task.id === selectedTaskId;
                     return (
                         <button
@@ -104,7 +81,6 @@ export function TaskPicker({
                             onClick={() => onTaskSelect(task.id)}
                         >
                             {task.label}
-                            {isSelected && " ✓"}
                         </button>
                     );
                 })}
