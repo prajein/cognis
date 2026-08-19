@@ -1,10 +1,12 @@
 import { PlatformConfig } from './interfaces';
 import { chatgptV1 } from './chatgpt-v1';
 import { claudeV1 } from './claude-v1';
+import { geminiV1 } from './gemini-v1';
 
 const configs: PlatformConfig[] = [
   chatgptV1,
   claudeV1,
+  geminiV1,
   // Add future platforms here
 ];
 

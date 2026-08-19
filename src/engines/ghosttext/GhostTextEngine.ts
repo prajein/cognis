@@ -14,6 +14,19 @@
  * <200ms ghost-text budget (Constitution §2). Display + accept/dismiss are the
  * perception layer's job and arrive back as their own events.
  *
+ * v0.2 template selection: stems rotate through several variants per gap type
+ * (no-immediate-repeat, via `rotation`) instead of v0.1's fixed 2-option set —
+ * still a template picker, not generation: no model, no network, no user text
+ * involved. (An earlier draft of this pass also interpolated a phrase guessed
+ * from the user's own live text into the stem — that was reverted: the stem
+ * is published on `ghosttext.generated`, so any user-text fragment inside it
+ * would travel over the EventBus and could be persisted, violating ADR-019's
+ * "raw prompt text never touches the EventBus." Unlike `GapDetectionEngine`,
+ * which only ever publishes a *derived signal* (`{gapType, confidence}`) from
+ * text it reads in-memory, a stem's whole purpose is to be displayed — so
+ * anything read into it necessarily gets published. There's no safe way to
+ * fold live user text into a stem under this architecture.)
+ *
  * Arc-ready: no platform/DOM coupling; an injectable clock + id keep it
  * deterministic in tests and identical when hardware drives the same events.
  */
@@ -174,7 +187,8 @@ export class GhostTextEngine {
 
   /**
    * Picks the next stem for a gap type, rotating through the configured list so
-   * repeated prompts get varied suggestions. Respects `maxStemLength`.
+   * repeated prompts get varied suggestions (no-immediate-repeat as long as
+   * more than one variant exists). Respects `maxStemLength`.
    */
   private selectStem(gapType: GapType): string | null {
     const stems = this.config.stems[gapType] ?? [];

@@ -39,7 +39,7 @@ export function Header({ connectionStatus, sessionState, isStreaming }: HeaderPr
 
     return (
         <header className="cognis-header">
-            <span>COGNIS</span>
+            <span className="cognis-wordmark">Cognis</span>
             <div className="header-controls">
                 <div className={`status-dot ${dotClass}`} />
                 <button 

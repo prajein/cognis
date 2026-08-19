@@ -21,8 +21,8 @@ export function CurrentState({ sessionState, isStreaming }: CurrentStateProps) {
 
     return (
         <section>
-            <h2 className="section-label">Current State</h2>
-            <div className="hero-state">
+            <span className="micro-label">Current State</span>
+            <div className="hero-state" style={{ marginTop: "0.6rem" }}>
                 <div className="state-name">{title}</div>
                 <div className="state-desc">{desc}</div>
             </div>

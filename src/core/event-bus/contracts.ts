@@ -195,6 +195,30 @@ export interface PromptEnrichedPayload {
 }
 
 /**
+ * Payload for enrichment.leverageGap
+ *
+ * Purpose: Identifies the single highest-confidence gap still unaddressed in
+ * the current prompt, for a pre-send inline nudge. This is a LOCAL heuristic
+ * substitute for a real "silent meta-call" LLM pass (Build Brief §5.5) — no
+ * LLM is available on-device today, so this ranks the Gap Detection Engine's
+ * own recent signals instead. Carries only a gap type and a static question
+ * template id, never prompt text (ADR-019).
+ * Producer: Enrichment Engine
+ * Consumer: Perception layer (pre-send overlay UI — not yet implemented, see
+ *           punch list), Storage Layer
+ */
+export interface EnrichmentLeverageGapIdentifiedPayload {
+  /** The highest-confidence gap type still unaddressed. */
+  readonly gapType: GapType;
+
+  /** Confidence of the underlying gap.detected signal that drove the pick. */
+  readonly confidence: number;
+
+  /** Id of the static question template to render (see leverage_gap_questions.json). */
+  readonly questionTemplateId: string;
+}
+
+/**
  * Payload for prompt.cancelled
  *
  * Purpose: Records that the user abandoned a prompt before sending.
@@ -739,6 +763,7 @@ export interface CognisEventMap {
   'prompt.typed': PromptTypedPayload;
   'prompt.sent': PromptSentPayload;
   'prompt.enriched': PromptEnrichedPayload;
+  'enrichment.leverageGap': EnrichmentLeverageGapIdentifiedPayload;
   'prompt.cancelled': PromptCancelledPayload;
 
   // Cognitive

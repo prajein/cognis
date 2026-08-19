@@ -1,0 +1,63 @@
+{
+  "version": "0.1.0",
+  "note": "Hand-picked response fixtures for the response-analyzer eval harness (docs/benchmarks/run-analyzer-eval.ts). IMPORTANT — honesty note: these are NOT independently human-annotated ground truth. They are regression bands: each fixture's expected score range was set by running the real analyzers against a deliberately-authored example (clearly good / clearly shallow / clearly cut off / etc.) and recording a band around the actual output, reviewed for face plausibility. The harness's job is to catch a future change to StructureAnalyzer/ReasoningAnalyzer/CompletenessAnalyzer/QualityAnalyzer that silently shifts scoring behavior on clear-cut cases, not to certify the analyzers match human judgment.",
+  "fixtures": [
+    {
+      "id": "shallow-directive",
+      "description": "Bare one-line directive: no structure, no reasoning markers, no conclusion, but not malformed.",
+      "responseText": "Sure, do that.",
+      "expected": {
+        "structure": [0.4, 0.6],
+        "reasoning": [0.2, 0.4],
+        "completeness": [0.7, 0.9],
+        "quality": [0.55, 0.75]
+      }
+    },
+    {
+      "id": "well-structured-reasoned",
+      "description": "Headers, a list, a code block, multiple reasoning/branching markers, and a conclusion.",
+      "responseText": "## Approach\n\nHere is how to solve this, because breaking it into steps helps clarity.\n\n- First, validate the input.\n- Then, transform the data.\n- Finally, write the output.\n\n```\nfunction solve(x) {\n  return x * 2;\n}\n```\n\nTherefore, this approach handles the common cases. However, otherwise the empty-input case needs separate handling, and unless you validate upfront, it will throw.\n\nIn summary, this should cover your needs. Let me know if you have questions.",
+      "expected": {
+        "structure": [0.65, 0.75],
+        "reasoning": [0.75, 1.0],
+        "completeness": [0.9, 1.0],
+        "quality": [0.75, 0.95]
+      }
+    },
+    {
+      "id": "unclosed-code-block",
+      "description": "Response cut off mid code block — the classic truncation signature.",
+      "responseText": "Here's the function you need:\n\n```python\ndef solve(x):\n    return x * 2\n\nThe function takes an input and",
+      "expected": {
+        "completeness": [0.0, 0.4]
+      }
+    },
+    {
+      "id": "reasoning-chain-no-structure",
+      "description": "Dense prose reasoning chain (several 'because'/'therefore'/'however' markers), no headers or lists.",
+      "responseText": "This happens because the cache is stale. Therefore, the first request always misses. However, subsequent requests succeed, and consequently the latency spikes only appear once per cache cycle. Furthermore, this means the fix is to shorten the cache TTL, not to remove caching entirely. For instance, dropping the TTL to 30 seconds resolves the spike without losing most of the benefit.",
+      "expected": {
+        "structure": [0.4, 0.6],
+        "reasoning": [0.9, 1.0],
+        "quality": [0.65, 0.85]
+      }
+    },
+    {
+      "id": "hedged-uncertain",
+      "description": "Response heavy on uncertainty/limitation hedges — should read as less complete/confident.",
+      "responseText": "This might work, but it's unclear without more information. It could possibly depend on your setup, and I am not sure this covers every case. It also seems like it may not scale, though it's hard to say for certain.",
+      "expected": {
+        "gapCompletion": [0.0, 0.1]
+      }
+    },
+    {
+      "id": "empty-response",
+      "description": "Degenerate empty-string edge case.",
+      "responseText": "",
+      "expected": {
+        "structure": [0.0, 0.0],
+        "completeness": [0.0, 0.0]
+      }
+    }
+  ]
+}

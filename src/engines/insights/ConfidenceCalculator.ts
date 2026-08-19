@@ -1,9 +1,23 @@
-export class ConfidenceCalculator {
-  // 30 days in ms
-  private static readonly DECAY_30_DAYS = 30 * 24 * 60 * 60 * 1000;
-  // 90 days in ms
-  private static readonly DECAY_90_DAYS = 90 * 24 * 60 * 60 * 1000;
+/**
+ * v0.2 calibration: continuous half-life decay replaces the v0.1 3-tier step
+ * function (100% under 30d / 50% 30-90d / 10% over 90d). The step function had
+ * a hard discontinuity at each cliff — evidence from day 29 counted double
+ * evidence from day 31, and evidence from day 89 counted 5x evidence from day
+ * 91, for no principled reason. `weight = 0.5 ^ (age / HALF_LIFE_MS)` is
+ * calibrated so `HALF_LIFE_MS` reproduces the old 30-day midpoint exactly
+ * (weight(30d) = 0.5) while landing close to the old 90-day reference point
+ * (weight(90d) = 0.125 vs. the old 0.1) — same reference points, no cliffs.
+ * `MIN_EVIDENCE_WEIGHT` preserves the v0.1 property that evidence never fully
+ * expires (old code floored at a permanent 10% weight past 90 days) — pure
+ * exponential decay would otherwise fade very old evidence to ~0, silently
+ * dropping a design intent the step function had. See
+ * docs/research/confidence-calibration.md for the full comparison and
+ * alternatives considered (kept step function, linear decay, no floor).
+ */
+const HALF_LIFE_MS = 30 * 24 * 60 * 60 * 1000;
+const MIN_EVIDENCE_WEIGHT = 0.1;
 
+export class ConfidenceCalculator {
   /**
    * Calculates the confidence of a potential insight based on the evidence events.
    * @param evidence Array of event timestamps (in ms) that support the insight.
@@ -27,14 +41,8 @@ export class ConfidenceCalculator {
     let weightedEvidenceCount = 0;
 
     for (const timestamp of evidence) {
-      const age = now - timestamp;
-      if (age > ConfidenceCalculator.DECAY_90_DAYS) {
-        weightedEvidenceCount += 0.1; // 10% weight
-      } else if (age > ConfidenceCalculator.DECAY_30_DAYS) {
-        weightedEvidenceCount += 0.5; // 50% weight
-      } else {
-        weightedEvidenceCount += 1.0; // 100% weight
-      }
+      const age = Math.max(now - timestamp, 0);
+      weightedEvidenceCount += Math.max(Math.pow(0.5, age / HALF_LIFE_MS), MIN_EVIDENCE_WEIGHT);
     }
 
     // Base confidence based on evidence volume vs threshold

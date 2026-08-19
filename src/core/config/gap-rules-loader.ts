@@ -28,7 +28,21 @@ export interface GapRuleSettings {
   readonly maxSignals: number;
   /** Pause duration (ms) that marks a cognitive pause (ghost-text trigger). */
   readonly cognitivePauseMs: number;
+  /**
+   * Weighted-evidence score (v0.2, [0, 1]) at or above which a gap is
+   * considered addressed. Optional for backward compatibility with configs
+   * (and test fixtures) predating the weighted matcher; defaults to 0.5 in
+   * `GapHeuristics` when omitted.
+   */
+  readonly addressedThreshold?: number;
 }
+
+/**
+ * A single evidence marker for a gap rule. Plain strings (the v0.1 shape)
+ * are treated as full-weight (1.0) markers; the object form lets tuning
+ * down-weight generic/ambiguous markers without a code change.
+ */
+export type MarkerEntry = string | { readonly marker: string; readonly weight?: number };
 
 /** Additive confidence adjustment per cognitive state. */
 export type StateModifiers = Readonly<Record<StateLabel, number>>;
@@ -44,8 +58,12 @@ export interface GapRule {
   readonly gapType: GapType;
   /** Confidence when the gap is present, before modifiers. */
   readonly baseConfidence: number;
-  /** If any marker appears in the prompt, the gap is considered addressed. */
-  readonly satisfiedWhenAnyPresent: readonly string[];
+  /**
+   * Evidence markers. Presence accumulates weighted evidence toward "this
+   * gap is addressed" (v0.2); absence, or partial/near-miss evidence, feeds
+   * a gap signal. See `GapHeuristics.matchScore`.
+   */
+  readonly satisfiedWhenAnyPresent: readonly MarkerEntry[];
 }
 
 /** Root gap-rules configuration. */

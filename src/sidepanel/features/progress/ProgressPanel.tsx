@@ -15,8 +15,8 @@ export function ProgressPanel({
     progressError,
 }: ProgressPanelProps) {
     return (
-        <section>
-            <h3>Progress</h3>
+        <section className="progress-panel">
+            <h2 className="section-heading">Progress</h2>
 
             {/* ------------------------------------------------------------- */}
             {/* Current session                                                */}
@@ -87,10 +87,10 @@ export function ProgressPanel({
             {!progressLoading &&
                 !progressError &&
                 skillBalance && (
-                    <section>
-                        <h4>
+                    <section className="progress-group">
+                        <span className="micro-label">
                             Skill Balance
-                        </h4>
+                        </span>
 
                         <ProgressCard
                             title="Coefficient of Variation"
@@ -118,10 +118,10 @@ export function ProgressPanel({
             {!progressLoading &&
                 !progressError &&
                 skillTransfer && (
-                    <section>
-                        <h4>
+                    <section className="progress-group">
+                        <span className="micro-label">
                             Cross-Subclass Transfer
-                        </h4>
+                        </span>
 
                         <ProgressCard
                             title="Prediction"
@@ -139,10 +139,10 @@ export function ProgressPanel({
             {!progressLoading &&
                 !progressError &&
                 cognitiveProgress && (
-                    <section>
-                        <h4>
+                    <section className="progress-group">
+                        <span className="micro-label">
                             Are you getting better?
-                        </h4>
+                        </span>
 
                         <ProgressCard
                             title="Cognitive Sessions"
@@ -167,10 +167,10 @@ export function ProgressPanel({
             {!progressLoading &&
                 !progressError &&
                 motorProgress && (
-                    <section>
-                        <h4>
+                    <section className="progress-group">
+                        <span className="micro-label">
                             Motor Progress
-                        </h4>
+                        </span>
 
                         <ProgressCard
                             title="Motor Sessions"

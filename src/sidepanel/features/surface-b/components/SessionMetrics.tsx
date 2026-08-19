@@ -19,8 +19,11 @@ export function SessionMetrics({ session }: SessionMetricsProps) {
 
     return (
         <section className="session-metrics">
-            <h2 className="section-label">Session <span style={{ float: 'right', fontWeight: 'normal', textTransform: 'none', fontFamily: 'var(--font-mono)' }}>{timeString}</span></h2>
-            
+            <div className="task-picker-header">
+                <h2 className="section-heading" style={{ marginBottom: 0 }}>Session</h2>
+                <span className="micro-label">{timeString}</span>
+            </div>
+
             <div className="metric-row">
                 <span>Focus</span>
                 <div className="metric-bar-container">

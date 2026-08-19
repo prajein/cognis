@@ -14,7 +14,7 @@ export function ObservationsTimeline({ insightsModel }: ObservationsTimelineProp
 
     return (
         <section>
-            <h2 className="section-label">What I Noticed</h2>
+            <h2 className="section-heading">What I noticed</h2>
             <div className="timeline-list">
                 {sortedInsights.map(insight => {
                     const time = new Date(insight.generatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });

@@ -66,6 +66,13 @@ async function bootstrapBackground(): Promise<void> {
   const errorReporter = new ConsoleErrorReporter();
   const eventBus = new EventBus(errorReporter);
 
+  // Enable opening side panel when extension toolbar icon is clicked
+  if (typeof chrome !== 'undefined' && chrome.sidePanel && chrome.sidePanel.setPanelBehavior) {
+    chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch((err) => {
+      console.warn('[Background] Failed to set sidePanel behavior:', err);
+    });
+  }
+
   // Initialize EventBridge in host mode (background script)
   const eventBridge = new ExtensionEventBridge(
     'background',

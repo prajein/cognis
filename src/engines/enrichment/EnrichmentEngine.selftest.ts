@@ -210,6 +210,57 @@ export async function runEnrichmentEngineTests(): Promise<{ passed: number; fail
   const isoOutA = await engineSessA.enrich('test', sessionId);
   const isoOutB = await engineSessB.enrich('test', sessionId);
   c.ok(isoOutA !== isoOutB, 'Session A gap state does not leak into Session B (different engine instance)');
+
+  // --- v0.2 Leverage-Gap Signal Tests ---
+
+  // Test 16: gap.detected publishes enrichment.leverageGap for the strongest gap.
+  {
+    const bus = new EventBus(new ConsoleErrorReporter());
+    const engine = new EnrichmentEngine(bus, { latencyTimeoutMs: 1000 });
+    engine.start();
+    const sess = toSessionId('leverage-session');
+
+    let leverage: any = null;
+    bus.subscribe('enrichment.leverageGap', (evt: any) => { leverage = evt.payload; });
+
+    bus.publish(CognitiveEvents.GAP_DETECTED, createDomainEvent(
+      CognitiveEvents.GAP_DETECTED, sess, 'test', { gapType: 'audience' as GapType, confidence: 0.5 }, { clock, idFactory }
+    ));
+    c.ok(leverage !== null, 'leverage gap: event published on first gap.detected');
+    c.eq(leverage?.gapType, 'audience', 'leverage gap: matches the only active gap');
+    c.eq(leverage?.questionTemplateId, 'audience-v1', 'leverage gap: carries the configured question template id');
+
+    bus.publish(CognitiveEvents.GAP_DETECTED, createDomainEvent(
+      CognitiveEvents.GAP_DETECTED, sess, 'test', { gapType: 'intentionality' as GapType, confidence: 0.9 }, { clock, idFactory }
+    ));
+    c.eq(leverage?.gapType, 'intentionality', 'leverage gap: higher-confidence gap takes over');
+
+    engine.stop();
+  }
+
+  // Test 17: leverage-gap payload never carries raw text — only gapType,
+  // confidence, and a template id (ADR-019).
+  {
+    const bus = new EventBus(new ConsoleErrorReporter());
+    const engine = new EnrichmentEngine(bus, { latencyTimeoutMs: 1000 });
+    engine.start();
+    const sess = toSessionId('leverage-session-2');
+
+    let payloadKeys: string[] = [];
+    bus.subscribe('enrichment.leverageGap', (evt: any) => { payloadKeys = Object.keys(evt.payload); });
+
+    bus.publish(CognitiveEvents.GAP_DETECTED, createDomainEvent(
+      CognitiveEvents.GAP_DETECTED, sess, 'test', { gapType: 'stakes' as GapType, confidence: 0.6 }, { clock, idFactory }
+    ));
+    c.eq(
+      payloadKeys.sort().join(','),
+      ['confidence', 'gapType', 'questionTemplateId'].sort().join(','),
+      'leverage gap: payload carries only gapType/confidence/questionTemplateId, no text',
+    );
+
+    engine.stop();
+  }
+
   console.log(`[SelfTest EnrichmentEngine] passed=${c.passed} failed=${c.failed}`);
   if (c.failed > 0) {
     console.error('Failures:\n - ' + c.failures.join('\n - '));
