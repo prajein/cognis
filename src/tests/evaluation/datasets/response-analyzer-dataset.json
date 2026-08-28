@@ -20,7 +20,7 @@
         "quality": 0.7
       },
       "observedIssues": [
-        "reasoning:unsupported_claim"
+        "shallow_directive", "no_code"
       ],
       "overallVerdict": "good",
       "split": "evaluation",
@@ -44,7 +44,7 @@
         "completeness": 0.9,
         "quality": 0.8
       },
-      "observedIssues": [],
+      "observedIssues": ["no_code"],
       "overallVerdict": "excellent",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -67,7 +67,7 @@
         "completeness": 0.6,
         "quality": 0.6
       },
-      "observedIssues": [],
+      "observedIssues": ["no_code"],
       "overallVerdict": "average",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -91,7 +91,7 @@
         "quality": 1
       },
       "observedIssues": [
-        "reasoning:unsupported_claim"
+        "shallow_directive" , "no_code"
       ],
       "overallVerdict": "good",
       "labelConfidence": 1,
@@ -117,7 +117,7 @@
         "completeness": 0.9,
         "quality": 0.88
       },
-      "observedIssues": [],
+      "observedIssues": ["no_code"],
       "overallVerdict": "excellent",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -141,7 +141,7 @@
         "quality": 0.66
       },
       "observedIssues": [
-        "under_explained"
+        "shallow_directive"
       ],
       "overallVerdict": "average",
       "split": "evaluation",
@@ -166,7 +166,7 @@
         "quality": 0.94
       },
       "observedIssues": [
-        "under_explained"
+        "shallow_directive", "no_code"
       ],
       "overallVerdict": "good",
       "split": "evaluation",
@@ -190,7 +190,7 @@
         "completeness": 1,
         "quality": 0.98
       },
-      "observedIssues": [],
+      "observedIssues": ["no_code"],
       "overallVerdict": "excellent",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -213,7 +213,7 @@
         "completeness": 1,
         "quality": 0.99
       },
-      "observedIssues": [],
+      "observedIssues": ["no_code"],
       "overallVerdict": "good",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -237,7 +237,7 @@
         "quality": 0.77
       },
       "observedIssues": [
-        "reasoning:weak_reasoning"
+        "shallow_directive", "no_code"
       ],
       "overallVerdict": "average",
       "split": "evaluation",
@@ -261,7 +261,7 @@
         "completeness": 0.98,
         "quality": 0.99
       },
-      "observedIssues": [],
+      "observedIssues": ["no_code"],
       "overallVerdict": "excellent",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -285,7 +285,7 @@
         "quality": 0.7
       },
       "observedIssues": [
-        "structure:excessive_headers"
+        "highly_structured", "no_code"
       ],
       "overallVerdict": "average",
       "split": "evaluation",
@@ -310,7 +310,7 @@
         "quality": 0.9
       },
       "observedIssues": [
-        "quality:under_explained"
+        "shallow_directive", "no_code"
       ],
       "overallVerdict": "good",
       "split": "holdout",
@@ -335,7 +335,7 @@
         "quality": 1
       },
       "observedIssues": [
-        "quality:under_explained"
+        "shallow_directive", "no_code"
       ],
       "overallVerdict": "excellent",
       "split": "holdout",
@@ -359,7 +359,7 @@
         "completeness": 0.7,
         "quality": 0.7
       },
-      "observedIssues": [],
+      "observedIssues": ["shallow_directive"],
       "overallVerdict": "poor",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -382,7 +382,7 @@
         "completeness": 0.89,
         "quality": 0.85
       },
-      "observedIssues": [],
+      "observedIssues": ["no_code"],
       "overallVerdict": "good",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -406,7 +406,7 @@
         "quality": 0.9
       },
       "observedIssues": [
-        "reasoning:circular_reasoning"
+        "shallow_directive", "no_code"
       ],
       "overallVerdict": "good",
       "split": "evaluation",
@@ -431,7 +431,7 @@
         "quality": 0.95
       },
       "observedIssues": [
-        "quality:under_explained"
+        "shallow_directive", "no_code"
       ],
       "overallVerdict": "excellent",
       "split": "evaluation",
@@ -456,7 +456,7 @@
         "quality": 0.89
       },
       "observedIssues": [
-        "quality:under_explained"
+        "shallow_directive", "no_code"
       ],
       "overallVerdict": "good",
       "split": "evaluation",
@@ -480,7 +480,7 @@
         "completeness": 0.98,
         "quality": 0.91
       },
-      "observedIssues": [],
+      "observedIssues": [ "no_code"],
       "overallVerdict": "excellent",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -504,7 +504,7 @@
         "quality": 0.87
       },
       "observedIssues": [
-        "structure:inconsistent_formatting"
+        "highly_structured", "no_code", "step_by_step"
       ],
       "overallVerdict": "good",
       "split": "evaluation",
@@ -529,8 +529,7 @@
         "quality": 0.94
       },
       "observedIssues": [
-        "quality:under_explained",
-        "reasoning:weak_reasoning"
+        "shallow_directive", "no_code"
       ],
       "overallVerdict": "excellent",
       "split": "evaluation",
@@ -554,7 +553,7 @@
         "completeness": 0.98,
         "quality": 0.86
       },
-      "observedIssues": [],
+      "observedIssues": ["no_code"],
       "overallVerdict": "good",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -578,7 +577,7 @@
         "quality": 0.94
       },
       "observedIssues": [
-        "quality:under_explained"
+        "shallow_directive"
       ],
       "overallVerdict": "excellent",
       "split": "evaluation",
@@ -603,7 +602,7 @@
         "quality": 0.89
       },
       "observedIssues": [
-        "completeness:truncated_response"
+        "no_code", "unclosed_markdown"
       ],
       "overallVerdict": "good",
       "split": "evaluation",
@@ -628,7 +627,7 @@
         "quality": 0.99
       },
       "observedIssues": [
-        "structure:inconsistent_formatting"
+        "highly_structured", "no_code"
       ],
       "overallVerdict": "excellent",
       "split": "evaluation",
@@ -653,7 +652,7 @@
         "quality": 0.94
       },
       "observedIssues": [
-        "qualuity:under_explained"
+        "shallow_directive", "no_code"
       ],
       "overallVerdict": "excellent",
       "split": "holdout",
@@ -678,7 +677,7 @@
         "quality": 0.87
       },
       "observedIssues": [
-        "quality:verbosity"
+        "prose_heavy", "no_code"
       ],
       "overallVerdict": "good",
       "split": "holdout",
@@ -702,7 +701,7 @@
         "completeness": 1,
         "quality": 1
       },
-      "observedIssues": [],
+      "observedIssues": ["unclosed_markdown"],
       "overallVerdict": "excellent",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -726,7 +725,7 @@
         "quality": 0.85
       },
       "observedIssues": [
-        "structure:excessive_headers"
+        "highly_structured", "unclosed_markdown"
       ],
       "overallVerdict": "good",
       "split": "evaluation",
@@ -750,8 +749,8 @@
         "completeness": 0.98,
         "quality": 0.91
       },
-      "observedIssues": [],
-      "overallVerdict": "good",
+      "observedIssues": ["shallow_directive", "no_code"],
+      "overallVerdict": "poor",
       "split": "evaluation",
       "labeledBy": "Dhanya"
     },
@@ -773,7 +772,7 @@
         "completeness": 0.92,
         "quality": 0.93
       },
-      "observedIssues": [],
+      "observedIssues": ["step_by_step"],
       "overallVerdict": "excellent",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -796,7 +795,7 @@
         "completeness": 0.54,
         "quality": 0.67
       },
-      "observedIssues": [],
+      "observedIssues": ["shallow_directive", "unclosed_markdown"],
       "overallVerdict": "poor",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -819,7 +818,7 @@
         "completeness": 0.85,
         "quality": 0.7
       },
-      "observedIssues": [],
+      "observedIssues": ["shallow_directive", "unclosed_markdown" ],
       "overallVerdict": "average",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -842,7 +841,7 @@
         "completeness": 0.89,
         "quality": 0.92
       },
-      "observedIssues": [],
+      "observedIssues": ["unclosed_markdown"],
       "overallVerdict": "good",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -865,7 +864,7 @@
         "completeness": 0.99,
         "quality": 0.89
       },
-      "observedIssues": [],
+      "observedIssues": ["unclosed_markdown" ],
       "overallVerdict": "good",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -888,7 +887,7 @@
         "completeness": 0.91,
         "quality": 0.89
       },
-      "observedIssues": [],
+      "observedIssues": ["shallow_directive"],
       "overallVerdict": "good",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -911,7 +910,7 @@
         "completeness": 0.98,
         "quality": 0.98
       },
-      "observedIssues": [],
+      "observedIssues": ["has_conclusion"],
       "overallVerdict": "excellent",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -935,7 +934,7 @@
         "quality": 0.82
       },
       "observedIssues": [
-        "structure:inconsistent_formatting"
+        "highly_structured"
       ],
       "overallVerdict": "good",
       "split": "evaluation",
@@ -983,7 +982,6 @@
         "quality": 0.92
       },
       "observedIssues": [
-        "structure:inconsistent_formatting"
       ],
       "overallVerdict": "good",
       "split": "evaluation",
@@ -1030,9 +1028,7 @@
         "completeness": 0.88,
         "quality": 0.64
       },
-      "observedIssues": [
-        "structure:inconsistent_formatting",
-        "quality:under_explained"
+      "observedIssues": ["shallow_directive"
       ],
       "overallVerdict": "poor",
       "split": "evaluation",
@@ -1057,7 +1053,7 @@
         "completeness": 0.91,
         "quality": 0.93
       },
-      "observedIssues": [],
+      "observedIssues": ["highly_structured"],
       "overallVerdict": "excellent",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -1081,7 +1077,7 @@
         "quality": 0.87
       },
       "observedIssues": [
-        "structure:inconsistent_formatting"
+        "prose_heavy"
       ],
       "overallVerdict": "good",
       "split": "evaluation",
@@ -1105,8 +1101,7 @@
         "completeness": 0.8,
         "quality": 0.66
       },
-      "observedIssues": [
-        "quality:under_explained"
+      "observedIssues": [ "shallow_directive"
       ],
       "overallVerdict": "poor",
       "split": "evaluation",
@@ -1131,7 +1126,7 @@
         "quality": 0.88
       },
       "observedIssues": [
-        "quality:under_explained"
+        "shallow_directive"
       ],
       "overallVerdict": "good",
       "split": "evaluation",
@@ -1156,8 +1151,7 @@
         "quality": 0.87
       },
       "observedIssues": [
-        "reasoning:circular_reasoning"
-      ],
+        "shallow_directive"      ],
       "overallVerdict": "good",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -1181,7 +1175,7 @@
         "quality": 0.85
       },
       "observedIssues": [
-        "quality:under_explained"
+        "shallow_directive"
       ],
       "overallVerdict": "average",
       "split": "evaluation",
@@ -1229,7 +1223,6 @@
         "quality": 0.85
       },
       "observedIssues": [
-        "structure:excessive_formatting"
       ],
       "overallVerdict": "average",
       "split": "evaluation",
@@ -1253,10 +1246,7 @@
         "completeness": 0.78,
         "quality": 0.65
       },
-      "observedIssues": [
-        "structure:excessive_formatting",
-        "quality:under_explained",
-        "structure:incosistent_formatting"
+      "observedIssues": [ "shallow_directive"
       ],
       "overallVerdict": "poor",
       "split": "evaluation",
@@ -1281,9 +1271,7 @@
         "quality": 0.8
       },
       "observedIssues": [
-        "reasoning:weak_reasoning",
-        "quality:under_explained",
-        "structure:incosistent_formatting"
+        "shallow_directive"
       ],
       "overallVerdict": "average",
       "split": "evaluation",
@@ -1308,7 +1296,7 @@
         "quality": 0.7
       },
       "observedIssues": [
-        "quality:under_explained"
+        "shallow_directive"
       ],
       "overallVerdict": "good",
       "split": "evaluation",
@@ -1333,8 +1321,7 @@
         "quality": 0.7
       },
       "observedIssues": [
-        "structure:inconsistent_formatting",
-        "quality:verbosity"
+        "prose_heavy"
       ],
       "overallVerdict": "average",
       "split": "evaluation",
@@ -1359,7 +1346,7 @@
         "quality": 0.84
       },
       "observedIssues": [
-        "quality:under_explained"
+        "shallow_directive"
       ],
       "overallVerdict": "good",
       "split": "evaluation",
@@ -1383,7 +1370,7 @@
         "completeness": 0.88,
         "quality": 0.88
       },
-      "observedIssues": [],
+      "observedIssues": ["highly_structured"],
       "overallVerdict": "good",
       "split": "holdout",
       "labeledBy": "Dhanya"
@@ -1407,8 +1394,7 @@
         "quality": 0.65
       },
       "observedIssues": [
-        "structure:inconsistent_formatting",
-        "quality:verbosity"
+        "prose_heavy"
       ],
       "overallVerdict": "poor",
       "split": "holdout",
@@ -1432,7 +1418,7 @@
         "completeness": 0.98,
         "quality": 0.99
       },
-      "observedIssues": [],
+      "observedIssues": ["highly_structured"],
       "overallVerdict": "excellent",
       "split": "holdout",
       "labeledBy": "Dhanya"
@@ -1456,7 +1442,7 @@
         "quality": 0.86
       },
       "observedIssues": [
-        "quality:under_explained"
+        "shallow_directive"
       ],
       "overallVerdict": "good",
       "split": "evaluation",
@@ -1481,9 +1467,7 @@
         "quality": 0.59
       },
       "observedIssues": [
-        "quality:under_explained",
-        "structure:inconsistent_Formatting",
-        "completeness:missing_edge_cases"
+        "shallow_directive"
       ],
       "overallVerdict": "poor",
       "split": "evaluation",
@@ -1508,7 +1492,7 @@
         "quality": 0.87
       },
       "observedIssues": [
-        "quality:under_Explained"
+        "shallow_directive"
       ],
       "overallVerdict": "average",
       "split": "evaluation",
@@ -1533,7 +1517,7 @@
         "quality": 0.885
       },
       "observedIssues": [
-        "quality:under_explained"
+        "shallow_directive"
       ],
       "overallVerdict": "average",
       "split": "evaluation",
@@ -1557,7 +1541,7 @@
         "completeness": 1,
         "quality": 1
       },
-      "observedIssues": [],
+      "observedIssues": ["highly_structured", "has_conclusion"],
       "overallVerdict": "excellent",
       "split": "evaluation",
       "labeledBy": "Dhanya"
@@ -1581,8 +1565,7 @@
         "quality": 0.69
       },
       "observedIssues": [
-        "structure:inconsistent_formatting",
-        "quality:marker_stuffing"
+        "prose_heavy"
       ],
       "overallVerdict": "average",
       "split": "evaluation",
@@ -1607,7 +1590,7 @@
         "quality": 0.7
       },
       "observedIssues": [
-        "quality:under_explained"
+        "shallow_directive"
       ],
       "overallVerdict": "average",
       "split": "evaluation",
@@ -1632,9 +1615,7 @@
         "quality": 0.79
       },
       "observedIssues": [
-        "structure:inconsistent_formatting",
-        "quality:marker_stuffing",
-        "reasoning:redundant_reasoning"
+        "prose_heavy"
       ],
       "overallVerdict": "average",
       "split": "evaluation",
@@ -1659,7 +1640,7 @@
         "quality": 0.89
       },
       "observedIssues": [
-        "quality:under_explained"
+        "shallow_directive"
       ],
       "overallVerdict": "good",
       "split": "evaluation",
@@ -1683,7 +1664,7 @@
         "completeness": 0.88,
         "quality": 0.89
       },
-      "observedIssues": [],
+      "observedIssues": ["has_conclusion", "highly_structured"],
       "overallVerdict": "good",
       "split": "holdout",
       "labeledBy": "Dhanya"
@@ -1707,8 +1688,7 @@
         "quality": 0.7
       },
       "observedIssues": [
-        "structure:inconsistent_formatting",
-        "reasoning:circular_reasoning"
+        "shallow_directive", "has_conclusion"
       ],
       "overallVerdict": "average",
       "split": "holdout",
@@ -1733,7 +1713,7 @@
         "quality": 0.94
       },
       "observedIssues": [
-        "quality:under_explained"
+        "shallow_directive"
       ],
       "overallVerdict": "good",
       "split": "holdout",
@@ -1758,8 +1738,7 @@
         "quality": 0.75
       },
       "observedIssues": [
-        "quality:under_explained",
-        "reasoning:missing_edge_cases"
+        "shallow_directive"
       ],
       "overallVerdict": "average",
       "split": "holdout",
@@ -1784,9 +1763,7 @@
         "quality": 0.72
       },
       "observedIssues": [
-        "quality:verbosity",
-        "quality:marker_stuffing",
-        "structure:excessive_headers"
+        "prose_heavy"
       ],
       "overallVerdict": "poor",
       "split": "evaluation",
@@ -1811,8 +1788,7 @@
         "quality": 0.8
       },
       "observedIssues": [
-        "quality:verbose",
-        "quality:marker_stuffing"
+        "prose_heavy"
       ],
       "overallVerdict": "good",
       "split": "evaluation",
@@ -1837,7 +1813,7 @@
         "quality": 0.8
       },
       "observedIssues": [
-        "structure:inconsistent_formatting"
+        "has_conclusion", "no_code"
       ],
       "overallVerdict": "good",
       "split": "evaluation",
@@ -1862,9 +1838,7 @@
         "quality": 0.67
       },
       "observedIssues": [
-        "quality:verbosity",
-        "quality:marker_stuffing",
-        "structure:inconsistent_formatting"
+        "prose_heavy"
       ],
       "overallVerdict": "average",
       "split": "evaluation",
@@ -1889,8 +1863,7 @@
         "quality": 0.56
       },
       "observedIssues": [
-        "quality:verbosity",
-        "quality:marker_stuffing"
+        "prose_heavy"
       ],
       "overallVerdict": "good",
       "split": "evaluation",
@@ -1915,8 +1888,7 @@
         "quality": 0.87
       },
       "observedIssues": [
-        "quality:marker_stuffing",
-        "quality:verbose"
+        "prose_heavy"
       ],
       "overallVerdict": "good",
       "split": "evaluation",
@@ -1941,10 +1913,7 @@
         "quality": 0.64
       },
       "observedIssues": [
-        "quality:verbose",
-        "quality:marker_stuffing",
-        "structure:unneccessary_headers",
-        "reasoning:circular_reasoning"
+        "prose_heavy"
       ],
       "overallVerdict": "poor",
       "split": "evaluation",
@@ -1969,8 +1938,7 @@
         "quality": 0.79
       },
       "observedIssues": [
-        "quality:verbosity",
-        "quality:marker_stuffing"
+        "prose_heavy"
       ],
       "overallVerdict": "average",
       "split": "evaluation",
@@ -1995,9 +1963,7 @@
         "quality": 0.77
       },
       "observedIssues": [
-        "quality:verbosity",
-        "quality:marker_stuffing",
-        "reasoning:circular_reasoning"
+        "prose_heavy"
       ],
       "overallVerdict": "average",
       "split": "evaluation",
@@ -2022,10 +1988,7 @@
         "quality": 0.6
       },
       "observedIssues": [
-        "quality:marker_Stuffing",
-        "reasoning:circular_reasoning",
-        "reasoning:redundant_reasoning",
-        "structure:excessive_headers"
+        "prose_heavy"
       ],
       "overallVerdict": "poor",
       "split": "evaluation",
@@ -2050,7 +2013,7 @@
         "quality": 0.73
       },
       "observedIssues": [
-        "quality:marker_stuffing"
+        "prose_heavy"
       ],
       "overallVerdict": "good",
       "split": "holdout",
@@ -2075,9 +2038,7 @@
         "quality": 0.74
       },
       "observedIssues": [
-        "quality:verbosity",
-        "structure:inconsistent_formatting",
-        "quality:marker_stuffing"
+        "prose_heavy"
       ],
       "overallVerdict": "average",
       "split": "holdout",
@@ -2102,10 +2063,7 @@
         "quality": 0.65
       },
       "observedIssues": [
-        "quality:verbosity",
-        "quality:marker_stuffing",
-        "structure:excessive_headers",
-        "reasoning:circular_reasoning"
+        "prose_heavy"
       ],
       "overallVerdict": "poor",
       "split": "holdout",
