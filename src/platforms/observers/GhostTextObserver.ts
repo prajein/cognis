@@ -5,6 +5,7 @@ import { GhostTextEvents, SessionEvents } from '../../core/event-bus/registry';
 import { GhostTextGeneratedPayload } from '../../core/event-bus/contracts';
 import { createDomainEvent } from '../../core/event-bus/createDomainEvent';
 import { GapType } from '../../core/types/gap.types';
+import { getTextareaCaretCoordinates } from './caret-utils';
 
 export class GhostTextObserver {
   private overlayNode: HTMLElement | null = null;
@@ -151,6 +152,13 @@ export class GhostTextObserver {
   }
 
   private getCaretOffset(): number | null {
+    const inputNode = document.querySelector(this.config.selectors.promptInput);
+    if (!inputNode) return null;
+    
+    if ('selectionStart' in inputNode) {
+        return (inputNode as HTMLInputElement | HTMLTextAreaElement).selectionEnd;
+    }
+
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) return null;
     return selection.focusOffset;
@@ -182,24 +190,32 @@ export class GhostTextObserver {
     const updatePosition = () => {
       if (this.state !== 'showing' || !this.overlayNode) return;
 
-      const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const rect = range.getBoundingClientRect();
-        
-        // Use fixed positioning based on the caret's viewport rect.
-        // If it's an empty paragraph in ProseMirror, rect width might be 0, but height is valid.
-        if (rect.height > 0) {
-           this.overlayNode.style.top = `${rect.top}px`;
-           this.overlayNode.style.left = `${rect.right}px`;
-        }
-      }
-
-      // Check if input node is still in DOM
-      const inputNode = document.querySelector(this.config.selectors.promptInput);
+      const inputNode = document.querySelector(this.config.selectors.promptInput) as HTMLElement | null;
       if (!inputNode) {
           this.dismissGhostText('node_removed');
           return;
+      }
+
+      if ('selectionStart' in inputNode && inputNode.tagName.toLowerCase() === 'textarea') {
+        const coords = getTextareaCaretCoordinates(inputNode as HTMLTextAreaElement);
+        if (coords) {
+          // Minor offset to ensure visually pleasing alignment
+          this.overlayNode.style.top = `${coords.top}px`;
+          this.overlayNode.style.left = `${coords.left}px`;
+        }
+      } else {
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          const rect = range.getBoundingClientRect();
+          
+          // Use fixed positioning based on the caret's viewport rect.
+          // If it's an empty paragraph in ProseMirror, rect width might be 0, but height is valid.
+          if (rect.height > 0) {
+             this.overlayNode.style.top = `${rect.top}px`;
+             this.overlayNode.style.left = `${rect.right}px`;
+          }
+        }
       }
 
       this.updatePositionFrameId = requestAnimationFrame(updatePosition);
