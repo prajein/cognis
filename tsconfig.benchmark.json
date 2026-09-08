@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "outDir": "dist-benchmark",
+    "rootDir": "./src",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "noEmit": false
+  },
+  "include": [
+    "src/tests/benchmarks/**/*.ts",
+    "src/tests/evaluation/**/*.ts",
+    "src/engines/response/**/*.ts",
+    "src/engines/insights/**/*.ts"
+  ]
+}

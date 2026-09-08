@@ -1,0 +1,204 @@
+{
+  "_schemaVersion": "1.0.0",
+  "_note": "eventOffsetsDays are relative to a fixed 'now' anchor (0 = now, negative = past), converted to absolute ms timestamps at run time -- same convention as the WS2 evaluation dataset. expectedConfidenceRange is a human-judged ground truth range: what a reasonable confidence value SHOULD be for this evidence pattern, independent of the real calculator's specific formula. Comparing the real calculator's output against this range is what surfaces miscalibration.",
+  "entries": [
+    {
+      "id": "cal-001",
+      "description": "5 events, all fresh (<30 days), evidence exactly meets requiredEvidenceCount -- baseline case, no decay involved",
+      "evidenceOffsetsDays": [-1, -5, -10, -15, -20],
+      "requiredEvidenceCount": 5,
+      "baselineStrategyScore": 0.8,
+      "contradictsExistingIdentity": false,
+      "existingEvidenceCount": 0,
+      "expectedConfidenceRange": [0.75, 0.85],
+      "purpose": "sanity baseline, no decay or contradiction interaction"
+    },
+    {
+      "id": "cal-002",
+      "description": "5 events at exactly 29 days old -- just inside the 100% weight band",
+      "evidenceOffsetsDays": [-29, -29, -29, -29, -29],
+      "requiredEvidenceCount": 5,
+      "baselineStrategyScore": 0.8,
+      "contradictsExistingIdentity": false,
+      "existingEvidenceCount": 0,
+      "expectedConfidenceRange": [0.75, 0.85],
+      "purpose": "one side of the 30-day cliff"
+    },
+    {
+      "id": "cal-003",
+      "description": "5 events at exactly 31 days old -- just past the 30-day cliff, same count and spacing as cal-002",
+      "evidenceOffsetsDays": [-31, -31, -31, -31, -31],
+      "requiredEvidenceCount": 5,
+      "baselineStrategyScore": 0.8,
+      "contradictsExistingIdentity": false,
+      "existingEvidenceCount": 0,
+      "expectedConfidenceRange": [0.60, 0.85],
+      "purpose": "other side of the 30-day cliff -- a human judge would expect a SMALL confidence reduction from cal-002, not a sudden halving"
+    },
+    {
+      "id": "cal-004",
+      "description": "5 events at exactly 89 days old -- just inside the 50% weight band",
+      "evidenceOffsetsDays": [-89, -89, -89, -89, -89],
+      "requiredEvidenceCount": 5,
+      "baselineStrategyScore": 0.8,
+      "contradictsExistingIdentity": false,
+      "existingEvidenceCount": 0,
+      "expectedConfidenceRange": [0.35, 0.45],
+      "purpose": "one side of the 90-day cliff"
+    },
+    {
+      "id": "cal-005",
+      "description": "5 events at exactly 91 days old -- just past the 90-day cliff, same count and spacing as cal-004",
+      "evidenceOffsetsDays": [-91, -91, -91, -91, -91],
+      "requiredEvidenceCount": 5,
+      "baselineStrategyScore": 0.8,
+      "contradictsExistingIdentity": false,
+      "existingEvidenceCount": 0,
+      "expectedConfidenceRange": [0.30, 0.45],
+      "purpose": "other side of the 90-day cliff -- a human judge would expect a SMALL confidence reduction from cal-004, not an 80% drop"
+    },
+    {
+      "id": "cal-006",
+      "description": "Mixed-age evidence: some fresh, some in the 50% band, some in the 10% band",
+      "evidenceOffsetsDays": [-2, -10, -35, -50, -95, -120],
+      "requiredEvidenceCount": 5,
+      "baselineStrategyScore": 0.8,
+      "contradictsExistingIdentity": false,
+      "existingEvidenceCount": 0,
+      "expectedConfidenceRange": [0.50, 0.70],
+      "purpose": "confirms weighted sum computes correctly across all three decay bands at once"
+    },
+    {
+      "id": "cal-007",
+      "description": "Evidence count far exceeds requiredEvidenceCount, all fresh -- confidence should never exceed baselineStrategyScore",
+      "evidenceOffsetsDays": [-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18, -19, -20],
+      "requiredEvidenceCount": 5,
+      "baselineStrategyScore": 0.8,
+      "contradictsExistingIdentity": false,
+      "existingEvidenceCount": 0,
+      "expectedConfidenceRange": [0.78, 0.82],
+      "purpose": "volume multiplier saturation ceiling check"
+    },
+    {
+      "id": "cal-008",
+      "description": "Only 1 fresh event against a requiredEvidenceCount of 5 -- thin evidence",
+      "evidenceOffsetsDays": [-1],
+      "requiredEvidenceCount": 5,
+      "baselineStrategyScore": 0.8,
+      "contradictsExistingIdentity": false,
+      "existingEvidenceCount": 0,
+      "expectedConfidenceRange": [0.10, 0.20],
+      "purpose": "volume multiplier at low evidence"
+    },
+    {
+      "id": "cal-009",
+      "description": "Zero evidence -- should always be zero confidence regardless of other inputs",
+      "evidenceOffsetsDays": [],
+      "requiredEvidenceCount": 5,
+      "baselineStrategyScore": 0.8,
+      "contradictsExistingIdentity": false,
+      "existingEvidenceCount": 0,
+      "expectedConfidenceRange": [0.0, 0.0],
+      "purpose": "zero-evidence floor"
+    },
+    {
+      "id": "cal-010",
+      "description": "Contradicts existing identity, new weighted evidence is exactly 1.9x old evidence -- just below the 2x no-penalty line",
+      "evidenceOffsetsDays": [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+      "requiredEvidenceCount": 5,
+      "baselineStrategyScore": 0.8,
+      "contradictsExistingIdentity": true,
+      "existingEvidenceCount": 10,
+      "expectedConfidenceRange": [0.40, 0.55],
+      "purpose": "just below the 2x contradiction-penalty cliff -- 19 weighted vs existing 10, 1.9x, penalty should apply"
+    },
+    {
+      "id": "cal-011",
+      "description": "Contradicts existing identity, new weighted evidence is exactly 2.0x old evidence -- exactly at the no-penalty line",
+      "evidenceOffsetsDays": [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+      "requiredEvidenceCount": 5,
+      "baselineStrategyScore": 0.8,
+      "contradictsExistingIdentity": true,
+      "existingEvidenceCount": 10,
+      "expectedConfidenceRange": [0.75, 0.85],
+      "purpose": "exactly at the 2x contradiction cliff -- 20 weighted vs existing 10, no penalty per the strict < comparison"
+    },
+    {
+      "id": "cal-012",
+      "description": "Contradicts existing identity, new weighted evidence is 2.1x old evidence -- just above the no-penalty line",
+      "evidenceOffsetsDays": [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+      "requiredEvidenceCount": 5,
+      "baselineStrategyScore": 0.8,
+      "contradictsExistingIdentity": true,
+      "existingEvidenceCount": 10,
+      "expectedConfidenceRange": [0.75, 0.85],
+      "purpose": "just above the 2x contradiction cliff -- confirms no discontinuity increasing further past the line"
+    },
+    {
+      "id": "cal-013",
+      "description": "Contradicts existing identity, decayed new evidence vs. undecayed existingEvidenceCount -- tests the asymmetric-decay concern directly",
+      "evidenceOffsetsDays": [-95, -95, -95, -95, -95, -95, -95, -95, -95, -95, -95, -95, -95, -95, -95, -95, -95, -95, -95, -95],
+      "requiredEvidenceCount": 5,
+      "baselineStrategyScore": 0.8,
+      "contradictsExistingIdentity": true,
+      "existingEvidenceCount": 10,
+      "expectedConfidenceRange": [0.30, 0.50],
+      "purpose": "20 raw events but only 10% weight each (95 days old) = 2.0 weighted, well BELOW existingEvidenceCount*2=20 despite 20 raw events -- surfaces whether raw event count or weighted count intuitively should matter for the contradiction comparison"
+    },
+    {
+      "id": "cal-014",
+      "description": "Single very old event (200 days), alone against a small requiredEvidenceCount",
+      "evidenceOffsetsDays": [-200],
+      "requiredEvidenceCount": 2,
+      "baselineStrategyScore": 0.9,
+      "contradictsExistingIdentity": false,
+      "existingEvidenceCount": 0,
+      "expectedConfidenceRange": [0.03, 0.08],
+      "purpose": "deep decay tail behavior, no floor above zero for very old single evidence"
+    },
+    {
+      "id": "cal-015",
+      "description": "Evidence exactly at the 30-day boundary itself (age == 30 days exactly, not just inside or outside)",
+      "evidenceOffsetsDays": [-30, -30, -30, -30, -30],
+      "requiredEvidenceCount": 5,
+      "baselineStrategyScore": 0.8,
+      "contradictsExistingIdentity": false,
+      "existingEvidenceCount": 0,
+      "expectedConfidenceRange": [0.75, 0.85],
+      "purpose": "confirms which side of the strict > comparison the exact boundary value falls on"
+    },
+    {
+      "id": "cal-016",
+      "description": "Evidence exactly at the 90-day boundary itself (age == 90 days exactly)",
+      "evidenceOffsetsDays": [-90, -90, -90, -90, -90],
+      "requiredEvidenceCount": 5,
+      "baselineStrategyScore": 0.8,
+      "contradictsExistingIdentity": false,
+      "existingEvidenceCount": 0,
+      "expectedConfidenceRange": [0.35, 0.45],
+      "purpose": "confirms which side of the strict > comparison the exact boundary value falls on"
+    },
+    {
+      "id": "cal-017",
+      "description": "Low baseline strategy score with abundant fresh evidence -- confirms baseline acts as a hard ceiling, not just an influence",
+      "evidenceOffsetsDays": [-1, -2, -3, -4, -5, -6, -7, -8, -9, -10],
+      "requiredEvidenceCount": 5,
+      "baselineStrategyScore": 0.3,
+      "contradictsExistingIdentity": false,
+      "existingEvidenceCount": 0,
+      "expectedConfidenceRange": [0.28, 0.32],
+      "purpose": "low-baseline strategies (e.g. V1ReasoningDepthEvaluator's 0.6) can never be pushed above their own baseline regardless of evidence volume"
+    },
+    {
+      "id": "cal-018",
+      "description": "requiredEvidenceCount of 1 (minimum plausible), single fresh event",
+      "evidenceOffsetsDays": [-1],
+      "requiredEvidenceCount": 1,
+      "baselineStrategyScore": 0.7,
+      "contradictsExistingIdentity": false,
+      "existingEvidenceCount": 0,
+      "expectedConfidenceRange": [0.65, 0.75],
+      "purpose": "low-threshold edge case"
+    }
+  ]
+}
