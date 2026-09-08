@@ -23,7 +23,6 @@ export class GhostTextObserver {
   private state: 'idle' | 'showing' = 'idle';
 
   private updatePositionFrameId: number | null = null;
-  private initialCaretOffset: number | null = null;
 
   constructor(
     private readonly eventBus: EventBus,
@@ -49,7 +48,7 @@ export class GhostTextObserver {
 
     const options = { capture: true };
     document.addEventListener('keydown', this.handleKeyDown, options);
-    document.addEventListener('selectionchange', this.handleSelectionChange, options);
+    document.addEventListener('mousedown', this.handleMouseDown, options);
     window.addEventListener('blur', this.handleBlur, options);
 
     console.log('[GhostTextObserver] Attached and observing.');
@@ -58,7 +57,7 @@ export class GhostTextObserver {
 
   public disconnect(): void {
     document.removeEventListener('keydown', this.handleKeyDown, { capture: true });
-    document.removeEventListener('selectionchange', this.handleSelectionChange, { capture: true });
+    document.removeEventListener('mousedown', this.handleMouseDown, { capture: true });
     window.removeEventListener('blur', this.handleBlur, { capture: true });
     this.unsubscribeAll.forEach(unsub => unsub());
     this.unsubscribeAll = [];
@@ -144,25 +143,13 @@ export class GhostTextObserver {
     } else {
         this.state = 'showing';
         this.currentSuggestion = suggestion;
-        this.initialCaretOffset = this.getCaretOffset();
         this.renderOverlay(inputNode, stem);
     }
 
     this.publishDisplayed(suggestion);
   }
 
-  private getCaretOffset(): number | null {
-    const inputNode = document.querySelector(this.config.selectors.promptInput);
-    if (!inputNode) return null;
-    
-    if ('selectionStart' in inputNode) {
-        return (inputNode as HTMLInputElement | HTMLTextAreaElement).selectionEnd;
-    }
 
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return null;
-    return selection.focusOffset;
-  }
 
   private renderOverlay(inputNode: HTMLElement, stem: string): void {
     this.overlayNode = document.createElement('span');
@@ -209,12 +196,20 @@ export class GhostTextObserver {
           const range = selection.getRangeAt(0);
           const rect = range.getBoundingClientRect();
           
-          // Use fixed positioning based on the caret's viewport rect.
-          // If it's an empty paragraph in ProseMirror, rect width might be 0, but height is valid.
           if (rect.height > 0) {
              this.overlayNode.style.top = `${rect.top}px`;
              this.overlayNode.style.left = `${rect.right}px`;
+          } else {
+             // Fallback for ProseMirror/contenteditable when rect.height is 0 (empty line/trailing space)
+             const inputRect = inputNode.getBoundingClientRect();
+             this.overlayNode.style.top = `${inputRect.bottom - 24}px`;
+             this.overlayNode.style.left = `${inputRect.right - 150}px`;
           }
+        } else {
+           // Fallback if no selection
+           const inputRect = inputNode.getBoundingClientRect();
+           this.overlayNode.style.top = `${inputRect.bottom - 24}px`;
+           this.overlayNode.style.left = `${inputRect.right - 150}px`;
         }
       }
 
@@ -241,7 +236,6 @@ export class GhostTextObserver {
     
     this.overlayNode = null;
     this.currentSuggestion = null;
-    this.initialCaretOffset = null;
     this.state = 'idle';
   }
 
@@ -251,17 +245,9 @@ export class GhostTextObserver {
     }
   }
 
-  private handleSelectionChange = (): void => {
+  private handleMouseDown = (): void => {
     if (this.state !== 'showing') return;
-    
-    const inputNode = document.querySelector(this.config.selectors.promptInput);
-    if (!inputNode) return;
-
-    const currentOffset = this.getCaretOffset();
-    // If caret moved due to arrow keys or mouse click
-    if (currentOffset !== null && currentOffset !== this.initialCaretOffset) {
-        this.dismissGhostText('caret_moved');
-    }
+    this.dismissGhostText('caret_moved');
   };
 
   private handleKeyDown = (e: KeyboardEvent): void => {
