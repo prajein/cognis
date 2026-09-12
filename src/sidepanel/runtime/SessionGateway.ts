@@ -43,7 +43,16 @@ export class IpcSessionGateway implements SessionCommandGateway, SessionQueryGat
    */
   private activeSessionId: string | null = null;
 
-  constructor(private readonly eventBus: EventBusContract) {}
+  constructor(private readonly eventBus: EventBusContract) {
+    this.eventBus.subscribe(SessionEvents.STARTED, (event) => {
+      this.activeSessionId = event.sessionId;
+    });
+    this.eventBus.subscribe(SessionEvents.ENDED, (event) => {
+      if (this.activeSessionId === event.sessionId) {
+        this.activeSessionId = null;
+      }
+    });
+  }
 
   // -------------------------------------------------------------------------
   // SessionCommandGateway — write path

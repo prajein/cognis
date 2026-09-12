@@ -75,8 +75,18 @@ export function useSession() {
 
       setCurrentState(SessionState.SESSION_ENDED);
       setCurrentSession((prev) => {
-        if (!prev) return null;
         const endedAt = new Date(event.timestamp);
+        if (!prev) {
+          return {
+            id: event.sessionId,
+            taskId: selectedTaskIdRef.current ?? 'general',
+            status: SessionState.SESSION_ENDED,
+            startedAt: new Date(event.timestamp),
+            endedAt,
+            durationMs: 0,
+            sessionNumber: 1,
+          };
+        }
         const durationMs = prev.startedAt
           ? endedAt.getTime() - prev.startedAt.getTime()
           : undefined;

@@ -149,10 +149,11 @@ export class ExtensionEventBridge {
     if (envelope.originContext === this.localContext) return;
 
     // We drop events this context originated and already processed locally.
-    // The ONLY exception is 'session.started' where the content script receives the authoritative
+    // The ONLY exception is session lifecycle events (session.started, session.ended, etc.)
+    // where the originating client (side-panel or content-script) awaits the authoritative
     // confirmation from the background orchestrator.
     if (this.recentlyBridgedIds.has(envelope.event.id)) {
-      if (envelope.event.type !== 'session.started') {
+      if (!envelope.event.type.startsWith('session.')) {
         return;
       }
     }
