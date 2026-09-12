@@ -133,9 +133,14 @@ export class ExtensionEventBridge {
   /**
    * Receives an event from IPC and publishes it locally.
    */
-  private handleIncomingMessage(message: any): void {
+  private handleIncomingMessage(message: any, senderOrPort?: chrome.runtime.MessageSender | chrome.runtime.Port): void {
     if (!message || !message.originContext || !message.event) {
       return;
+    }
+
+    let senderTabId: number | undefined;
+    if (senderOrPort && 'tab' in senderOrPort && senderOrPort.tab?.id) {
+      senderTabId = senderOrPort.tab.id;
     }
 
     const envelope = message as BridgeEnvelope;
@@ -143,12 +148,13 @@ export class ExtensionEventBridge {
     // Loop prevention: Do not accept events that originated from our own context type.
     if (envelope.originContext === this.localContext) return;
 
-
-    // We drop events we've already seen, EXCEPT when we are receiving the authoritative
-    // confirmation of an event we originated (e.g. background confirming our session.started).
-    if (this.recentlyBridgedIds.has(envelope.event.id) && !envelope.event.isAuthoritative) {
-      // Drop silently or keep the existing drop log if needed
-      return;
+    // We drop events this context originated and already processed locally.
+    // The ONLY exception is 'session.started' where the content script receives the authoritative
+    // confirmation from the background orchestrator.
+    if (this.recentlyBridgedIds.has(envelope.event.id)) {
+      if (envelope.event.type !== 'session.started') {
+        return;
+      }
     }
 
     console.log(`\n[Bridge] IN ← ${envelope.originContext}\nevent=${envelope.event.type}\neventId=${envelope.event.id}\nsessionId=${envelope.event.sessionId || 'N/A'}\n`);
@@ -165,7 +171,7 @@ export class ExtensionEventBridge {
     this.localBus.publish(inboundEvent.type, inboundEvent);
 
     // If we are in the background worker and an event arrives from content-script or side-panel,
-    // broadcast the authoritative event to all connected sidepanels and tabs.
+    // broadcast the authoritative event to all connected sidepanels and other tabs.
     if (this.localContext === 'background') {
       const broadcastEnvelope: BridgeEnvelope = {
         originContext: 'background',
@@ -176,7 +182,8 @@ export class ExtensionEventBridge {
       }
       chrome.tabs.query({}, (tabs) => {
         for (const tab of tabs) {
-          if (tab.id) {
+          // Do NOT echo the event back to the exact tab that originated it!
+          if (tab.id && (!senderTabId || tab.id !== senderTabId)) {
             chrome.tabs.sendMessage(tab.id, broadcastEnvelope).catch(() => {});
           }
         }

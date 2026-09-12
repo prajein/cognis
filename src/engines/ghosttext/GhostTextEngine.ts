@@ -153,18 +153,24 @@ export class GhostTextEngine {
    */
   private onPause(durationMs: number, pauseAt: Timestamp, sessionId: SessionId): void {
     const { settings } = this.config;
-    if (durationMs < settings.pauseThresholdMs) {
+    if (durationMs < settings.pauseThresholdMs - 50) {
       return;
     }
 
     const gap = this.recentGap;
-    if (gap === null || gap.sessionId !== sessionId) {
+    if (gap === null) {
+      console.log('[GhostTextEngine] Pause detected, but no recent gap detected yet.');
+      return;
+    }
+    if (gap.sessionId !== sessionId) {
       return;
     }
     if (this.suppressedGaps.has(gap.gapType)) {
+      console.log('[GhostTextEngine] Gap suppressed by adaptation:', gap.gapType);
       return;
     }
     if (pauseAt - gap.atTimestamp > settings.gapRecencyMs) {
+      console.log('[GhostTextEngine] Gap expired beyond recency window.');
       return;
     }
 
@@ -172,6 +178,8 @@ export class GhostTextEngine {
     if (stem === null) {
       return;
     }
+
+    console.log('[GhostTextEngine] Publishing ghosttext.generated for gap:', gap.gapType, 'stem:', stem);
 
     const interventionId = this.idFactory ? this.idFactory() : crypto.randomUUID();
 

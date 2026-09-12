@@ -146,6 +146,12 @@ export class GapDetectionEngine {
       revisionDepth: this.revisionDepth,
     });
 
+    if (signals.length > 0) {
+      console.log('[GapDetectionEngine] Detected gaps:', signals.map(s => `${s.gapType} (${s.confidence.toFixed(2)})`).join(', '));
+    } else {
+      console.log('[GapDetectionEngine] Analysis complete: No gap threshold cleared on current input.');
+    }
+
     for (const signal of signals) {
       const event = createDomainEvent(
         "gap.detected",

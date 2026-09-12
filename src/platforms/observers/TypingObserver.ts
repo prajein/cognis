@@ -17,7 +17,7 @@ export class TypingObserver {
 
   private unsubscribeAll: (() => void)[] = [];
   
-  private readonly IDLE_THRESHOLD_MS = 1200;
+  private readonly IDLE_THRESHOLD_MS = 1250; // Buffer 50ms over 1200ms to guarantee clearing GhostTextEngine's threshold
   private readonly THROTTLE_MS = 100; // Max 10 events per second
 
   constructor(
@@ -33,32 +33,45 @@ export class TypingObserver {
       return false;
     }
 
+    // Try initial probe, but do NOT abort if node is not in DOM yet (SPA hydration)
     this.inputNode = document.querySelector(this.config.selectors.promptInput) as HTMLElement | null;
-    if (!this.inputNode) {
-      return false;
-    }
 
-    const options = { signal: this.abortController.signal };
+    const options = { capture: true, signal: this.abortController.signal };
     
     // Event Delegation: React frequently unmounts and recreates the input node.
-    // Attaching directly to the node is fragile. We attach to document and check the target.
-    document.addEventListener('input', (e) => {
-      const target = e.target as HTMLElement;
-      if (target && target.closest(this.config.selectors.promptInput)) {
-        this.inputNode = target.closest(this.config.selectors.promptInput) as HTMLElement;
-        this.onInput();
+    // We attach to document with capture: true to intercept typing before framework absorption.
+    const handleTypingEvent = (e: Event) => {
+      let target = e.target as Element | null;
+      if (target && target.nodeType === Node.TEXT_NODE) {
+        target = target.parentElement;
       }
-    }, options);
+      if (target && target.closest) {
+        const matched = target.closest(this.config.selectors.promptInput) as HTMLElement | null;
+        if (matched) {
+          this.inputNode = matched;
+          this.onInput();
+        }
+      }
+    };
+
+    document.addEventListener('input', handleTypingEvent, options);
+    document.addEventListener('keyup', handleTypingEvent, options);
 
     document.addEventListener('keydown', (e) => {
-      const target = e.target as HTMLElement;
-      if (target && target.closest(this.config.selectors.promptInput)) {
-        this.inputNode = target.closest(this.config.selectors.promptInput) as HTMLElement;
-        this.onKeyDown(e as KeyboardEvent);
+      let target = e.target as Element | null;
+      if (target && target.nodeType === Node.TEXT_NODE) {
+        target = target.parentElement;
+      }
+      if (target && target.closest) {
+        const matched = target.closest(this.config.selectors.promptInput) as HTMLElement | null;
+        if (matched) {
+          this.inputNode = matched;
+          this.onKeyDown(e as KeyboardEvent);
+        }
       }
     }, options);
 
-    console.log('[TypingObserver] Attached and observing.');
+    console.log('[TypingObserver] Attached and observing (Event Delegation). Initial node found:', !!this.inputNode);
     return true;
   }
 
@@ -77,9 +90,12 @@ export class TypingObserver {
   }
 
   private getInputValue(): string {
+    if (!this.inputNode || !this.inputNode.isConnected) {
+      this.inputNode = document.querySelector(this.config.selectors.promptInput) as HTMLElement | null;
+    }
     if (!this.inputNode) return '';
-    if ('value' in this.inputNode) {
-      return (this.inputNode as HTMLInputElement | HTMLTextAreaElement).value || '';
+    if ('value' in this.inputNode && this.inputNode.tagName.toLowerCase() === 'textarea') {
+      return (this.inputNode as HTMLTextAreaElement).value || '';
     }
     return this.inputNode.innerText || this.inputNode.textContent || '';
   }
@@ -152,9 +168,11 @@ export class TypingObserver {
     }
 
     const pauseDuration = Date.now() - this.lastTypingTime;
+    const currentText = this.getInputValue();
+    console.log('[TypingObserver] Pause detected. Text length:', currentText.length, 'Duration (ms):', pauseDuration);
     
     if (this.gapEngine) {
-      this.gapEngine.captureTransientText(this.getInputValue());
+      this.gapEngine.captureTransientText(currentText);
     }
 
     this.publish({

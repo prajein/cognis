@@ -23,6 +23,7 @@ export class GhostTextObserver {
   private state: 'idle' | 'showing' = 'idle';
 
   private updatePositionFrameId: number | null = null;
+  private missingNodeFrames = 0;
 
   constructor(
     private readonly eventBus: EventBus,
@@ -49,7 +50,8 @@ export class GhostTextObserver {
     const options = { capture: true };
     document.addEventListener('keydown', this.handleKeyDown, options);
     document.addEventListener('mousedown', this.handleMouseDown, options);
-    window.addEventListener('blur', this.handleBlur, options);
+    // Note: window.blur is intentionally NOT attached here. 
+    // Attaching to window.blur causes premature dismissal whenever the user interacts with DevTools or the Chrome Sidepanel.
 
     console.log('[GhostTextObserver] Attached and observing.');
     return true;
@@ -58,7 +60,6 @@ export class GhostTextObserver {
   public disconnect(): void {
     document.removeEventListener('keydown', this.handleKeyDown, { capture: true });
     document.removeEventListener('mousedown', this.handleMouseDown, { capture: true });
-    window.removeEventListener('blur', this.handleBlur, { capture: true });
     this.unsubscribeAll.forEach(unsub => unsub());
     this.unsubscribeAll = [];
     this.clearOverlay();
@@ -82,7 +83,7 @@ export class GhostTextObserver {
         pointer-events: none;
         color: #9CA3AF;
         white-space: pre;
-        z-index: 10000;
+        z-index: 999999;
         opacity: 0;
         transform: translateX(2px);
         transition: opacity 200ms ease-out, transform 200ms ease-out;
@@ -91,7 +92,7 @@ export class GhostTextObserver {
         text-overflow: ellipsis;
       }
       .cognis-ghost-overlay.visible {
-        opacity: 0.5;
+        opacity: 0.85;
         transform: translateX(0);
       }
       .cognis-ghost-overlay.fade-out {
@@ -105,8 +106,13 @@ export class GhostTextObserver {
   private onGhostTextGenerated(payload: GhostTextGeneratedPayload, generatedAt: number): void {
     if (this.isDestroyed) return;
 
+    console.log('[GhostTextObserver] Received GhostTextEvents.GENERATED:', payload.interventionId, 'stem:', payload.stem);
+
     const inputNode = document.querySelector(this.config.selectors.promptInput) as HTMLElement;
-    if (!inputNode) return;
+    if (!inputNode) {
+      console.warn('[GhostTextObserver] Cannot render overlay; input node not found for selector:', this.config.selectors.promptInput);
+      return;
+    }
 
     // Truncate stem to ~80 chars to ensure it's a small nudge
     let stem = payload.stem;
@@ -152,12 +158,21 @@ export class GhostTextObserver {
 
 
   private renderOverlay(inputNode: HTMLElement, stem: string): void {
+    console.log('[GhostTextObserver] Rendering overlay for stem:', stem);
     this.overlayNode = document.createElement('span');
     this.overlayNode.className = 'cognis-ghost-overlay';
     this.overlayNode.textContent = stem;
 
-    // Mirror typography
-    const styles = window.getComputedStyle(inputNode);
+    // Direct inline styles as guarantee against CSP or stylesheet delay
+    this.overlayNode.style.position = 'fixed';
+    this.overlayNode.style.pointerEvents = 'none';
+    this.overlayNode.style.zIndex = '999999';
+    this.overlayNode.style.color = '#9CA3AF';
+    this.overlayNode.style.whiteSpace = 'pre';
+
+    // Mirror typography from active paragraph or input node
+    const typographyTarget = inputNode.querySelector('p') || inputNode;
+    const styles = window.getComputedStyle(typographyTarget);
     this.overlayNode.style.fontFamily = styles.fontFamily;
     this.overlayNode.style.fontSize = styles.fontSize;
     this.overlayNode.style.lineHeight = styles.lineHeight;
@@ -170,7 +185,70 @@ export class GhostTextObserver {
     void this.overlayNode.offsetWidth;
     this.overlayNode.classList.add('visible');
 
+    this.missingNodeFrames = 0;
     this.startPositionTracking();
+  }
+
+  private getContentEditableCaretCoordinates(inputNode: HTMLElement): { top: number; left: number } | null {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return null;
+
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+
+    // 1. Direct bounding rect check if height > 0 and not at 0,0
+    if (rect.height > 0 && (rect.top !== 0 || rect.left !== 0)) {
+      return { top: rect.top, left: rect.right };
+    }
+
+    // 2. Client rects list check
+    const rects = range.getClientRects();
+    if (rects.length > 0 && rects[0].height > 0) {
+      return { top: rects[0].top, left: rects[0].right };
+    }
+
+    // 3. If collapsed in a text node, measure preceding character range (non-destructive)
+    if (range.startContainer.nodeType === Node.TEXT_NODE && range.startOffset > 0) {
+      try {
+        const charRange = document.createRange();
+        charRange.setStart(range.startContainer, range.startOffset - 1);
+        charRange.setEnd(range.startContainer, range.startOffset);
+        const charRect = charRange.getBoundingClientRect();
+        if (charRect.height > 0 && (charRect.top !== 0 || charRect.left !== 0)) {
+          return { top: charRect.top, left: charRect.right };
+        }
+      } catch {
+        // Continue to fallback
+      }
+    }
+
+    // 4. If at offset 0 of a text node with content
+    if (range.startContainer.nodeType === Node.TEXT_NODE && (range.startContainer.textContent?.length ?? 0) > 0) {
+      try {
+        const charRange = document.createRange();
+        charRange.setStart(range.startContainer, 0);
+        charRange.setEnd(range.startContainer, 1);
+        const charRect = charRange.getBoundingClientRect();
+        if (charRect.height > 0 && (charRect.top !== 0 || charRect.left !== 0)) {
+          return { top: charRect.top, left: charRect.left };
+        }
+      } catch {
+        // Continue to fallback
+      }
+    }
+
+    // 5. Active ProseMirror paragraph fallback
+    const activeP = inputNode.querySelector('p:last-child') || inputNode.querySelector('p');
+    if (activeP) {
+      const pRect = activeP.getBoundingClientRect();
+      if (pRect.height > 0) {
+        return { top: pRect.top, left: pRect.right + 2 };
+      }
+    }
+
+    // 6. Final fallback: top-left of inputNode (inside typing area, not in toolbar buttons)
+    const inputRect = inputNode.getBoundingClientRect();
+    return { top: inputRect.top + 8, left: inputRect.left + 16 };
   }
 
   private startPositionTracking(): void {
@@ -179,9 +257,15 @@ export class GhostTextObserver {
 
       const inputNode = document.querySelector(this.config.selectors.promptInput) as HTMLElement | null;
       if (!inputNode) {
+        this.missingNodeFrames++;
+        if (this.missingNodeFrames > 5) {
           this.dismissGhostText('node_removed');
           return;
+        }
+        this.updatePositionFrameId = requestAnimationFrame(updatePosition);
+        return;
       }
+      this.missingNodeFrames = 0;
 
       if ('selectionStart' in inputNode && inputNode.tagName.toLowerCase() === 'textarea') {
         const coords = getTextareaCaretCoordinates(inputNode as HTMLTextAreaElement);
@@ -191,25 +275,10 @@ export class GhostTextObserver {
           this.overlayNode.style.left = `${coords.left}px`;
         }
       } else {
-        const selection = window.getSelection();
-        if (selection && selection.rangeCount > 0) {
-          const range = selection.getRangeAt(0);
-          const rect = range.getBoundingClientRect();
-          
-          if (rect.height > 0) {
-             this.overlayNode.style.top = `${rect.top}px`;
-             this.overlayNode.style.left = `${rect.right}px`;
-          } else {
-             // Fallback for ProseMirror/contenteditable when rect.height is 0 (empty line/trailing space)
-             const inputRect = inputNode.getBoundingClientRect();
-             this.overlayNode.style.top = `${inputRect.bottom - 24}px`;
-             this.overlayNode.style.left = `${inputRect.right - 150}px`;
-          }
-        } else {
-           // Fallback if no selection
-           const inputRect = inputNode.getBoundingClientRect();
-           this.overlayNode.style.top = `${inputRect.bottom - 24}px`;
-           this.overlayNode.style.left = `${inputRect.right - 150}px`;
+        const coords = this.getContentEditableCaretCoordinates(inputNode);
+        if (coords) {
+          this.overlayNode.style.top = `${coords.top}px`;
+          this.overlayNode.style.left = `${coords.left}px`;
         }
       }
 
@@ -239,7 +308,10 @@ export class GhostTextObserver {
     this.state = 'idle';
   }
 
-  private handleTerminalEvent(payload: { interventionId: string }): void {
+  private handleTerminalEvent(payload: { interventionId: string; reason?: string }): void {
+    if (payload.reason === 'replaced') {
+      return;
+    }
     if (this.currentSuggestion && payload.interventionId === this.currentSuggestion.interventionId) {
       this.clearOverlay();
     }
@@ -253,8 +325,11 @@ export class GhostTextObserver {
   private handleKeyDown = (e: KeyboardEvent): void => {
     if (this.state !== 'showing' || !this.currentSuggestion) return;
 
-    const target = e.target as HTMLElement;
-    if (!target.closest(this.config.selectors.promptInput)) return;
+    let target = e.target as Element | null;
+    if (target && target.nodeType === Node.TEXT_NODE) {
+      target = target.parentElement;
+    }
+    if (!target || !target.closest || !target.closest(this.config.selectors.promptInput)) return;
 
     if (e.key === 'Tab') {
       e.preventDefault();
@@ -288,6 +363,8 @@ export class GhostTextObserver {
     // Snapshot the suggestion before clearOverlay() nullifies it.
     const { interventionId, stem: stemToInsert, gapType } = this.currentSuggestion;
 
+    console.log('[GhostTextObserver] Accepted ghost text via Tab key:', stemToInsert);
+
     // Use the verified browser-native insertion method
     const success = document.execCommand('insertText', false, stemToInsert);
 
@@ -307,6 +384,8 @@ export class GhostTextObserver {
 
   private dismissGhostText(reason: 'explicit' | 'timeout' | 'continued_typing' | 'caret_moved' | 'node_removed' | 'lost_focus' | 'replaced'): void {
     if (!this.currentSuggestion) return;
+
+    console.log('[GhostTextObserver] Dismissed ghost text. Reason:', reason);
 
     // Snapshot the suggestion before clearOverlay() nullifies it.
     const { interventionId, stem, gapType } = this.currentSuggestion;
