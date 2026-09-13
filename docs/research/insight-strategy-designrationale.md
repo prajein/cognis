@@ -1,21 +1,51 @@
 # Strategy Design Document — Insight Engine Expansion
 
 **Workstream:** WS2 — Insight Strategy Design & Implementation
-**Author:** Dhanya
-**Status:** Submitted for review
-**Strategies proposed:** `V1GapResolutionEvaluator` (Gap domain), `V1ReasoningDepthEvaluator` (Reasoning domain)
+**Strategies proposed:** `V1PromptingPatternEvaluator` (Prompting domain), `V1GapResolutionEvaluator` (Gap domain), `V1ReasoningDepthEvaluator` (Reasoning domain)
 
 ---
 
 ## Summary
 
-The Insight Engine currently has one strategy, covering one of eight taxonomy domains. This document proposes two new strategies covering the Gap and Reasoning domains, each designed against the confirmed real event contracts and confidence-calibration mechanism already in production.
+The Insight Engine currently has one strategy, covering one of eight taxonomy domains. This document proposes three new strategies covering the Prompting, Gap, and Reasoning domains, each designed against the confirmed real event contracts and confidence-calibration mechanism already in production. All three have been implemented, self-tested, and verified against a 26-entry evaluation dataset.
 
 One implementation dependency was identified during design and is called out at the end of this document — it does not affect the validity of either design, but affects when either strategy can produce output in the live product.
 
 ---
 
-## Strategy 1: `V1GapResolutionEvaluator`
+## Strategy A: `V1PromptingPatternEvaluator`
+
+**Domain:** Prompting
+
+### Signal Hypothesis
+
+Overall prompt quality can be inferred from the total frequency of detected context gaps across all 8 gap types combined: a decline in gap frequency over time suggests the user is specifying more complete context up front, without needing per-gap-type detail. This is a holistic companion to `V1GapResolutionEvaluator` below, which reports per-gap-type patterns rather than one combined trend.
+
+### Evidence Requirements and Expected Event Types
+
+- **`gap.detected`**, queried per gap type via 8 composite markers (`gap.detected:{gapType}`) and summed into a single combined timeline, since event history access returns timestamps only, not payloads.
+- Both a recent-window sample and a historical sample of at least 5 events each are required before any trend is claimed.
+
+**Note on output language:** the RFC's example phrasing references "sessions" (e.g., "over the last 30 sessions"). Session boundaries are not recoverable from timestamp-only event history, so this strategy reports over a fixed 30-day window instead, and states that explicitly in the insight summary rather than claiming an unverifiable session count.
+
+### Confidence Calibration Approach
+
+- **Evidence:** the recent-window combined gap timestamps
+- **Required count:** 5
+- **Baseline:** 0.75 — gap-frequency trends are more directly observable than inferred score trends, warranting a higher starting baseline than the Reasoning strategy below
+- **Contradicts:** not currently set (no contradiction signal identified for this strategy)
+- **Existing count:** historical evidence count, to avoid redundant re-surfacing
+
+### Edge Cases and Failure Modes
+
+- **Flat or noisy frequency change:** no insight generated unless the relative change between recent and historical density exceeds a significance threshold, to avoid reporting normal variation as a trend.
+- **Multiple gap types changing simultaneously:** correctly aggregated into one combined signal rather than producing duplicate or conflicting insights.
+- **New users with no historical baseline:** no insight, since a trend requires evidence on both sides of the comparison window.
+- **Directional symmetry:** the strategy reports both improving (declining frequency) and declining (rising frequency) trends, framed constructively in either direction.
+
+---
+
+## Strategy B: `V1GapResolutionEvaluator`
 
 **Domain:** Gap
 
@@ -53,49 +83,51 @@ Fed into the standard `ConfidenceCalculator`:
 
 ---
 
-## Strategy 2: `V1ReasoningDepthEvaluator`
+## Strategy C: `V1ReasoningDepthEvaluator`
 
 **Domain:** Reasoning
 
 ### Signal Hypothesis
 
-Rather than a flat average comparison of reasoning scores over time, this strategy applies a statistical trend test to determine whether reasoning depth in the responses a user receives is genuinely improving or declining — and calibrates its own confidence against the known reliability profile of its upstream data source, established during the Response Analyzer baseline evaluation (WS1).
+**Scope note:** the originally proposed design (a linear-regression trend over per-response `reasoningScore` values) was found not to be implementable during implementation — `ReasoningContext.getEventHistory()` returns event timestamps only, with no payload access, so `reasoningScore` cannot be retrieved per event through the current API. Rather than ship a strategy that claims to measure reasoning "depth" while actually measuring something else, this strategy was descoped to a frequency-based signal: the trend in how often the user has exchanges substantial enough to trigger full response analysis. This is an honest, working proxy for reasoning *engagement*, explicitly distinguished from reasoning *quality* in both the code and its output — and it should be upgraded to the original score-trend design once payload-level event access is available (see Implementation Dependency, below).
 
 ### Evidence Requirements and Expected Event Types
 
-- **`response.analysis.completed`** — `{ promptHash, structuralScore, reasoningScore, qualityScore, flags }`. `reasoningScore` is used directly as the trend signal.
+- **`response.analysis.completed`**, queried as a timestamp-only event history (no payload access currently available). A minimum of 5 events on each side of a 30-day comparison window is required before any trend is claimed.
 
 **Trend detection:**
 ```
-slope, R² = linearRegression(sessionOrderedReasoningScores)
+recentDensity   = count(events in the last 30 days) / days spanned
+earlierDensity  = count(events before that) / days spanned
+relativeChange  = (recentDensity - earlierDensity) / earlierDensity
 
-if R² below significance threshold:
-    no insight generated — data too noisy to support a trend claim
+if |relativeChange| below a significance threshold:
+    no insight generated — change too small to be a meaningful trend
 else:
-    insight generated in the supported direction (improving / declining),
-    framed descriptively, not evaluatively
+    insight generated in the supported direction (increasing / decreasing
+    engagement), framed descriptively, not evaluatively
 ```
-
-A linear-regression approach over a naive before/after average avoids reporting a confident trend off 2-3 outlier scores in a small sample, and runs well within on-device latency constraints.
 
 ### Confidence Calibration Approach
 
-- **Evidence:** `response.analysis.completed` events, using `reasoningScore`
-- **Required count:** 5 (Insight Validator's real floor); the trend logic additionally requires a minimum R² before firing, so a technically-sufficient but statistically noisy 5-point sample does not produce a low-quality insight
-- **Baseline:** set conservatively, reflecting the WS1 baseline finding that `ReasoningAnalyzer` is the lowest-accuracy of the four response analyzers on pure score error — an explicit, blanket acknowledgment of known upstream measurement uncertainty rather than an attempt to selectively discount individual data points
-- **Contradicts:** set when the regression's confidence interval is wide relative to the slope
-- **Existing count:** prior reasoning-depth insights surfaced to this user
+- **Evidence:** the recent-window `response.analysis.completed` timestamps
+- **Required count:** 5 on both sides of the comparison window (matches the Insight Validator's real evidence floor)
+- **Baseline:** set conservatively (0.6), reflecting the WS1 baseline finding that `ReasoningAnalyzer` is the lowest-accuracy of the four response analyzers on pure score error — an explicit, blanket acknowledgment of known upstream measurement uncertainty, applied uniformly rather than attempting to selectively discount individual data points (which would require exactly the payload access this strategy doesn't have)
+- **Contradicts:** not currently set
+- **Existing count:** prior reasoning-engagement insights surfaced to this user
 
 ### Edge Cases and Failure Modes
 
-- **Insufficient or statistically noisy evidence:** no insight below the evidence floor, and no insight when R² is too low even above it.
-- **Genuine short-term regression during difficult material:** framed descriptively, not as a concerning decline.
-- **Trend-reversal sensitivity:** hysteresis applied so a slope oscillating near zero doesn't re-trigger a new insight every session.
+- **No historical baseline or no recent evidence:** no insight when either side of the comparison window falls below 5 events — a trend cannot be claimed from only one side of a comparison.
+- **Flat or noisy frequency change:** no insight when the relative change between recent and historical density is too small to be meaningful.
+- **Genuine short-term dip during difficult material:** framed descriptively as an observed change in engagement, not as a quality judgment — this strategy makes no claim about whether a decline is good or bad.
 
 ---
 
-## Implementation Dependency
+## Implementation Dependency (not a design issue — flagging for visibility)
 
-Both strategies are designed against confirmed real event contracts and are ready for implementation and self-testing against injected evaluation fixtures, consistent with this workstream's required mock-based evaluation dataset.
+All three strategies are designed against confirmed real event contracts, and have been implemented, self-tested, and verified against a 26-entry evaluation dataset run against the actual strategy code (not just described on paper).
 
-Separately: the production context-builder that supplies real event history to strategies is not yet implemented — it currently returns a hardcoded placeholder for a single unrelated marker and an empty result for all others, including the events both strategies above depend on. This is infrastructure outside this workstream's ownership boundary. Neither strategy can produce live insights in production until it exists. Recommend this be tracked and assigned independently of this document's approval.
+Separately: the production context-builder that supplies real event history to strategies is not yet implemented — it currently returns a hardcoded placeholder for a single unrelated marker and an empty result for all others, including every event all three strategies above depend on. This is infrastructure outside this workstream's ownership boundary. None of the three strategies can produce live insights in production until it exists. Recommend this be tracked and assigned independently of this document's approval.
+
+Separately, and specific to Strategy C: once payload-level event access exists, `V1ReasoningDepthEvaluator` should be revisited and upgraded from its current frequency-based signal to the originally intended `reasoningScore` trend design, which is the more valuable signal once it's implementable.
