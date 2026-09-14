@@ -1,11 +1,4 @@
-```
- ██████╗  ██████╗  ██████╗ ███╗   ██╗██╗███████╗
-██╔════╝ ██╔═══██╗██╔════╝ ████╗  ██║██║██╔════╝
-██║      ██║   ██║██║  ███╗██╔██╗ ██║██║███████╗
-██║      ██║   ██║██║   ██║██║╚██╗██║██║╚════██║
-╚██████╗ ╚██████╔╝╚██████╔╝██║ ╚████║██║███████║
- ╚═════╝  ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚═╝╚══════╝
-```
+## COGNIS
 
 <p align="center"><strong>Keep thinking while you use AI.</strong></p>
 
@@ -42,9 +35,9 @@ Cognis runs alongside ChatGPT, Claude, and Gemini.
 
 Worth understanding before you install. Cognis intercepts submit and prepends locally built context to your prompt before it reaches the model.
 
-* The model sees more than you typed. Your own words are never altered or removed, but instructions you did not write are added around them.
-* That added text is assembled from static local templates. Nothing is sent anywhere to produce it.
-* The shipped templates are still placeholders and carry opinionated defaults, such as suppressing code blocks. Edit [`enrichment_layers.json`](src/core/config/enrichment_layers.json) to match how you actually work.
+- The model sees more than you typed. Your own words are never altered or removed, but instructions you did not write are added around them.
+- That added text is assembled from static local templates. Nothing is sent anywhere to produce it.
+- The shipped templates are still placeholders and carry opinionated defaults, such as suppressing code blocks. Edit [`enrichment_layers.json`](src/core/config/enrichment_layers.json) to match how you actually work.
 
 Implemented in [`SubmitInterceptor`](src/platforms/observers/SubmitInterceptor.ts) and [`EnrichmentEngine`](src/engines/enrichment/EnrichmentEngine.ts). Making it opt in is a priority.
 
