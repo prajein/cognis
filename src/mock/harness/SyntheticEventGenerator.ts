@@ -15,7 +15,7 @@
  *   `TypingObserver`) to avoid a dependency from mock → perception layer.
  */
 
-import { DomainEvent, CognisEventMap } from '../../core/event-bus/contracts';
+import { DomainEvent, CognisEventMap, ResponseAnalysisCompletedPayload } from '../../core/event-bus/contracts';
 import {
   createDomainEvent,
   EventFactoryOptions,
@@ -269,6 +269,21 @@ export class SyntheticEventGenerator {
       this.sessionId,
       SOURCE,
       { partialLength, durationMs },
+      this.options,
+    );
+  }
+
+  responseAnalysisCompleted(
+    analysis: Omit<ResponseAnalysisCompletedPayload, 'promptHash'> & { promptHash?: string }
+  ): DomainEvent<CognisEventMap['response.analysis.completed']> {
+    return createDomainEvent(
+      ResponseEvents.ANALYSIS_COMPLETED,
+      this.sessionId,
+      SOURCE,
+      {
+        promptHash: analysis.promptHash || 'mock-hash',
+        ...analysis
+      },
       this.options,
     );
   }

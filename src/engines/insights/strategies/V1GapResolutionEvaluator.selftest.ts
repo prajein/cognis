@@ -30,11 +30,59 @@ function offsetsToTimestamps(offsetDays: number[]): number[] {
 }
 
 function makeContext(history: Record<string, number[]>): ReasoningContext {
+  const gaps = {} as Record<string, any>;
+  const ALL_GAP_TYPES = ['intentionality', 'audience', 'constraint', 'stakes', 'assumption', 'mechanism', 'temporal', 'second_order'];
+  const cutoff = NOW - 30 * MS_PER_DAY;
+
+  for (const gapType of ALL_GAP_TYPES) {
+    const detTimestamps = history[`gap.detected:${gapType}`] ?? [];
+    let detHistoricalCount = 0;
+    let detHistoricalEarliest = 0;
+    const detRecentTimestamps: number[] = [];
+
+    for (const t of detTimestamps) {
+      if (t < cutoff) {
+        detHistoricalCount++;
+        if (detHistoricalEarliest === 0 || t < detHistoricalEarliest) {
+          detHistoricalEarliest = t;
+        }
+      } else {
+        detRecentTimestamps.push(t);
+      }
+    }
+
+    const resTimestamps = history[`ghosttext.accepted:${gapType}`] ?? [];
+    let resHistoricalCount = 0;
+    let resHistoricalEarliest = 0;
+    const resRecentTimestamps: number[] = [];
+
+    for (const t of resTimestamps) {
+      if (t < cutoff) {
+        resHistoricalCount++;
+        if (resHistoricalEarliest === 0 || t < resHistoricalEarliest) {
+          resHistoricalEarliest = t;
+        }
+      } else {
+        resRecentTimestamps.push(t);
+      }
+    }
+
+    gaps[gapType] = {
+      detection: { historicalCount: detHistoricalCount, historicalEarliest: detHistoricalEarliest, recentTimestamps: detRecentTimestamps },
+      resolution: { historicalCount: resHistoricalCount, historicalEarliest: resHistoricalEarliest, recentTimestamps: resRecentTimestamps }
+    };
+  }
+
   return {
     sessionId: 'selftest-session',
     now: NOW,
-    getEventHistory: (marker: string) => history[marker] ?? [],
-  };
+    globalAnalyticalProfile: {
+      projectionId: 'global',
+      responseAnalysis: { historicalCount: 0, historicalEarliest: 0, recentTimestamps: [] },
+      gaps,
+      lastUpdated: NOW
+    }
+  } as any;
 }
 
 // --- Test 1: chronic, unresolved gap type ---

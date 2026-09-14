@@ -5,6 +5,8 @@ import { AutomaticityReadModel } from '../../../storage/projections/builders/Aut
 import { GapProfileReadModel } from '../../../storage/projections/builders/GapProfileProjectionBuilder';
 import { IdentityReadModel } from '../../../storage/projections/builders/IdentityProjectionBuilder';
 import { ResponseMetricsReadModel } from '../../../storage/projections/builders/ResponseMetricsProjectionBuilder';
+import { GlobalAnalyticalProfileReadModel } from '../../../storage/projections/builders/GlobalAnalyticalProfileProjectionBuilder';
+import { GapType } from '../../../core/types/gap.types';
 
 export class ReasoningContextBuilder {
   constructor(private readonly readModelRepo: ReadModelRepository) {}
@@ -18,13 +20,15 @@ export class ReasoningContextBuilder {
       automaticityModel,
       gapModel,
       identityModel,
-      responseModel
+      responseModel,
+      globalModel
     ] = await Promise.all([
       this.readModelRepo.get<SessionReadModel>(`session-v1_${sessionId}`),
       this.readModelRepo.get<AutomaticityReadModel>(`automaticity-v1_${sessionId}`),
       this.readModelRepo.get<GapProfileReadModel>(`gap-profile-v1_${sessionId}`),
       this.readModelRepo.get<IdentityReadModel>(`identity-v1_${sessionId}`),
-      this.readModelRepo.get<ResponseMetricsReadModel>(`response-metrics-v1_${sessionId}`)
+      this.readModelRepo.get<ResponseMetricsReadModel>(`response-metrics-v1_${sessionId}`),
+      this.readModelRepo.get<GlobalAnalyticalProfileReadModel>(`global-analytical-profile-v1`)
     ]);
 
     // Replace any missing projections with fully materialized Default Read Models.
@@ -37,6 +41,26 @@ export class ReasoningContextBuilder {
       gapProfile: gapModel ?? this.createDefaultGapReadModel(sessionId, now),
       identityProfile: identityModel ?? this.createDefaultIdentityReadModel(sessionId, now),
       responseMetrics: responseModel ?? this.createDefaultResponseMetricsReadModel(sessionId, now),
+      globalAnalyticalProfile: globalModel ?? this.createDefaultGlobalAnalyticalProfile(now),
+    };
+  }
+
+  private createDefaultGlobalAnalyticalProfile(now: number): GlobalAnalyticalProfileReadModel {
+    const emptyTracker = () => ({ historicalCount: 0, historicalEarliest: 0, recentTimestamps: [] });
+    return {
+      projectionId: 'global-analytical-profile-v1',
+      responseAnalysis: emptyTracker(),
+      gaps: {
+        'intentionality': { detection: emptyTracker(), resolution: emptyTracker() },
+        'audience': { detection: emptyTracker(), resolution: emptyTracker() },
+        'constraint': { detection: emptyTracker(), resolution: emptyTracker() },
+        'stakes': { detection: emptyTracker(), resolution: emptyTracker() },
+        'assumption': { detection: emptyTracker(), resolution: emptyTracker() },
+        'mechanism': { detection: emptyTracker(), resolution: emptyTracker() },
+        'temporal': { detection: emptyTracker(), resolution: emptyTracker() },
+        'second_order': { detection: emptyTracker(), resolution: emptyTracker() }
+      } as Record<GapType, any>,
+      lastUpdated: now
     };
   }
 

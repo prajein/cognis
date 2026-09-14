@@ -52,26 +52,39 @@ export class V1PromptingPatternEvaluator implements InsightStrategy {
   public execute(context: ReasoningContext): InsightCandidate[] {
     const lookbackStart = context.now - LOOKBACK_DAYS * MS_PER_DAY;
 
-    // Aggregate all gap types into one combined timeline -- this strategy
-    // cares about overall prompting quality, not any single gap category.
-    const allTimestamps: number[] = [];
-    for (const gapType of ALL_GAP_TYPES) {
-      allTimestamps.push(...context.getEventHistory(buildGapMarker(gapType)));
-    }
+    // Aggregate all gap types into one combined timeline
+    let earlierCount = 0;
+    let earliest = 0;
+    const recent: number[] = [];
 
-    if (allTimestamps.length < MIN_EVIDENCE_COUNT) {
+    for (const gapType of ALL_GAP_TYPES) {
+      const gapData = context.globalAnalyticalProfile.gaps[gapType];
+      if (!gapData) continue;
+      
+      const tracker = gapData.detection;
+      earlierCount += tracker.historicalCount;
+      if (tracker.historicalEarliest > 0) {
+        if (earliest === 0 || tracker.historicalEarliest < earliest) {
+          earliest = tracker.historicalEarliest;
+        }
+      }
+      recent.push(...tracker.recentTimestamps);
+    }
+    
+    const totalCount = earlierCount + recent.length;
+
+    if (totalCount < MIN_EVIDENCE_COUNT) {
       return []; // not enough total gap history to say anything about a trend
     }
 
-    const recent = allTimestamps.filter((t) => t >= lookbackStart);
-    const earlier = allTimestamps.filter((t) => t < lookbackStart);
-
-    if (recent.length < MIN_EVIDENCE_COUNT || earlier.length < MIN_EVIDENCE_COUNT) {
+    if (recent.length < MIN_EVIDENCE_COUNT || earlierCount < MIN_EVIDENCE_COUNT) {
       return []; // need a real sample on both sides of the window to claim a trend
     }
 
     const recentDensity = recent.length / spanDaysEndingAt(recent, context.now);
-    const earlierDensity = earlier.length / spanDaysEndingAt(earlier, lookbackStart);
+    
+    const earlierSpanDays = earlierCount === 0 ? 1 : Math.max(1, (lookbackStart - earliest) / MS_PER_DAY);
+    const earlierDensity = earlierCount / earlierSpanDays;
 
     if (earlierDensity === 0) {
       return [];
@@ -90,7 +103,7 @@ export class V1PromptingPatternEvaluator implements InsightStrategy {
       MIN_EVIDENCE_COUNT,
       0.75,
       false,
-      earlier.length,
+      earlierCount,
       context.now,
     );
 

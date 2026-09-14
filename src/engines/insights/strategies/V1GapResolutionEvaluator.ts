@@ -66,20 +66,24 @@ export class V1GapResolutionEvaluator implements InsightStrategy {
     context: ReasoningContext,
     lookbackStart: number,
   ): InsightCandidate | null {
-    const all = context.getEventHistory(buildGapMarker(gapType));
-    if (all.length < MIN_EVIDENCE_COUNT) {
+    const gapData = context.globalAnalyticalProfile.gaps[gapType];
+    if (!gapData) return null;
+
+    const detectionTracker = gapData.detection;
+    const earlierCount = detectionTracker.historicalCount;
+    const recent = detectionTracker.recentTimestamps;
+    const totalCount = earlierCount + recent.length;
+    
+    if (totalCount < MIN_EVIDENCE_COUNT) {
       return null; // not enough evidence, ever, to say anything meaningful
     }
 
-    const recent = all.filter((t) => t >= lookbackStart);
-    const earlier = all.filter((t) => t < lookbackStart);
     const recentDensity = densityPerDay(recent, LOOKBACK_DAYS);
 
     // --- Chronic path: enough recent evidence, still frequent, largely unresolved ---
     if (recent.length >= MIN_EVIDENCE_COUNT && recentDensity >= CHRONIC_DENSITY_THRESHOLD) {
-      const resolutions = context
-        .getEventHistory(buildResolutionMarker(gapType))
-        .filter((t) => t >= lookbackStart);
+      const resolutionTracker = gapData.resolution;
+      const resolutions = resolutionTracker.recentTimestamps;
       const resolutionRatio = resolutions.length / recent.length;
 
       if (resolutionRatio < RESOLUTION_RATIO_CEILING) {
@@ -88,7 +92,7 @@ export class V1GapResolutionEvaluator implements InsightStrategy {
           MIN_EVIDENCE_COUNT,
           0.8,
           false,
-          earlier.length,
+          earlierCount,
           context.now,
         );
         return {
@@ -110,18 +114,19 @@ export class V1GapResolutionEvaluator implements InsightStrategy {
     }
 
     // --- Improving path: meaningful historical pattern, now clearly reduced ---
-    if (earlier.length >= MIN_EVIDENCE_COUNT) {
-      const historicalDensity = densityPerDay(earlier, spanDaysEndingAt(earlier, lookbackStart));
+    if (earlierCount >= MIN_EVIDENCE_COUNT) {
+      const earlierSpanDays = earlierCount === 0 ? 1 : Math.max(1, (lookbackStart - detectionTracker.historicalEarliest) / MS_PER_DAY);
+      const historicalDensity = earlierCount / earlierSpanDays;
       const isMeaningfulHistory = historicalDensity >= CHRONIC_DENSITY_THRESHOLD;
       const hasDropped = recentDensity <= historicalDensity * IMPROVEMENT_RATIO_THRESHOLD;
 
       if (isMeaningfulHistory && hasDropped) {
         const confidence = this.calculator.calculate(
-          earlier,
+          recent,
           MIN_EVIDENCE_COUNT,
           0.65,
           false,
-          recent.length,
+          earlierCount,
           context.now,
         );
         return {
@@ -130,7 +135,7 @@ export class V1GapResolutionEvaluator implements InsightStrategy {
           title: `Improving gap: ${gapType}`,
           summary: `Your prompts have shown a meaningful reduction in ${gapType} gaps compared to your earlier history.`,
           confidence,
-          evidenceCount: earlier.length,
+          evidenceCount: earlierCount,
           metadata: {
             gapType,
             pattern: 'improving',

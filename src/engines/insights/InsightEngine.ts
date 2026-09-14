@@ -3,8 +3,9 @@ import { IInsightEngine } from './interfaces';
 import { ReasoningPipeline } from './pipeline/ReasoningPipeline';
 import { InsightScheduler } from './InsightScheduler';
 import { V1AutomaticityEvaluator } from './strategies/V1AutomaticityEvaluator';
-import { FormulationGapTrendStrategy } from './strategies/FormulationGapTrendStrategy';
-import { CognitiveStateProxyStrategy } from './strategies/CognitiveStateProxyStrategy';
+import { V1ReasoningDepthEvaluator } from './strategies/V1ReasoningDepthEvaluator';
+import { V1PromptingPatternEvaluator } from './strategies/V1PromptingPatternEvaluator';
+import { V1GapResolutionEvaluator } from './strategies/V1GapResolutionEvaluator';
 
 import { ReadModelRepository } from '../../storage/repositories/ReadModelRepository';
 import { ReasoningContextBuilder } from './pipeline/ReasoningContextBuilder';
@@ -20,9 +21,10 @@ export class InsightEngine implements IInsightEngine {
 
     // Initialize Strategies
     const strategies = [
-      new V1AutomaticityEvaluator(),
-      new FormulationGapTrendStrategy(),
-      new CognitiveStateProxyStrategy()
+      new V1AutomaticityEvaluator(), // Kept but currently returns empty
+      new V1ReasoningDepthEvaluator(),
+      new V1PromptingPatternEvaluator(),
+      new V1GapResolutionEvaluator()
     ];
 
     // Initialize Context Builder

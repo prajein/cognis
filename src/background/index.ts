@@ -14,6 +14,7 @@ import { IdentityProjectionBuilder } from '../storage/projections/builders/Ident
 import { AutomaticityProjectionBuilder } from '../storage/projections/builders/AutomaticityProjectionBuilder';
 import { ResponseMetricsProjectionBuilder } from '../storage/projections/builders/ResponseMetricsProjectionBuilder';
 import { InsightProjectionBuilder } from '../storage/projections/builders/InsightProjectionBuilder';
+import { GlobalAnalyticalProfileProjectionBuilder } from '../storage/projections/builders/GlobalAnalyticalProfileProjectionBuilder';
 import { AdaptationPreferenceRepository } from '../storage/repositories/AdaptationPreferenceRepository';
 import { RetentionRepository } from '../storage/repositories/RetentionRepository';
 import { RetentionPolicy } from '../storage/retention/RetentionPolicy';
@@ -109,7 +110,8 @@ async function bootstrapBackground(): Promise<void> {
       new IdentityProjectionBuilder(readModelRepo),
       new AutomaticityProjectionBuilder(readModelRepo),
       new ResponseMetricsProjectionBuilder(readModelRepo),
-      new InsightProjectionBuilder(readModelRepo)
+      new InsightProjectionBuilder(readModelRepo),
+      new GlobalAnalyticalProfileProjectionBuilder(readModelRepo)
     ];
 
     const projectionManager = new ProjectionManager(

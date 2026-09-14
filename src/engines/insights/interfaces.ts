@@ -5,6 +5,7 @@ import { AutomaticityReadModel } from '../../storage/projections/builders/Automa
 import { GapProfileReadModel } from '../../storage/projections/builders/GapProfileProjectionBuilder';
 import { IdentityReadModel } from '../../storage/projections/builders/IdentityProjectionBuilder';
 import { ResponseMetricsReadModel } from '../../storage/projections/builders/ResponseMetricsProjectionBuilder';
+import { GlobalAnalyticalProfileReadModel } from '../../storage/projections/builders/GlobalAnalyticalProfileProjectionBuilder';
 
 export interface ReasoningContext {
   readonly sessionId: string;
@@ -16,6 +17,7 @@ export interface ReasoningContext {
   readonly gapProfile: Readonly<GapProfileReadModel>;
   readonly identityProfile: Readonly<IdentityReadModel>;
   readonly responseMetrics: Readonly<ResponseMetricsReadModel>;
+  readonly globalAnalyticalProfile: Readonly<GlobalAnalyticalProfileReadModel>;
 }
 
 export interface InsightStrategy {

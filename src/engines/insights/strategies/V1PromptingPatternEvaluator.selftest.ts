@@ -27,11 +27,43 @@ function offsetsToTimestamps(offsetDays: number[]): number[] {
 }
 
 function makeContext(history: Record<string, number[]>): ReasoningContext {
+  const gaps = {} as Record<string, any>;
+  const ALL_GAP_TYPES = ['intentionality', 'audience', 'constraint', 'stakes', 'assumption', 'mechanism', 'temporal', 'second_order'];
+  const cutoff = NOW - 30 * MS_PER_DAY;
+
+  for (const gapType of ALL_GAP_TYPES) {
+    const timestamps = history[`gap.detected:${gapType}`] ?? [];
+    let historicalCount = 0;
+    let historicalEarliest = 0;
+    const recentTimestamps: number[] = [];
+
+    for (const t of timestamps) {
+      if (t < cutoff) {
+        historicalCount++;
+        if (historicalEarliest === 0 || t < historicalEarliest) {
+          historicalEarliest = t;
+        }
+      } else {
+        recentTimestamps.push(t);
+      }
+    }
+
+    gaps[gapType] = {
+      detection: { historicalCount, historicalEarliest, recentTimestamps },
+      resolution: { historicalCount: 0, historicalEarliest: 0, recentTimestamps: [] }
+    };
+  }
+
   return {
     sessionId: 'selftest-session',
     now: NOW,
-    getEventHistory: (marker: string) => history[marker] ?? [],
-  };
+    globalAnalyticalProfile: {
+      projectionId: 'global',
+      responseAnalysis: { historicalCount: 0, historicalEarliest: 0, recentTimestamps: [] },
+      gaps,
+      lastUpdated: NOW
+    }
+  } as any;
 }
 
 // --- Test 1: improving -- gap frequency has clearly declined ---

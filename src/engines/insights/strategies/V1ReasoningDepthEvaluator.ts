@@ -49,23 +49,27 @@ export class V1ReasoningDepthEvaluator implements InsightStrategy {
   private readonly calculator = new ConfidenceCalculator();
 
   public execute(context: ReasoningContext): InsightCandidate[] {
-    const all = context.getEventHistory(RESPONSE_ANALYSIS_MARKER);
-    if (all.length < MIN_EVIDENCE_COUNT) {
+    const tracker = context.globalAnalyticalProfile.responseAnalysis;
+    const earlierCount = tracker.historicalCount;
+    const recent = tracker.recentTimestamps;
+    const totalCount = earlierCount + recent.length;
+
+    if (totalCount < MIN_EVIDENCE_COUNT) {
       return [];
     }
 
     const lookbackStart = context.now - LOOKBACK_DAYS * MS_PER_DAY;
-    const recent = all.filter((t) => t >= lookbackStart);
-    const earlier = all.filter((t) => t < lookbackStart);
 
-    // Both a real recent sample AND a real historical baseline are required --
-    // no trend claim is possible without something to compare against.
-    if (recent.length < MIN_EVIDENCE_COUNT || earlier.length < MIN_EVIDENCE_COUNT) {
+    // Both a real recent sample AND a real historical baseline are required
+    if (recent.length < MIN_EVIDENCE_COUNT || earlierCount < MIN_EVIDENCE_COUNT) {
       return [];
     }
 
     const recentDensity = recent.length / spanDaysEndingAt(recent, context.now);
-    const earlierDensity = earlier.length / spanDaysEndingAt(earlier, lookbackStart);
+    
+    // Calculate historical span using the tracked earliest timestamp
+    const earlierSpanDays = earlierCount === 0 ? 1 : Math.max(1, (lookbackStart - tracker.historicalEarliest) / MS_PER_DAY);
+    const earlierDensity = earlierCount / earlierSpanDays;
 
     if (earlierDensity === 0) {
       return [];
@@ -88,7 +92,7 @@ export class V1ReasoningDepthEvaluator implements InsightStrategy {
       // uncertainty -- see design rationale doc, Confidence Calibration.
       0.6,
       false,
-      earlier.length,
+      earlierCount,
       context.now,
     );
 

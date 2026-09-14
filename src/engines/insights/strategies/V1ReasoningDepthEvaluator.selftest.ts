@@ -28,11 +28,38 @@ function offsetsToTimestamps(offsetDays: number[]): number[] {
 }
 
 function makeContext(history: Record<string, number[]>): ReasoningContext {
+  const timestamps = history[MARKER] ?? [];
+  const cutoff = NOW - 30 * MS_PER_DAY;
+  
+  let historicalCount = 0;
+  let historicalEarliest = 0;
+  const recentTimestamps: number[] = [];
+
+  for (const t of timestamps) {
+    if (t < cutoff) {
+      historicalCount++;
+      if (historicalEarliest === 0 || t < historicalEarliest) {
+        historicalEarliest = t;
+      }
+    } else {
+      recentTimestamps.push(t);
+    }
+  }
+
   return {
     sessionId: 'selftest-session',
     now: NOW,
-    getEventHistory: (marker: string) => history[marker] ?? [],
-  };
+    globalAnalyticalProfile: {
+      projectionId: 'global',
+      responseAnalysis: {
+        historicalCount,
+        historicalEarliest,
+        recentTimestamps
+      },
+      gaps: {} as any,
+      lastUpdated: NOW
+    }
+  } as any;
 }
 
 // --- Test 1: clearly increasing engagement ---
