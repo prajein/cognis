@@ -14,6 +14,8 @@
 import { StructureAnalyzer } from "../../engines/response/analyzers/StructureAnalyzer";
 import { ReasoningAnalyzer } from "../../engines/response/analyzers/ReasoningAnalyzer";
 import { CompletenessAnalyzer } from "../../engines/response/analyzers/CompletenessAnalyzer";
+import { AssumptionAnalyzer } from "../../engines/response/analyzers/AssumptionAnalyzer";
+import { GapCompletionAnalyzer } from "../../engines/response/analyzers/GapCompletionAnalyzer";
 import { QualityAnalyzer } from "../../engines/response/analyzers/QualityAnalyzer";
 
 import * as fs from "fs";
@@ -392,7 +394,9 @@ function main(): void {
         new QualityAnalyzer(
           new StructureAnalyzer(),
           new ReasoningAnalyzer(),
-          new CompletenessAnalyzer()
+          new CompletenessAnalyzer(),
+          new AssumptionAnalyzer(),
+          new GapCompletionAnalyzer()
         ).analyze(t, h),
       labelKey: "quality",
       // no issueDomain -- composite is scored against the full unfiltered issue list

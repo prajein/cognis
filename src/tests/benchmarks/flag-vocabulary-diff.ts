@@ -15,6 +15,8 @@ import * as path from "path";
 import { StructureAnalyzer } from "../../engines/response/analyzers/StructureAnalyzer";
 import { ReasoningAnalyzer } from "../../engines/response/analyzers/ReasoningAnalyzer";
 import { CompletenessAnalyzer } from "../../engines/response/analyzers/CompletenessAnalyzer";
+import { AssumptionAnalyzer } from "../../engines/response/analyzers/AssumptionAnalyzer";
+import { GapCompletionAnalyzer } from "../../engines/response/analyzers/GapCompletionAnalyzer";
 import { QualityAnalyzer } from "../../engines/response/analyzers/QualityAnalyzer";
 
 // Anchored to project root, not __dirname -- see intelligence-benchmark.ts for why.
@@ -28,7 +30,9 @@ const dataset = JSON.parse(fs.readFileSync(datasetPath, "utf-8"));
 const structure = new StructureAnalyzer();
 const reasoning = new ReasoningAnalyzer();
 const completeness = new CompletenessAnalyzer();
-const quality = new QualityAnalyzer(structure, reasoning, completeness);
+const assumption = new AssumptionAnalyzer();
+const gapCompletion = new GapCompletionAnalyzer();
+const quality = new QualityAnalyzer(structure, reasoning, completeness, assumption, gapCompletion);
 
 const predictedFlagsSeen: Record<string, Set<string>> = {
   StructureAnalyzer: new Set(),

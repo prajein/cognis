@@ -1,8 +1,12 @@
+import { IdentityReadModel } from '../../storage/projections/builders/IdentityProjectionBuilder';
+import { GapProfileReadModel } from '../../storage/projections/builders/GapProfileProjectionBuilder';
+import { StateLabel } from '../types/state.types';
+
 export interface EnrichmentInput {
-  identityProfile: any; // TODO: Define type
-  gapProfile: any; // TODO: Define type
-  currentState: any; // TODO: Define type
-  ghostTextCompletions: any; // TODO: Define type
+  identityProfile: IdentityReadModel | null;
+  gapProfile: GapProfileReadModel | null;
+  currentState: StateLabel;
+  ghostTextCompletions: string[];
   prompt: string;
 }
 

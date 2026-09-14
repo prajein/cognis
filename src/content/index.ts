@@ -2,6 +2,7 @@ import { EventBus } from '../core/event-bus/EventBus';
 import { ExtensionEventBridge } from '../core/event-bus/ExtensionEventBridge';
 import { ConsoleErrorReporter } from '../core/error/ConsoleErrorReporter';
 import { GapDetectionEngine } from '../engines/gap/GapDetectionEngine';
+import { ContentScriptEnricher } from './ContentScriptEnricher';
 import { EnrichmentEngine } from '../engines/enrichment/EnrichmentEngine';
 import { GhostTextEngine } from '../engines/ghosttext/GhostTextEngine';
 import { StateEngine } from '../engines/state/StateEngine';
@@ -58,7 +59,8 @@ function bootstrapContentScript(): void {
     const ghostEngine = new GhostTextEngine(eventBus);
     ghostEngine.start();
 
-    const enrichmentEngine = new EnrichmentEngine(eventBus);
+    const pureEngine = new EnrichmentEngine();
+    const enrichmentEngine = new ContentScriptEnricher(eventBus, pureEngine, 1500);
     enrichmentEngine.start();
 
     const stateEngine = new StateEngine(eventBus);

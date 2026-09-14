@@ -2,7 +2,6 @@ import { EventBusContract } from '../../core/event-bus/types';
 import { IInsightEngine } from './interfaces';
 import { ReasoningPipeline } from './pipeline/ReasoningPipeline';
 import { InsightScheduler } from './InsightScheduler';
-import { V1AutomaticityEvaluator } from './strategies/V1AutomaticityEvaluator';
 import { V1ReasoningDepthEvaluator } from './strategies/V1ReasoningDepthEvaluator';
 import { V1PromptingPatternEvaluator } from './strategies/V1PromptingPatternEvaluator';
 import { V1GapResolutionEvaluator } from './strategies/V1GapResolutionEvaluator';
@@ -21,7 +20,6 @@ export class InsightEngine implements IInsightEngine {
 
     // Initialize Strategies
     const strategies = [
-      new V1AutomaticityEvaluator(), // Kept but currently returns empty
       new V1ReasoningDepthEvaluator(),
       new V1PromptingPatternEvaluator(),
       new V1GapResolutionEvaluator()

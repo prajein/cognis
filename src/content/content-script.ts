@@ -5,6 +5,7 @@ import { PlatformManager } from '../platforms/manager/PlatformManager';
 import { GapDetectionEngine } from '../engines/gap/GapDetectionEngine';
 import { GhostTextEngine } from '../engines/ghosttext/GhostTextEngine';
 import { StateEngine } from '../engines/state/StateEngine';
+import { ContentScriptEnricher } from './ContentScriptEnricher';
 import { EnrichmentEngine } from '../engines/enrichment/EnrichmentEngine';
 import { DomainEvent } from '../core/event-bus/contracts';
 import {
@@ -94,10 +95,14 @@ async function bootstrapContentScript(): Promise<void> {
     }
   }
 
-  const enrichmentEngine = new EnrichmentEngine(eventBus, {
+  const pureEngine = new EnrichmentEngine();
+  const enrichmentEngine = new ContentScriptEnricher(
+    eventBus,
+    pureEngine,
+    1500,
     identityProfile,
     initialActiveGaps
-  });
+  );
   enrichmentEngine.start();
 
   const platformManager = new PlatformManager(eventBus, gapEngine, enrichmentEngine);
