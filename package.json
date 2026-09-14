@@ -1,6 +1,20 @@
 {
   "name": "cognis",
   "version": "0.1.0",
+  "description": "A browser extension that helps you keep thinking while you use AI.",
+  "license": "MIT",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/prajein/cognis.git"
+  },
+  "bugs": {
+    "url": "https://github.com/prajein/cognis/issues"
+  },
+  "homepage": "https://github.com/prajein/cognis#readme",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "validate:schemas": "node scripts/validate-schemas.mjs",
     "generate:brain-maps": "npx tsx src/sidepanel/features/brain-map/utils/svg-generator.ts",
@@ -21,6 +35,7 @@
     "@vitejs/plugin-react": "^6.0.5",
     "ajv": "^8.20.0",
     "jsdom": "^29.1.1",
+    "tsx": "^4.23.13",
     "typescript": "^6.0.3",
     "vite": "^8.2.0"
   },
