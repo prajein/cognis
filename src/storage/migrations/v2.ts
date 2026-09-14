@@ -1,12 +1,10 @@
 /**
  * IndexedDB Schema Migration: Version 2 — Hardware-Ready Stores
  *
- * What & why: Suchit's Week-1 deliverable says to "create the hardware-ready
- * tables now (signal_frame, state_score, and so on) but leave them empty — that
- * way adding Arc later needs no migration." This migration does exactly that: it
- * creates the empty object stores that future Arc hardware will populate, so the
- * day hardware arrives is a matter of *writing* to existing stores, not evolving
- * the schema on a user's live database.
+ * What & why: the hardware-ready tables (signal_frame, state_score, and so on)
+ * are created now but left empty, so that adding a hardware signal source later
+ * is a matter of *writing* to existing stores rather than evolving the schema on
+ * a user's live database.
  *
  * Architectural constraints (identical to v1):
  * - Runs once, inside `onupgradeneeded`, when the DB upgrades from < 2 to >= 2.
