@@ -1,124 +1,82 @@
 # Cognis
 
-Cognis is the software execution layer of Hyle's broader Arc vision—a future hardware and software cognitive operating system. Currently, while the physical Arc hardware remains in research and development, Cognis serves as the production-ready software implementation delivered as a browser extension.
+A browser extension that helps you keep thinking while you use AI.
 
-## Product Objectives
+## The problem
 
-Cognis is designed to reduce cognitive offloading while maintaining the utility of artificial intelligence systems. It mediates human-AI interactions to preserve and enrich the cognitive workflow through a closed-loop behavioral model:
+AI assistants are very good at giving you an answer. That is exactly why they are easy to lean on: you type a vague prompt, get something plausible back, accept it, and move on. Do that often enough and the work of framing a problem — noticing what you actually want, which constraints matter, what you are assuming — quietly shifts from you to the model.
 
-1. Observe Human Behavior
-2. Model Cognitive State
-3. Guide Behavior via Non-Intrusive Interventions
-4. Measure Behavioral Change
-5. Refine the Cognitive Model
+The cost is invisible in the moment. The task still ships. But the skill of formulating the problem stops developing, and over time you get worse at the part the model cannot do for you.
 
-The product is built on two primary surfaces:
-*   **Surface A (AI Co-Pilot):** Integrates inside browser-based AI interfaces (e.g., ChatGPT, Claude) to detect contextual gaps, model user cognitive state, inject contextual ghost-text interventions, and enrich prompts before submission.
-*   **Surface B (Skill Visualizer):** A dedicated tracking surface that logs tasks, visualizes skill development, and monitors task automaticity using research-derived cognitive models.
+Cognis is built on a simple bet: the fix is not to use AI less. It is to make the moment *before* you hit send a little more deliberate.
 
-## Architectural Principles
+## What it does
 
-*   **Event-Driven Architecture:** All communications flow exclusively through a central `EventBus`. Modules are fully decoupled; they never reference or invoke each other directly.
-*   **Event Sourcing:** All system actions are modeled as immutable domain events. State projections are built reactively by consuming these events.
-*   **Hardware Readiness:** Downstream consumers interact with abstract contracts. The underlying state and hardware providers (e.g., typing detection vs. future BLE hardware signals) are interchangeable.
-*   **Local First:** Behavioral tracking and processing are kept entirely client-side. No raw user prompt text or clipboard history is persisted or transmitted to cloud platforms.
-*   **Deterministic Latency:** Critical path operations are optimized for low latency, targeting under 100ms for prompt enrichment and under 200ms for ghost-text generation.
+Cognis runs alongside ChatGPT, Claude, and Gemini and does two things.
 
-## Repository Structure
+**While you write**, it notices when a prompt is under-specified — no stated goal, no constraints, no context about what you have already tried. When you pause to think, it offers a short ghost-text opener you can continue in your own words, drawn from a local template set. There is no model call and no spinner; suggestions appear during a natural pause or not at all.
 
-The codebase is organized into clean domain boundaries as defined by our Event-Driven Layered Architecture. The structure below reflects the complete implementation, including the modular Runtime Perception Layer and the feature-sliced Surface B React application:
+**When you submit**, it prepends locally-generated context to your prompt — your stated preferences, the current task frame, and guidance derived from the gaps it detected — then sends the expanded version. This changes what the model receives, so it is worth understanding before you install: see [Prompt enrichment](#prompt-enrichment).
 
-```text
-cognis/
-├── src/
-│   ├── background/       # Service worker orchestrating application lifecycle and event routing
-│   ├── content/          # Content scripts injecting observers into host AI platforms
-│   ├── core/             # Central core domain logic and infrastructural boundaries
-│   │   ├── config/       # Core static configuration and JSON schemas (e.g., state_engine_rules)
-│   │   ├── constants/    # Stable event registry names and system-wide re-exports
-│   │   ├── contracts/    # Core platform adapter and engine interface contracts
-│   │   ├── error/        # Error reporting abstractions and domain-specific implementations
-│   │   ├── event-bus/    # Event Bus implementation, Extension Event Bridge, and Registry
-│   │   └── types/        # TypeScript types representing event payloads and domain schemas
-│   ├── engines/          # Pure, platform-agnostic business logic processors
-│   │   ├── diagnostics/  # Runtime tracing, event stream validation, and system invariants
-│   │   ├── enrichment/   # Contextual prompt enrichment compilation logic
-│   │   ├── gap/          # Detects formulation gaps in current input
-│   │   │   └── pipeline/ # Multi-stage pipeline logic for isolating formulation gaps
-│   │   ├── ghosttext/    # Orchestrates and projects ghost text proposals
-│   │   │   └── pipeline/ # Transformation pipeline rendering ghost text overlays
-│   │   ├── insights/     # Measures task automaticity and patterns via evaluation strategies
-│   │   │   ├── pipeline/ # Analytical pipelines feeding automaticity scores
-│   │   │   └── strategies/# Specific algorithms for cognitive and behavioral evaluation
-│   │   ├── response/     # Analyzes AI response stream chunks
-│   │   │   ├── analyzers/# Specialized chunk analyzers (Quality, Structure, Completeness)
-│   │   │   └── pipeline/ # Sequential processing of reconstructed stream responses
-│   │   └── state/        # Resolves cognitive states from typing cadence and interaction pauses
-│   ├── mock/             # Sandbox testing environments and simulated behaviors
-│   │   └── harness/      # Simulated platform runtime, streams, and raw inputs
-│   ├── platforms/        # Runtime Perception Layer (RPL) abstracting host AI platforms
-│   │   ├── chatgpt/      # ChatGPT-specific adapter composition and overrides
-│   │   ├── claude/       # Claude-specific adapter composition and overrides
-│   │   ├── gemini/       # Gemini-specific adapter composition and overrides
-│   │   ├── interfaces/   # Re-exported platform contracts for dependency inversion
-│   │   ├── manager/      # Selection, instantiation, and lifecycle execution of active platforms
-│   │   ├── observers/    # DOM mutation and interaction listeners (e.g., TypingObserver)
-│   │   ├── selectors/    # Platform-specific DOM query selectors registry
-│   │   └── translators/  # Maps raw DOM events into standardized core domain events
-│   ├── shared/           # Cross-domain utilities and shared system constants
-│   ├── sidepanel/        # Surface B (Skill Visualizer) Feature-Sliced React Application
-│   │   ├── components/   # Shared generic UI components across the application
-│   │   │   ├── Badge/    # UI Badge component logic and styling
-│   │   │   ├── Button/   # UI Button component logic and styling
-│   │   │   ├── Card/     # UI Card component logic and styling
-│   │   │   ├── EmptyState/# Fallback UI for missing data states
-│   │   │   ├── ProgressRing/# SVG progress ring components
-│   │   │   └── Skeleton/ # Loading state skeleton components
-│   │   ├── features/     # Feature-sliced domain modules 
-│   │   │   ├── brain-map/# Cognitive load visualization module
-│   │   │   │   ├── assets/       # Master SVG templates and raw assets
-│   │   │   │   │   └── generated/# 47 static SVG snapshots compiled by the generator
-│   │   │   │   ├── components/   # React components specific to brain-map rendering
-│   │   │   │   ├── hooks/        # Custom React hooks for brain-map state and interactions
-│   │   │   │   └── utils/        # Build-time SVG generator and validation engine
-│   │   │   ├── insights/ # Module displaying automaticity scores and evaluations
-│   │   │   │   ├── components/   # UI components specific to insights
-│   │   │   │   └── hooks/        # React hooks fetching insight ReadModels
-│   │   │   ├── progress/ # Module displaying temporal skill development
-│   │   │   │   ├── components/   # UI components specific to progress tracking
-│   │   │   │   └── hooks/        # React hooks fetching progress ReadModels
-│   │   │   ├── session/  # Current cognitive session state module
-│   │   │   │   ├── components/   # UI components specific to active sessions
-│   │   │   │   └── hooks/        # React hooks polling session state
-│   │   │   └── surface-b/# Root coordination and layout for the Surface B interface
-│   │   │       ├── components/   # Top-level Surface B orchestrators
-│   │   │       └── hooks/        # Global hooks for Surface B integrations
-│   │   ├── hooks/        # Shared global application hooks
-│   │   ├── layout/       # Application shell, headers, and structural layout components
-│   │   ├── navigation/   # Routing definitions and sidebar navigation components
-│   │   ├── providers/    # Global context providers (Theme, Settings, Cognis Context)
-│   │   ├── shared/       # Utilities strictly scoped to the sidepanel app
-│   │   │   ├── constants/# Sidepanel specific constants
-│   │   │   ├── formatters/# Data parsing and text formatting tools
-│   │   │   ├── types/    # Interface definitions for React props and local state
-│   │   │   └── utils/    # Helper functions and small generic utilities
-│   │   ├── state/        # Centralized state selectors mapping to IndexedDB ReadModels
-│   │   └── styles/       # Global CSS styles and theme tokens
-│   ├── storage/          # Local persistence layer
-│   │   ├── indexeddb/    # Database connection manager (cognis_v3) and event subscriber
-│   │   ├── migrations/   # Versioned IndexedDB schema migrations (v1, v2, v3 schemas)
-│   │   ├── projections/  # Read-model projection logic converting events to state
-│   │   │   └── builders/ # Specialized data builders decoupled from core projectors
-│   │   └── repositories/ # Repository implementations (Event, Profile, ReadModel, Session)
-│   └── tests/            # Automated selftests and test harnesses
-│       ├── engines/      # Tests verifying platform-agnostic business logic processors
-│       │   ├── insights/ # Testing for insight strategies and automaticity scoring
-│       │   │   └── pipeline/# Tests validating the reasoning pipeline behavior
-│       │   └── state/    # Tests verifying cognitive state resolution transitions
-│       └── platforms/    # Tests validating platform adapter components (observers, translators)
-├── docs/                 # Documentation directory
-│   ├── adrs/             # Architectural Decision Records capturing system design choices
-│   ├── implementation-overviews/ # High-level summaries of completed architectural phases
-│   └── implementation-plans/     # Technical step-by-step RFCs and execution plans
-└── scripts/              # Build-time utility scripts
+**Over time**, it tracks how your prompting changes: which gaps you keep leaving, whether you start closing them without being asked, how much of your work has become automatic. That lives in a side panel you open when you want it, not a notification that interrupts you.
+
+## Design principles
+
+**Local-first.** Everything runs in your browser. There is no server and no telemetry — the source contains no network calls at all. Raw prompt text is never written to storage: the extension reads what you type in memory to detect gaps, then persists only the derived signal (a gap type and a confidence score).
+
+**Never in the way.** Suggestions are generated synchronously from local templates and cost nothing to ignore. Cognis never blocks you waiting on itself.
+
+**Bounded memory.** Stored behavioural data expires after 90 days.
+
+## Prompt enrichment
+
+Cognis intercepts submit on supported sites. Before the prompt reaches the model it prepends context blocks assembled from local templates in [`src/core/config/enrichment_layers.json`](src/core/config/enrichment_layers.json), rewrites the input field with the result, and re-fires the site's own submit.
+
+This is the most intrusive thing the extension does, so be aware of it:
+
+- The model sees more than you typed. Your own words are never altered or removed, but instructions you did not write are added around them.
+- The added text is assembled locally from static templates. Nothing is sent anywhere to produce it.
+- The default templates are still placeholders and carry opinionated instructions (for example, suppressing code blocks). Edit the config to match how you actually work.
+
+The behaviour is implemented in [`SubmitInterceptor`](src/platforms/observers/SubmitInterceptor.ts) and [`EnrichmentEngine`](src/engines/enrichment/EnrichmentEngine.ts). Making it opt-in and user-visible is a priority — see [Status](#status).
+
+## Install
+
+Requires Node 20+ and a Chromium browser.
+
+```bash
+git clone https://github.com/prajein/cognis.git
+cd cognis
+npm install
+npm run build
 ```
+
+Then load it:
+
+1. Open `chrome://extensions`
+2. Enable **Developer mode**
+3. Click **Load unpacked** and select the `dist/` folder
+
+Open ChatGPT, Claude, or Gemini and start typing. Click the extension icon for the side panel.
+
+## Development
+
+```bash
+npm run build      # build the extension
+npm run test       # validate schemas and generated assets
+npm run selftest   # run engine self-tests
+```
+
+The codebase is event-driven: modules never call each other directly, they publish and consume domain events on a central bus. Detection, suggestion, and analysis are pure logic with no DOM or storage access, which keeps them testable in isolation and makes adding another AI platform a matter of writing an adapter rather than a new pipeline.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) if you would like to help.
+
+## Status
+
+Early and under active development. Interfaces and behaviour will change.
+
+Cognis modifies the page it runs on and reads what you type into it. It is a research prototype, not a hardened product — read the source before trusting it with anything sensitive.
+
+## License
+
+MIT — see [LICENSE](LICENSE).

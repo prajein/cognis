@@ -38,7 +38,7 @@
       "overallVerdict": "good",
       "labelConfidence": 0.92,
       "split": "evaluation",
-      "labeledBy": "Dhanya",
+      "labeledBy": "annotator-1",
       "labelNotes": "Good example of redundant-but-not-wrong reasoning."
     },
     {
@@ -63,7 +63,7 @@
       "overallVerdict": "average",
       "labelConfidence": 0.88,
       "split": "evaluation",
-      "labeledBy": "Dhanya",
+      "labeledBy": "annotator-1",
       "labelNotes": "Deliberate stress-test case for the reasoning marker bias."
     },
     {
@@ -88,7 +88,7 @@
       "overallVerdict": "poor",
       "labelConfidence": 0.95,
       "split": "holdout",
-      "labeledBy": "Dhanya",
+      "labeledBy": "annotator-1",
       "labelNotes": "Directly tests CompletenessAnalyzer's backtick-counting logic."
     }
   ]

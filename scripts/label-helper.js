@@ -22,7 +22,7 @@ const DATASET_PATH = path.join(
 );
 const PROMPT_REFERENCE_PATH = path.join(__dirname, "./prompt-reference.local.json");
 
-const LABELED_BY = "Dhanya"; 
+const LABELED_BY = "annotator-1"; 
 
 const PLATFORMS = ["chatgpt", "claude", "gemini"];
 const PROMPT_CATEGORIES = [

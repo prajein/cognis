@@ -1,0 +1,17 @@
+#!/bin/sh
+# Block committing dependency or build directories, even via `git add -f`.
+
+staged=$(git diff --cached --name-only --diff-filter=A)
+
+blocked=$(echo "$staged" | grep -E '^(node_modules|dist|build)/' | head -5)
+
+if [ -n "$blocked" ]; then
+  echo "pre-commit: refusing to commit generated/dependency files:"
+  echo "$blocked" | sed 's/^/  /'
+  echo "  ..."
+  echo ""
+  echo "These are ignored in .gitignore. If a file here was force-added, drop it"
+  echo "from the index (keeping it on disk) with:"
+  echo "  git rm -r --cached --quiet node_modules dist build"
+  exit 1
+fi
