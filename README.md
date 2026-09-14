@@ -1,44 +1,52 @@
-# Cognis
+```
+ ██████╗  ██████╗  ██████╗ ███╗   ██╗██╗███████╗
+██╔════╝ ██╔═══██╗██╔════╝ ████╗  ██║██║██╔════╝
+██║      ██║   ██║██║  ███╗██╔██╗ ██║██║███████╗
+██║      ██║   ██║██║   ██║██║╚██╗██║██║╚════██║
+╚██████╗ ╚██████╔╝╚██████╔╝██║ ╚████║██║███████║
+ ╚═════╝  ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚═╝╚══════╝
+```
 
-A browser extension that helps you keep thinking while you use AI.
+<p align="center"><strong>Keep thinking while you use AI.</strong></p>
+
+<p align="center">
+  <img src="docs/assets/demo.svg" width="720"
+       alt="Cognis notices an under-specified prompt and offers a short opener you finish yourself">
+</p>
 
 ## The problem
 
-AI assistants are very good at giving you an answer. That is exactly why they are easy to lean on: you type a vague prompt, get something plausible back, accept it, and move on. Do that often enough and the work of framing a problem — noticing what you actually want, which constraints matter, what you are assuming — quietly shifts from you to the model.
+AI gives you an answer fast, which is exactly what makes it easy to lean on. You type a vague prompt, get something plausible back, accept it, move on.
 
-The cost is invisible in the moment. The task still ships. But the skill of formulating the problem stops developing, and over time you get worse at the part the model cannot do for you.
+Do that often enough and the work of framing a problem (noticing what you actually want, which constraints matter, what you are assuming) shifts quietly from you to the model. The task still ships. But the skill stops developing, and you get worse at the part the model cannot do for you.
 
-Cognis is built on a simple bet: the fix is not to use AI less. It is to make the moment *before* you hit send a little more deliberate.
+Cognis is a bet that the fix is not using AI less. It is making the moment before you hit send more deliberate.
 
 ## What it does
 
-Cognis runs alongside ChatGPT, Claude, and Gemini and does two things.
+Cognis runs alongside ChatGPT, Claude, and Gemini.
 
-**While you write**, it notices when a prompt is under-specified — no stated goal, no constraints, no context about what you have already tried. When you pause to think, it offers a short ghost-text opener you can continue in your own words, drawn from a local template set. There is no model call and no spinner; suggestions appear during a natural pause or not at all.
+**Before you send.** It notices when a prompt has no goal, no constraints, and no word about what you already tried. When you pause to think, it offers a short opener you finish in your own words.
 
-**When you submit**, it prepends locally-generated context to your prompt — your stated preferences, the current task frame, and guidance derived from the gaps it detected — then sends the expanded version. This changes what the model receives, so it is worth understanding before you install: see [Prompt enrichment](#prompt-enrichment).
-
-**Over time**, it tracks how your prompting changes: which gaps you keep leaving, whether you start closing them without being asked, how much of your work has become automatic. That lives in a side panel you open when you want it, not a notification that interrupts you.
+**Over time.** It tracks which gaps you keep leaving and whether you start closing them unprompted. That lives in a side panel you open when you want it.
 
 ## Design principles
 
-**Local-first.** Everything runs in your browser. There is no server and no telemetry — the source contains no network calls at all. Raw prompt text is never written to storage: the extension reads what you type in memory to detect gaps, then persists only the derived signal (a gap type and a confidence score).
+**Local first.** No server, no telemetry, no network calls anywhere in the source. Raw prompt text is never written to storage, only the derived signal: which gap, how confident.
 
-**Never in the way.** Suggestions are generated synchronously from local templates and cost nothing to ignore. Cognis never blocks you waiting on itself.
+**Never in the way.** Suggestions are picked from local templates during a natural pause. Nothing ever blocks you waiting on Cognis.
 
-**Bounded memory.** Stored behavioural data expires after 90 days.
+**Bounded memory.** Behavioural data expires after 90 days.
 
 ## Prompt enrichment
 
-Cognis intercepts submit on supported sites. Before the prompt reaches the model it prepends context blocks assembled from local templates in [`src/core/config/enrichment_layers.json`](src/core/config/enrichment_layers.json), rewrites the input field with the result, and re-fires the site's own submit.
+Worth understanding before you install. Cognis intercepts submit and prepends locally built context to your prompt before it reaches the model.
 
-This is the most intrusive thing the extension does, so be aware of it:
+* The model sees more than you typed. Your own words are never altered or removed, but instructions you did not write are added around them.
+* That added text is assembled from static local templates. Nothing is sent anywhere to produce it.
+* The shipped templates are still placeholders and carry opinionated defaults, such as suppressing code blocks. Edit [`enrichment_layers.json`](src/core/config/enrichment_layers.json) to match how you actually work.
 
-- The model sees more than you typed. Your own words are never altered or removed, but instructions you did not write are added around them.
-- The added text is assembled locally from static templates. Nothing is sent anywhere to produce it.
-- The default templates are still placeholders and carry opinionated instructions (for example, suppressing code blocks). Edit the config to match how you actually work.
-
-The behaviour is implemented in [`SubmitInterceptor`](src/platforms/observers/SubmitInterceptor.ts) and [`EnrichmentEngine`](src/engines/enrichment/EnrichmentEngine.ts). Making it opt-in and user-visible is a priority — see [Status](#status).
+Implemented in [`SubmitInterceptor`](src/platforms/observers/SubmitInterceptor.ts) and [`EnrichmentEngine`](src/engines/enrichment/EnrichmentEngine.ts). Making it opt in is a priority.
 
 ## Install
 
@@ -67,7 +75,27 @@ npm run test       # validate schemas and generated assets
 npm run selftest   # run engine self-tests
 ```
 
-The codebase is event-driven: modules never call each other directly, they publish and consume domain events on a central bus. Detection, suggestion, and analysis are pure logic with no DOM or storage access, which keeps them testable in isolation and makes adding another AI platform a matter of writing an adapter rather than a new pipeline.
+Modules never call each other directly. They publish and consume domain events on a central bus:
+
+```
+        ChatGPT  ·  Claude  ·  Gemini
+                     │
+              DOM observers                  platforms/
+                     │
+                ┌────▼────┐
+                │  event  │                  core/
+                │   bus   │
+                └────┬────┘
+             ┌───────┼───────┐
+            gap    ghost   insights          engines/
+             └───────┼───────┘
+                     │
+                 IndexedDB                   storage/
+                     │
+                  side panel                 sidepanel/
+```
+
+Engines are pure logic with no DOM or storage access, which keeps them testable in isolation and makes supporting another AI platform a matter of writing an adapter rather than a new pipeline.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) if you would like to help.
 
@@ -75,8 +103,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) if you would like to help.
 
 Early and under active development. Interfaces and behaviour will change.
 
-Cognis modifies the page it runs on and reads what you type into it. It is a research prototype, not a hardened product — read the source before trusting it with anything sensitive.
+Cognis modifies the page it runs on and reads what you type into it. It is a research prototype, not a hardened product. Read the source before trusting it with anything sensitive.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE).
