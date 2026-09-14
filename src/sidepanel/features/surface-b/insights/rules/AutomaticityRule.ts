@@ -4,24 +4,10 @@ import type { InsightRule } from "../InsightRule";
 
 export class AutomaticityRule implements InsightRule {
   evaluate(context: InsightContext): Insight | null {
-    const sessionCount = context.sessionCount;
-
-    if (sessionCount == null) {
-      return null;
-    }
-
-    if (sessionCount < 5) {
-      return null;
-    }
-
-    return {
-      id: "automaticity",
-      type: "automaticity",
-      severity: "info",
-      title: "Automaticity Progress",
-      description:
-        "Repeated practice suggests progress toward automaticity for this task.",
-      timestamp: context.generatedAt,
-    };
+    // [PLACEHOLDER] Automaticity inference is currently in research phase.
+    // The V1 AutomaticityEvaluator has been deferred. 
+    // This rule is intentionally returning null so that the UI does not 
+    // render fake intelligence based on simple session counts.
+    return null;
   }
 }
