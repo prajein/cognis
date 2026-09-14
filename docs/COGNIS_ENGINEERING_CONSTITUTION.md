@@ -619,31 +619,16 @@ Contracts do not adapt to feature code.
 
 ---
 
-## Ownership
+## Module Boundaries
 
-Naren
+Each area below is a distinct unit of ownership. Changes that cross these
+boundaries require architectural review.
 
-- core
-- platforms
-- enrichment
-- architecture governance
-- mock harness
-
-Suchit
-
-- storage
-- state engine
-
-Yogesh
-
-- gap engine
-- ghost text
-
-Riya
-
-- surface B
-- visualization
-- automaticity projections
+- **core / platforms / enrichment / mock harness** — event contracts,
+  platform adapters, architecture governance
+- **storage / state engine** — persistence, migrations, state resolution
+- **gap engine / ghost text** — detection heuristics and suggestion stems
+- **surface B** — visualization and automaticity projections
 
 ---
 
