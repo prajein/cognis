@@ -1,0 +1,95 @@
+{
+  "_schemaNote": "v2.0.0 -- merged schema after Architecture Lead review.",
+  "_schemaVersion": "2.0.0",
+  "_enums": {
+    "platform": ["chatgpt", "claude", "gemini"],
+    "promptCategory": [
+      "factual",
+      "reasoning",
+      "coding",
+      "long_form",
+      "ambiguous",
+      "adversarial_verbose",
+      "other"
+    ],
+    "overallVerdict": ["excellent", "good", "average", "poor", "failing"],
+    "split": ["evaluation", "holdout"]
+  },
+  "entries": [
+    {
+      "id": "resp-001",
+      "platform": "chatgpt",
+      "promptCategory": "coding",
+      "promptHash": "sha256:REPLACE_WITH_REAL_HASH",
+      "responseText": "Example: a well-structured coding response with a fenced code block, clear explanation before and after, and a clean because/therefore reasoning chain.",
+      "responseMetadata": {
+        "wordCount": 42,
+        "containsCode": true,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.84,
+        "reasoning": 0.73,
+        "completeness": 0.91,
+        "quality": 0.8
+      },
+      "observedIssues": ["verbosity", "redundant_reasoning"],
+      "overallVerdict": "good",
+      "labelConfidence": 0.92,
+      "split": "evaluation",
+      "labeledBy": "Dhanya",
+      "labelNotes": "Good example of redundant-but-not-wrong reasoning."
+    },
+    {
+      "id": "resp-002",
+      "platform": "claude",
+      "promptCategory": "adversarial_verbose",
+      "promptHash": "sha256:REPLACE_WITH_REAL_HASH",
+      "responseText": "Example: an intentionally verbose response stuffed with 'because' and 'therefore' markers without real reasoning depth -- tests the known ReasoningAnalyzer marker-stuffing weakness.",
+      "responseMetadata": {
+        "wordCount": 610,
+        "containsCode": false,
+        "containsMarkdown": false,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.6,
+        "reasoning": 0.35,
+        "completeness": 0.75,
+        "quality": 0.55
+      },
+      "observedIssues": ["verbosity", "marker_stuffing"],
+      "overallVerdict": "average",
+      "labelConfidence": 0.88,
+      "split": "evaluation",
+      "labeledBy": "Dhanya",
+      "labelNotes": "Deliberate stress-test case for the reasoning marker bias."
+    },
+    {
+      "id": "resp-003",
+      "platform": "gemini",
+      "promptCategory": "coding",
+      "promptHash": "sha256:REPLACE_WITH_REAL_HASH",
+      "responseText": "Example: response cut off mid-codeblock, unclosed triple-backtick fence.",
+      "responseMetadata": {
+        "wordCount": 88,
+        "containsCode": true,
+        "containsMarkdown": true,
+        "language": "en"
+      },
+      "labels": {
+        "structure": 0.4,
+        "reasoning": 0.5,
+        "completeness": 0.2,
+        "quality": 0.38
+      },
+      "observedIssues": ["unclosed_markdown", "prose_heavy"],
+      "overallVerdict": "poor",
+      "labelConfidence": 0.95,
+      "split": "holdout",
+      "labeledBy": "Dhanya",
+      "labelNotes": "Directly tests CompletenessAnalyzer's backtick-counting logic."
+    }
+  ]
+}
